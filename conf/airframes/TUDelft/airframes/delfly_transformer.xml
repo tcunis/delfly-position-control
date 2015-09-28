@@ -19,9 +19,9 @@
 
   <servos driver="Pwm">
     <servo name="MOTOR_LEFT" no="4" min="1100" neutral="1100" max="1900"/>
-    <servo name="MOTOR_RIGHT" no="5" min="1100" neutral="1500" max="1900"/>
-    <servo name="DIHEDRAL" no="0" min="1100" neutral="1500" max="1900"/>
-    <servo name="WING_DEF" no="0" min="1900" neutral="1500" max="1100"/>
+    <servo name="MOTOR_RIGHT" no="5" min="1100" neutral="1100" max="1900"/>
+    <servo name="DIHEDRAL" no="0" min="1280" neutral="1500" max="1720"/>
+    <servo name="WING_DEF" no="1" min="900" neutral="1500" max="2100"/>
   </servos>
 
   <commands>
@@ -43,8 +43,8 @@
   <command_laws>
     <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
     <!--let var="ledswitch" value="(2*recording_status-1)*MAX_PPRZ"/-->
-    <set servo="MOTOR_LEFT" value="@THRUST-MAX_PPRZ*0.2*@ROLL"/>
-    <set servo="MOTOR_RIGHT" value="@THRUST+MAX_PPRZ*0.2*@ROLL"/>
+    <set servo="MOTOR_LEFT" value="@THRUST+0.1*@ROLL"/>
+    <set servo="MOTOR_RIGHT" value="@THRUST-0.1*@ROLL"/>
     <set servo="DIHEDRAL" value="@PITCH"/>
     <set servo="WING_DEF" value="@YAW"/>
   </command_laws>
@@ -279,15 +279,13 @@
       <define name="DUAL_PWM_ON"/>
     </subsystem>
   -->
-    <subsystem name="telemetry" type="superbitrf"/>
+    <!--subsystem name="telemetry" type="superbitrf"/-->
     <!-- Comment the previous line and uncomment the following one if you need
          to use the debug serial interface for telemetry. -->
-    <!--
     <subsystem name="telemetry" type="transparent">
         <configure name="MODEM_BAUD" value="B57600"/>
         <configure name="MODEM_PORT" value="UART1"/>
     </subsystem>
-  -->
     <subsystem name="imu" type="lisa_s_v1.0"/>
     <subsystem name="gps" type="ublox"/>
     <subsystem name="stabilization" type="int_quat"/>
