@@ -13,17 +13,17 @@
     <waypoint lat="51.990614" lon="4.376779" name="p2"/>
     <waypoint lat="51.990636" lon="4.376759" name="p3"/>
     <waypoint lat="51.990651" lon="4.376805" name="p4"/>
-    <waypoint lat="51.9906213" lon="4.3768628" name="FA1"/>
-    <waypoint lat="51.9905874" lon="4.3767766" name="FA2"/>
-    <waypoint lat="51.9906409" lon="4.3767226" name="FA3"/>
-    <waypoint lat="51.9906737" lon="4.3768074" name="FA4"/>
+    <waypoint lat="51.9906213" lon="4.3768628" name="_FA1"/>
+    <waypoint lat="51.9905874" lon="4.3767766" name="_FA2"/>
+    <waypoint lat="51.9906409" lon="4.3767226" name="_FA3"/>
+    <waypoint lat="51.9906737" lon="4.3768074" name="_FA4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
-      <corner name="FA4"/>
-      <corner name="FA3"/>
-      <corner name="FA2"/>
-      <corner name="FA1"/>
+      <corner name="_FA1"/>
+      <corner name="_FA2"/>
+      <corner name="_FA3"/>
+      <corner name="_FA4"/>
     </sector>
   </sectors>
   <blocks>
