@@ -121,6 +121,10 @@ extern bool_t nav_set_heading_current(void);
     dist2_to_wp = get_dist2_to_waypoint(_wp); \
   }
 
+/*********** Moving waypoint *********************************************/
+extern bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
+
+
 /*********** Navigation on a circle **************************************/
 extern void nav_circle(struct EnuCoor_i *wp_center, int32_t radius);
 #define NavCircleWaypoint(_center, _radius) { \

@@ -541,3 +541,19 @@ bool_t nav_set_heading_current(void)
   nav_heading = stateGetNedToBodyEulers_i()->psi;
   return FALSE;
 }
+
+/** Set stay at moving waypoint */
+bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
+    double lambda = stage_time / 60.0;
+    
+    // temp = (1 - lambda)*from + lambda*to
+    VECT3_SUM_SCALED( waypoints[wpTemp].enu_i, waypoints[wpFrom].enu_i, waypoints[wpFrom].enu_i, -lambda );
+    VECT3_ADD_SCALED( waypoints[wpTemp].enu_i, waypoints[wpTo].enu_i, lambda );
+    
+    // stay at temp
+    NavGotoWaypoint(wpTemp);
+    NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
+    NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
+    
+    return TRUE;
+}
