@@ -24,6 +24,7 @@
     <subsystem name="stabilization" type="indi"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="extended"/>
+    <subsystem name="positionctrl" type="windtunnel" />
   </firmware>
 
   <modules main_freq="512">
@@ -209,7 +210,7 @@
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES" value="{&quot;nw_motor&quot;, &quot;ne_motor&quot;, &quot;se_motor&quot;, &quot;sw_motor&quot;}"/>
     <define name="JSBSIM_MODEL" value="&quot;simple_ardrone2&quot;"/>
-    <define name="JSBSIM_INIT" value="&quot;reset00&quot;"/>
+<!--    <define name="JSBSIM_INIT" value="&quot;reset00&quot;"/> -->
     <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_ardrone2.h&quot;"/>
   </section>
 
@@ -229,5 +230,9 @@
     <define name="CRITIC_BAT_LEVEL" value="9.9" unit="V"/>
     <define name="LOW_BAT_LEVEL" value="10.1" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
+  </section>
+  
+  <section name="POSITIONCTRL" prefix="POSITIONCTRL_WINDTUNNEL_">
+    <define name="WIND_VELOCITY" value="10" unit="m/s"/>
   </section>
 </airframe>
