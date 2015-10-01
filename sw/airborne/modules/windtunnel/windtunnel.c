@@ -31,6 +31,8 @@
 
 #include "modules/windtunnel/windtunnel.h"
 
+#include "subsystems/datalink/telemetry.h"
+
 #include "generated/modules.h"
 #include "generated/airframe.h"
 
@@ -47,6 +49,19 @@ int8_t wp_temporary;
 volatile double time_moving;
 
 
+
+static void send_windtunneltm ( struct transport_tx* trans, struct link_device* device ) {
+
+     DOWNLINK_SEND_WINDTUNNEL( DefaultChannel, DefaultDevice,
+        (uint8_t*)&windtunnel_velocity,
+        &windtunnel_velocity_vector.x,
+        &windtunnel_velocity_vector.y,
+        &windtunnel_navigation_target.x,
+        &windtunnel_navigation_target.y,
+        (double*)&time_moving );
+}
+
+
 /** Init wind-tunnel set-up */
 void windtunnel_init ( void ) {
     
@@ -56,6 +71,8 @@ void windtunnel_init ( void ) {
     
     wp_temporary = 0;
     time_moving = 0.0;
+
+    register_periodic_telemetry( DefaultPeriodic, "WINDTUNNEL", send_windtunneltm );
 }
 
 
@@ -93,7 +110,7 @@ void windtunnel_periodic () {
     }
 }
 
-void windtunnel_start_periodic (void) {}
+void windtunnel_start_periodic (void) { time_moving = 0.0; }
 void windtunnel_stop_periodic (void) {}
 
 bool_t windtunnel_set_periodic ( bool_t bStart ) {
