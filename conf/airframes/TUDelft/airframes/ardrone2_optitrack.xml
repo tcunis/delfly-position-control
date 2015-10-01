@@ -29,6 +29,7 @@
 
   <modules main_freq="512">
     <load name="bat_voltage_ardrone2.xml"/>
+    <load name="windtunnel.xml"/>
   </modules>
 
   <commands>
@@ -232,7 +233,11 @@
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
   
-  <section name="POSITIONCTRL" prefix="POSITIONCTRL_WINDTUNNEL_">
+<!--  <section name="POSITIONCTRL" prefix="POSITIONCTRL_WINDTUNNEL_">
     <define name="WIND_VELOCITY" value="10" unit="m/s"/>
+  </section>-->
+  
+  <section name="WINDTUNNEL" prefix="WINDTUNNEL_">
+    <define name="WIND_VELOCITY" value="0" unit="m/s" />
   </section>
 </airframe>

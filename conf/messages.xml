@@ -184,7 +184,10 @@
     <field name="segment_north_2" type="float" unit="m"/>
   </message>
 
-  <!-- ID 23 is free -->
+  <message name="WINDTUNNEL" id="23">
+      <field name="windtunnel_wind_velocity" type="uint8" unit="m/s" />
+  </message>
+  
   <!-- ID 24 is free -->
 
   <message name="SVINFO" id="25">
@@ -2179,7 +2182,6 @@
     <field name="V_East" type="double"/>
     <field name="V_Down" type="double"/>
   </message>
-
 </msg_class>
 
 

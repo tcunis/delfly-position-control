@@ -2,7 +2,7 @@
 
 <settings>
   <dl_settings>
-    <dl_settings NAME="windtunnel">
+    <dl_settings NAME="Pos-Ctrl">
       <dl_setting var="wind_velocity" unit="m/s" min="0" step="1" max="100" module="positionctrl_windtunnel" shortname="V_w" param="POSITIONCTRL_WINDTUNNEL_WIND_VELOCITY"/>
     </dl_settings>
   </dl_settings>

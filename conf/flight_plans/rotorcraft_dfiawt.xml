@@ -63,11 +63,17 @@
     <block name="stay_p1">
       <stay wp="p1"/>
     </block>
-    <block name="MoveWaypoint" pre_call="wind_setMovingWaypoint(WP_TD, WP_p1, WP_p2)">
+    <block name="MoveWaypoint" pre_call="windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2)">
+      <call fun="{ windtunnel_set_periodic( TRUE ); FALSE; }" />
       <stay wp="HOME" />
     </block>
+    <block name="VelocityControl (WindTunnel)" pre_call="" post_call="windtunnel_set_periodic(FALSE)">
+      <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
+      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" /> 
+      <call fun="nav_StayWtNavTarget(WP_TD)" />
+    </block>
     <block name="VelocityControl">
-        <call fun="nav_StayMovingWaypoint(WP_TD, WP_p1, WP_p2)" />
+      <call fun="nav_StayMovingWaypoint(WP_TD, WP_p1, WP_p2)" />
     </block>
     <block name="Decrease Altitude">
       <call fun="NavSetWaypointHere(WP_TD)"/>

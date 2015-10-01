@@ -1,6 +1,9 @@
 /*
  * Copyright (C) Torbjoern Cunis <t.cunis@tudelft.nl>
  * MAVLab Delft University of Technology
+ * 
+ * This sub-system provides control modes in order to control the position
+ * flying in a wind-tunnel; as well as to test the desired solution outside.
  *
  * This file is part of paparazzi.
  *
@@ -18,14 +21,8 @@
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
- */
-
-/** @file positionctrl_windtunnel.c
- * MAVLab Delft University of Technology
- * 
- * This sub-system provides control modes in order to control the position
- * flying in a wind-tunnel; as well as to test the desired solution in without 
- * a windtunnel.
+ *
+ * @file positionctrl_windtunnel.c
  */
 
 
@@ -36,8 +33,10 @@
 
 #include "navigation.h"
 
+#include "windtunnel/windtunnel.h"
 
-volatile uint8_t wind_velocity = POSITIONCTRL_WINDTUNNEL_WIND_VELOCITY;
+
+//volatile uint8_t windtunnel_velocity = POSITIONCTRL_WINDTUNNEL_WIND_VELOCITY;
 
 
 /** Returns squared horizontal distance to given point */
@@ -89,7 +88,7 @@ void wind_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
     double distance = FLOAT_VECT3_NORM(distance_vector);
     VECT3_SDIV( distance_normed, distance_vector, distance );
     // velo = d_no * V_w
-    VECT3_SMUL( velocity_vector, distance_normed, wind_velocity );  
+    VECT3_SMUL( velocity_vector, distance_normed, windtunnel_velocity );  
     
 }
 
@@ -118,11 +117,11 @@ bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
     double distance = FLOAT_VECT3_NORM(distance_vector);
     VECT3_SDIV( distance_normed, distance_vector, distance );
     // velo = d_no * V_w
-    VECT3_SMUL( velocity_vector, distance_normed, wind_velocity );
+    VECT3_SMUL( velocity_vector, distance_normed, windtunnel_velocity );
     
     
     // navt = from + distance_vector*( V_w * t / |dist|)
-    //VECT3_SUM_SCALED( nav_target_f, waypoints[wpFrom].enu_i, distance_vector, stage_time/(distance*1.0/wind_velocity) );
+    //VECT3_SUM_SCALED( nav_target_f, waypoints[wpFrom].enu_i, distance_vector, stage_time/(distance*1.0/windtunnel_velocity) );
     VECT3_SUM_SCALED( nav_target_f, waypoints[wpFrom].enu_i, velocity_vector, stage_time );
     
     // temp = WP(navt)
@@ -133,6 +132,20 @@ bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
     horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
     VECT3_COPY(navigation_target, nav_target_f);
     dist2_to_wp = get_dist2_to_point_f(&nav_target_f);
+    NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
+    NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
+    
+    return TRUE;
+}
+
+
+/** Set stay at wind-tunnel navigation target */
+bool_t nav_StayWtNavTarget( int8_t wpTemp ) {
+    
+    // goto navt
+    horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
+    VECT3_COPY(navigation_target, windtunnel_navigation_target);
+    dist2_to_wp = get_dist2_to_point_f(&windtunnel_navigation_target);
     NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
     NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
     
