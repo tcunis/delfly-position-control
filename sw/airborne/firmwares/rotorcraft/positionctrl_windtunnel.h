@@ -30,26 +30,18 @@
 
 #include "std.h"
 
-#include "subsystems/navigation/waypoints.h"
+#include "math/pprz_geodetic_float.h"
 
-
-extern volatile uint8_t wind_velocity;
 
 
 extern float get_dist2_to_point_f(struct EnuCoor_f *p);
 
 
-extern void wind_init ( void );
 
 /*********** Moving waypoint *********************************************/
-extern void wind_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
-
-extern bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
-
 extern bool_t nav_StayWtNavTarget( int8_t wpTemp );
 
-
-extern void wind_move_waypoint ( int16_t );
+extern bool_t nav_FollowWtNavTarget( int8_t wpTemp );
 
 
 #endif //POSITIONCTRL_WINDTUNNEL_H

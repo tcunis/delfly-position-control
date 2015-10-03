@@ -28,7 +28,7 @@
 
 #include "firmwares/rotorcraft/positionctrl_windtunnel.h"
 
-#include "generated/airframe.h"
+//#include "generated/airframe.h"
 #include "state.h"
 
 #include "navigation.h"
@@ -51,93 +51,6 @@ float get_dist2_to_point_f(struct EnuCoor_f *p)
 }
 
 
-struct EnuCoor_f waypoint_from;
-struct EnuCoor_f velocity_vector;
-struct EnuCoor_f navigation_target_f;
-
-int8_t wp_temporary;
-
-double time_moving;
-
-
-/** Init wind-tunnel set-up */
-void wind_init ( void ) {
-    
-    VECT3_ASSIGN( waypoint_from, 0, 0, 0 );
-    VECT3_ASSIGN( velocity_vector, 0, 0, 0 );
-    VECT3_ASSIGN( navigation_target_f, 0, 0, 0 );
-    
-    wp_temporary = 0;
-    time_moving = 0.0;
-}
-
-
-/** Set moving waypoint / target */
-void wind_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
-    
-    VECT3_COPY( waypoint_from, waypoints[wpFrom].enu_i );
-    wp_temporary = wpTemp;
-    time_moving = 0.0;
-    
-    struct EnuCoor_f distance_vector;
-    struct EnuCoor_f distance_normed;
-    
-    // dist = to - from
-    VECT3_DIFF( distance_vector, waypoints[wpTo].enu_i, waypoints[wpFrom].enu_i );
-    // d_no = dist / |dist|
-    double distance = FLOAT_VECT3_NORM(distance_vector);
-    VECT3_SDIV( distance_normed, distance_vector, distance );
-    // velo = d_no * V_w
-    VECT3_SMUL( velocity_vector, distance_normed, windtunnel_velocity );  
-    
-}
-
-void wind_move_waypoint( int16_t freq ) {
-    
-    time_moving += 1.0/freq;
-    
-    // navt = from + distance_vector*( V_w * t / |dist|)
-    VECT3_SUM_SCALED( navigation_target_f, waypoint_from, velocity_vector, time_moving );
-    
-    if ( wp_temporary > 0 ) { // temp != DUMMY
-        // temp = WP(navt)
-        VECT3_COPY( waypoints[wp_temporary].enu_i, navigation_target_f );
-    }
-}
-
-/** Set stay at moving waypoint */
-bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
-    
-    struct EnuCoor_f distance_vector, nav_target_f;
-    struct EnuCoor_f distance_normed;
-    {
-    // dist = to - from
-    VECT3_DIFF( distance_vector, waypoints[wpTo].enu_i, waypoints[wpFrom].enu_i );
-    // d_no = dist / |dist|
-    double distance = FLOAT_VECT3_NORM(distance_vector);
-    VECT3_SDIV( distance_normed, distance_vector, distance );
-    // velo = d_no * V_w
-    VECT3_SMUL( velocity_vector, distance_normed, windtunnel_velocity );
-    
-    
-    // navt = from + distance_vector*( V_w * t / |dist|)
-    //VECT3_SUM_SCALED( nav_target_f, waypoints[wpFrom].enu_i, distance_vector, stage_time/(distance*1.0/windtunnel_velocity) );
-    VECT3_SUM_SCALED( nav_target_f, waypoints[wpFrom].enu_i, velocity_vector, stage_time );
-    
-    // temp = WP(navt)
-    VECT3_COPY( waypoints[wpTemp].enu_i, nav_target_f );
-    }
-    
-    // goto navt
-    horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
-    VECT3_COPY(navigation_target, nav_target_f);
-    dist2_to_wp = get_dist2_to_point_f(&nav_target_f);
-    NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
-    NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
-    
-    return TRUE;
-}
-
 
 /** Set stay at wind-tunnel navigation target */
 bool_t nav_StayWtNavTarget( int8_t wpTemp ) {
@@ -152,17 +65,19 @@ bool_t nav_StayWtNavTarget( int8_t wpTemp ) {
     return TRUE;
 }
 
-//bool_t nav_StayMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
-//    double lambda = stage_time / 60.0;
-//    
-//    // temp = (1 - lambda)*from + lambda*to
-//    VECT3_SUM_SCALED( waypoints[wpTemp].enu_i, waypoints[wpFrom].enu_i, waypoints[wpFrom].enu_i, -lambda );
-//    VECT3_ADD_SCALED( waypoints[wpTemp].enu_i, waypoints[wpTo].enu_i, lambda );
-//    
-//    // stay at temp
-//    NavGotoWaypoint(wpTemp);
-//    NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
-//    NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
-//    
-//    return TRUE;
-//}
+
+/** Set follow wind-tunnel navigation target
+    Unlike StayWtNavTarget(), this uses a velocity P controller
+    instead of NavGotoWaypoint(). */
+bool_t nav_FollowWtNavTarget( int8_t wpTemp ) {
+
+    nav_set_heading_towards( windtunnel_navigation_target.x, windtunnel_navigtion_target.y );
+    
+
+    horizontal_mode = HORIZONTAL_MODE_ATTITUDE;
+    guidance_h_mode_changed( GUIDANCE_H_MODE_HOVER );
+    NavVerticalAutoThrottleMode(RadOfDeg(0.000000));
+    NavVerticalAltitudeMode(WaypointAlt(wpTemp), 0.);
+}
+
+
