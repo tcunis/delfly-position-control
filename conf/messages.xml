@@ -192,8 +192,16 @@
     <field name="navigation_target_y" type="float" unit="m" />
     <field name="time_moving"   type="double" unit="s"  />
   </message>
-  
-  <!-- ID 24 is free -->
+
+  <message name="POS_CTRL" id="24">
+    <field name="pos_now_x" type="float" unit="m" />
+    <field name="pos_now_y" type="float" unit="m" />
+    <field name="pos_ref_x" type="float" unit="m" />
+    <field name="pos_ref_y" type="float" unit="m" />
+    <field name="vel_cmd" type="double" unit="m/s" />
+    <field name="vel_cmd_x" type="float" unit="m/s" />
+    <field name="vel_cmd_y" type="float" unit="m/s" />
+  </message>
 
   <message name="SVINFO" id="25">
     <field name="chn" type="uint8"/>

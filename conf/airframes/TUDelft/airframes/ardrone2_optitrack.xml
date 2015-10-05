@@ -30,6 +30,7 @@
   <modules main_freq="512">
     <load name="bat_voltage_ardrone2.xml"/>
     <load name="windtunnel.xml"/>
+    <load name="windtunnel_posctrl.xml"/>
   </modules>
 
   <commands>
@@ -196,6 +197,9 @@
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
+    <define name="USE_SPEED_REF" value="TRUE" />
+    <define name="MODE_MODULE_SETTING" value="GUIDANCE_H_MODE_MODULE" />
+
     <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>
     <!-- Bad weather -->
@@ -233,11 +237,13 @@
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
   
-<!--  <section name="POSITIONCTRL" prefix="POSITIONCTRL_WINDTUNNEL_">
-    <define name="WIND_VELOCITY" value="10" unit="m/s"/>
-  </section>-->
+  <section name="POSITIONCTRL" prefix="POSITIONCTRL_">
+    <define name="VELOCITY_PGAIN" value="0.5" />
+    <define name="VELOCITY_IGAIN" value="0" />
+  </section>
   
   <section name="WINDTUNNEL" prefix="WINDTUNNEL_">
     <define name="WIND_VELOCITY" value="0" unit="m/s" />
+    <define name="DELAY_TIME" value="0" unit="s" />
   </section>
 </airframe>

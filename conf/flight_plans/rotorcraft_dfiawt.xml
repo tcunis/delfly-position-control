@@ -68,14 +68,19 @@
       <call fun="{ windtunnel_set_periodic( TRUE ); FALSE; }" />
       <stay wp="HOME" />
     </block>
-    <block name="VelocityControl (WindTunnel)">
+    <block name="VelocityControl (Set ref)">
+      <call fun="nav_SetVelocityRef(WP_TD, 0.5, 0.5, -1)" />
+    </block>
+    <block name="VelocityControl (Stay WindTunnel)">
       <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
-      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" /> 
+      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />
       <call fun="nav_StayWtNavTarget(WP_TD)" />
     </block>
-    <block name="VelocityControl">
-      <call fun="nav_StayMovingWaypoint(WP_TD, WP_p1, WP_p2)" />
-    </block>
+    <block name="VelocityControl (Follow Windtunnel)">
+<!--      <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
+      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />-->
+      <call fun="nav_FollowWtNavTarget(WP_TD)" />
+    </block>    
     <block name="Decrease Altitude">
       <call fun="NavSetWaypointHere(WP_TD)"/>
       <call fun="{ waypoint_set_alt( WP_TD, GetPosAlt() - 1 ); FALSE; }"/>

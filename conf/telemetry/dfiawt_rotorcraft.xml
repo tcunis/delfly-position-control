@@ -27,6 +27,7 @@
       <message name="SURVEY"                 period="2.5"  />
       <message name="OPTIC_FLOW_EST"         period="0.25" />
       <message name="WINDTUNNEL"             period=".25"  module="windtunnel" />
+      <message name="POS_CTRL"               period=".25"  module="windtunnel_posctrl" />
     </mode>
 
     <mode name="ppm">

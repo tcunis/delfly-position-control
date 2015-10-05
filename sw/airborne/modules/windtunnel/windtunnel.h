@@ -35,7 +35,8 @@
 #include "subsystems/navigation/waypoints.h"
 
 
-extern volatile uint8_t windtunnel_velocity;
+extern double windtunnel_velocity;
+extern uint8_t windtunnel_delay;
 
 extern struct EnuCoor_f windtunnel_navigation_target;
 

@@ -1,0 +1,42 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="windtunnel_posctrl">
+  <doc>
+    <description>
+        Wind-tunnel position control module.
+        
+        Copyright (C) Torbjoern Cunis &lt;t.cunis@tudelft.nl&gt;
+        MAVLab Delft University of Technology
+
+        This module provides advanced control approaches in order to control
+        the A/C position with respect to the geographic reference frame in case
+        of a varying aerodynamic frame, for instance if flying in a 
+        wind-tunnel.
+
+        This file is part of paparazzi.
+        
+        paparazzi is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 2, or (at your option)
+        any later version.
+        
+        paparazzi is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+         
+        You should have received a copy of the GNU General Public License
+        along with paparazzi; see the file COPYING.  If not, write to
+        the Free Software Foundation, 59 Temple Place - Suite 330,
+        Boston, MA 02111-1307, USA.
+    </description>
+  </doc>
+  <header>
+    <file name="windtunnel_posctrl.h"/>
+  </header>
+  <init fun="wtposctrl_init()"/>
+  <makefile>
+    <file name="windtunnel_posctrl.c"/>
+  </makefile>
+</module>
+

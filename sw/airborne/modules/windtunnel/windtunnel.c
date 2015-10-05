@@ -37,16 +37,18 @@
 #include "generated/airframe.h"
 
 
-volatile uint8_t windtunnel_velocity = WINDTUNNEL_WIND_VELOCITY;
+
+double windtunnel_velocity = WINDTUNNEL_WIND_VELOCITY;      // in m/s
+uint8_t windtunnel_delay = WINDTUNNEL_DELAY_TIME;           // in s    
 
 
-struct EnuCoor_f waypoint_from;
-struct EnuCoor_f windtunnel_velocity_vector;
-struct EnuCoor_f windtunnel_navigation_target;
+struct EnuCoor_f waypoint_from;                     // in ENU_f -- [m]^3
+struct EnuCoor_f windtunnel_velocity_vector;        // in ENU_f -- [m]^3
+struct EnuCoor_f windtunnel_navigation_target;      // in ENU_f -- [m]^3
 
 int8_t wp_temporary;
 
-volatile double time_moving;
+volatile double time_moving;                        // in s
 
 
 
@@ -79,34 +81,40 @@ void windtunnel_init ( void ) {
 /** Set moving waypoint / target */
 void windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
     
-    VECT3_COPY( waypoint_from, waypoints[wpFrom].enu_i );
+    VECT3_COPY( waypoint_from /*in ENU_f*/, waypoints[wpFrom].enu_f );
     wp_temporary = wpTemp;
     time_moving = 0.0;
     
-    struct EnuCoor_f distance_vector;
-    struct EnuCoor_f distance_normed;
+    struct EnuCoor_f distance_vector;       // in ENU_f -- [m]^3
+    struct EnuCoor_f distance_normed;       // in ENU_f -- [m]^3, |d_no| = 1 m
     
     // dist = to - from
-    VECT3_DIFF( distance_vector, waypoints[wpTo].enu_i, waypoints[wpFrom].enu_i );
+    VECT3_DIFF( distance_vector /*in ENU_f*/, waypoints[wpTo].enu_f, waypoints[wpFrom].enu_f );
     // d_no = dist / |dist|
-    double distance = FLOAT_VECT3_NORM(distance_vector);
-    VECT3_SDIV( distance_normed, distance_vector, distance );
+    double distance /*in m*/ = FLOAT_VECT3_NORM(distance_vector /*in ENU_f*/);
+    VECT3_SDIV( distance_normed /*in ENU_f*/, distance_vector /*in ENU_f -- [m]^3*/, distance /*in m*/ );
     // velo = d_no * V_w
-    VECT3_SMUL( windtunnel_velocity_vector, distance_normed, windtunnel_velocity );
+    VECT3_SMUL( windtunnel_velocity_vector /*in ENU_f -- [m/s]^3*/, distance_normed /*in ENU_f*/, windtunnel_velocity /*in m/s*/ );
     
-    VECT3_COPY( windtunnel_navigation_target, waypoint_from );
+    VECT3_COPY( windtunnel_navigation_target /*in ENU_f*/, waypoint_from /*in ENU_f*/ );
 }
 
 void windtunnel_periodic () {
     
     time_moving += WINDTUNNEL_PERIODIC_PERIOD;
+
+    if ( time_moving < windtunnel_delay )
+        return; //nothing to do within delay
     
     // navt = from + distance_vector*( V_w * t / |dist|)
-    VECT3_SUM_SCALED( windtunnel_navigation_target, waypoint_from, windtunnel_velocity_vector, time_moving );
+    VECT3_SUM_SCALED( windtunnel_navigation_target /*in ENU_f -- [m]^3*/, 
+                      waypoint_from /*in ENU_f -- [m]^3*/, 
+                      windtunnel_velocity_vector /*in ENU_f -- [m/s]^3*/,
+                      (time_moving - windtunnel_delay) /*in s*/ );
     
     if ( wp_temporary > 0 ) { // temp != DUMMY
         // temp = WP(navt)
-        VECT3_COPY( waypoints[wp_temporary].enu_i, windtunnel_navigation_target );
+        waypoint_set_enu( wp_temporary, &windtunnel_navigation_target /*in ENU_f*/ );
     }
 }
 

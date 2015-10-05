@@ -33,8 +33,8 @@
 #include "math/pprz_geodetic_float.h"
 
 
-
-extern float get_dist2_to_point_f(struct EnuCoor_f *p);
+extern double posctrl_vel_Kp;
+extern double posctrl_vel_Ki;
 
 
 
@@ -42,6 +42,8 @@ extern float get_dist2_to_point_f(struct EnuCoor_f *p);
 extern bool_t nav_StayWtNavTarget( int8_t wpTemp );
 
 extern bool_t nav_FollowWtNavTarget( int8_t wpTemp );
+
+extern bool_t nav_SetVelocityRef( int8_t wpTemp, double velocity_x, double velocity_y, double heading );
 
 
 #endif //POSITIONCTRL_WINDTUNNEL_H
