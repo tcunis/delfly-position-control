@@ -3,6 +3,7 @@
 <flight_plan alt="1" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
   <header>
 #include "autopilot.h"
+#include "guidance.h"
 #include "positionctrl_windtunnel.h"
 </header>
   <waypoints>
@@ -28,8 +29,8 @@
     </sector>
   </sectors>
   <exceptions>
-    <exception cond="! InsideFlightArea( GetPosX(), GetPosY() )" deroute="Standby"/>
-    <exception cond="GetPosAlt() > 5" deroute="Decrease Altitude"/>
+<!--    <exception cond="! InsideFlightArea( GetPosX(), GetPosY() )" deroute="Standby"/>
+    <exception cond="GetPosAlt() > 5" deroute="Decrease Altitude"/> -->
   </exceptions>
   <blocks>
     <block name="Wait GPS">
@@ -58,6 +59,7 @@
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <call fun="{ guidance_h_mode_changed( GUIDANCE_H_MODE_NAV ); FALSE; }" />
       <stay wp="STDBY"/>
     </block>
     <block name="stay_p1">
@@ -68,17 +70,20 @@
       <call fun="{ windtunnel_set_periodic( TRUE ); FALSE; }" />
       <stay wp="HOME" />
     </block>
-    <block name="VelocityControl (Set ref)">
-      <call fun="nav_SetVelocityRef(WP_TD, 0.5, 0.5, -1)" />
+    <block name="VelocityControl (Set velocity ref)">
+      <call fun="nav_SetVelocityRef(WP_TD, 0.5, 0, 0)" />
     </block>
-    <block name="VelocityControl (Stay WindTunnel)">
+    <block name="PositionControl (Set position ref)">
+      <call fun="nav_FollowWtNavTarget(WP_TD)" />
+    </block>    
+    <block name="WindtunnelControl (Stay WindTunnel)">
       <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
       <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />
       <call fun="nav_StayWtNavTarget(WP_TD)" />
     </block>
-    <block name="VelocityControl (Follow Windtunnel)">
-<!--      <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
-      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />-->
+    <block name="WindtunnelControl2 (Follow Windtunnel)">
+      <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
+      <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />
       <call fun="nav_FollowWtNavTarget(WP_TD)" />
     </block>    
     <block name="Decrease Altitude">

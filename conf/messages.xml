@@ -194,13 +194,24 @@
   </message>
 
   <message name="POS_CTRL" id="24">
-    <field name="pos_now_x" type="float" unit="m" />
-    <field name="pos_now_y" type="float" unit="m" />
+    <!-- position control -->
     <field name="pos_ref_x" type="float" unit="m" />
     <field name="pos_ref_y" type="float" unit="m" />
-    <field name="vel_cmd" type="double" unit="m/s" />
+    <field name="pos_now_x" type="float" unit="m" />
+    <field name="pos_now_y" type="float" unit="m" />
+    <field name="pos_dif_x" type="float" unit="m" />
+    <field name="pos_dif_y" type="float" unit="m" />
+
+    <!-- position / velocity control -->
+    <field name="vel_cmd"  type="double" unit="m/s" />
     <field name="vel_cmd_x" type="float" unit="m/s" />
     <field name="vel_cmd_y" type="float" unit="m/s" />
+
+    <!-- velocity control -->
+    <field name="vel_now"  type="double" unit="m/s" />
+    <field name="vel_now_x" type="float" unit="m/s" />
+    <field name="vel_now_y" type="float" unit="m/s" />
+
   </message>
 
   <message name="SVINFO" id="25">

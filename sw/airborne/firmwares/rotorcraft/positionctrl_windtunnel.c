@@ -65,11 +65,13 @@
 
 double posctrl_vel_Kp = POSITIONCTRL_VELOCITY_PGAIN;
 double posctrl_vel_Ki = POSITIONCTRL_VELOCITY_IGAIN;
+double posctrl_vel_Kd = 0; //POSITIONCTRL_VELOCITY_DGAIN;
 
 
 struct Int32Vect2 velocity_ref; ///< with INT32_SPEED_FRAC
 
 struct DoubleVect3 scaled_position_error_int; // integral of scaled position errors in Enu_f -- [m*s]^3
+
 
 
 static double get_dist2_to_point_f ( struct EnuCoor_f* p /*in ENU_f -- [m]^3*/ );
@@ -125,7 +127,8 @@ bool_t nav_FollowWtNavTarget( int8_t wpTemp ) {
 //    wtposctrl_tm_velocity_cmd_f = control_velocity( &velocity_ref, windtunnel_navigation_target, *stateGetPositionEnu_f() );
 
     // for debug: use temp waypoint for position control
-    wtposctrl_tm_velocity_cmd_f = control_velocity( &velocity_ref, waypoints[wpTemp].enu_f, *stateGetPositionEnu_f() );
+    //wtposctrl_tm_velocity_cmd_f = 
+    control_velocity( &velocity_ref, waypoints[wpTemp].enu_f, *stateGetPositionEnu_f() );
 
 
     int32_t heading_i = int32_atan2( velocity_ref.y, velocity_ref.x );
@@ -154,7 +157,7 @@ static double control_velocity ( struct Int32Vect2* velocity_ref /*in ENU_i -- [
                           struct EnuCoor_f position_ref, struct EnuCoor_f position_now /*both in ENU_f -- [m]^3*/ 
                         ) {
     struct DoubleVect3 position_diff, velocity_f; // in ENU_f -- [m]^3 and [m/s]^3, resp.
-    VECT2_DIFF( position_diff, position_now, position_ref );    // diff = now - ref
+    VECT2_DIFF( position_diff, position_ref, position_now );    // diff = ref - now  <=> diff = now->ref
     position_diff.z = 0; // regret z-axis error here
     
     // vel = Kp*diff + sum(Ki*diff)[0:t]
@@ -174,10 +177,11 @@ static double control_velocity ( struct Int32Vect2* velocity_ref /*in ENU_i -- [
     /* set telemetry data */
     VECT2_COPY( wtposctrl_tm_position_now, position_now );
     VECT2_COPY( wtposctrl_tm_position_ref, position_ref );
+    VECT2_COPY( wtposctrl_tm_position_dif, position_diff );
 
-    VECT2_COPY( wtposctrl_tm_velocity_cmd, velocity_f );
+    //VECT2_COPY( wtposctrl_tm_velocity_cmd, velocity_f );
     
-    return double_vect3_norm( &velocity_f );   // return |vel| -- [m]
+    return FLOAT_VECT3_NORM( velocity_f );   // return |vel| -- [m]
 }
 
 

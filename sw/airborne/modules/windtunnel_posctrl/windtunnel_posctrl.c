@@ -25,32 +25,60 @@
 
 #include "modules/windtunnel_posctrl/windtunnel_posctrl.h"
 
+#include "subsystems/datalink/telemetry.h"
+#include "subsystems/gps.h"
+
 #include "math/pprz_algebra_int.h"
 
-#include "subsystems/datalink/telemetry.h"
 
 
-struct Int32Vect2 wtposctrl_guidance_h_speed_sp;    // in ENU_i, with #INT32_SPEED_FRAC
+#define VECT2_SPEEDS_FLOAT_OF_BFP(_ef, _ei) {      \
+    (_ef).x = SPEED_FLOAT_OF_BFP((_ei).x);   \
+    (_ef).y = SPEED_FLOAT_OF_BFP((_ei).y);   \
+  }
+
+
+struct Int32Vect2 wtposctrl_guidance_h_speed_sp;    // in NED_i (!), with #INT32_SPEED_FRAC
 
 int32_t wtposctrl_heading;                          // in rad, with #INT32_ANGLE_FRAC
 
-struct EnuCoor_f wtposctrl_tm_position_now;
-struct EnuCoor_f wtposctrl_tm_position_ref;
+/*      in ENU_f -- m and m/s, resp      */
+struct EnuCoor_f wtposctrl_tm_position_ref,
+                 wtposctrl_tm_position_now,
+                 wtposctrl_tm_position_dif;
 
-struct EnuCoor_f wtposctrl_tm_velocity_cmd;
-double wtposctrl_tm_velocity_cmd_f;
+struct EnuCoor_f wtposctrl_tm_velocity_cmd,
+                 wtposctrl_tm_velocity_now,
+                 wtposctrl_tm_velocity_gps;
+
+/*      in m/s                           */
+double wtposctrl_tm_velocity_cmd_f,
+       wtposctrl_tm_velocity_now_f;
+
+
+/*      in ECEF_f -- m                   */
+struct EcefCoor_f velocity_gps_ned_f;
 
 
 static void send_posctrltm ( struct transport_tx* trans, struct link_device* device ) {
 
     DOWNLINK_SEND_POS_CTRL( DefaultChannel, DefaultDevice,
-        &wtposctrl_tm_position_now.x,
-        &wtposctrl_tm_position_now.y,
-        &wtposctrl_tm_position_ref.x,
-        &wtposctrl_tm_position_ref.y,
-        &wtposctrl_tm_velocity_cmd_f,
-        &wtposctrl_tm_velocity_cmd.x,
-        &wtposctrl_tm_velocity_cmd.y );
+    /*                  position control                            */    
+    /* pos_ref_x = */ &wtposctrl_tm_position_ref.x /* float in m    */,
+    /* pos_ref_y = */ &wtposctrl_tm_position_ref.y /* float in m    */,
+    /* pos_now_x = */ &wtposctrl_tm_position_now.x /* float in m    */,
+    /* pos_now_y = */ &wtposctrl_tm_position_now.y /* float in m    */,
+    /* pos_dif_x = */ &wtposctrl_tm_position_dif.x /* float in m    */,
+    /* pos_dif_y = */ &wtposctrl_tm_position_dif.y /* float in m    */,
+    /*                  position / velocity control                 */
+    /* vel_cmd   = */ &wtposctrl_tm_velocity_cmd_f /* double in m/s */,
+    /* vel_cmd_x = */ &wtposctrl_tm_velocity_cmd.x /* float in m/s  */,
+    /* vel_cmd_y = */ &wtposctrl_tm_velocity_cmd.y /* float in m/s  */,
+    /*                  velocity control                            */
+    /* vel_now   = */ &wtposctrl_tm_velocity_now_f /* double in m/s */,
+    /* vel_now_x = */ &wtposctrl_tm_velocity_now.x /* float in m/s  */,
+    /* vel_now_y = */ &wtposctrl_tm_velocity_now.y /* float in m/s  */
+    );
 }
 
 
@@ -59,10 +87,12 @@ void wtposctrl_init (void) {
     INT_VECT2_ZERO( wtposctrl_guidance_h_speed_sp );
     wtposctrl_heading = 0;
 
-    INT_VECT3_ZERO( wtposctrl_tm_position_now );
     INT_VECT3_ZERO( wtposctrl_tm_position_ref );
+    INT_VECT3_ZERO( wtposctrl_tm_position_now );
     INT_VECT3_ZERO( wtposctrl_tm_velocity_cmd );
-    wtposctrl_tm_velocity_cmd_f = 0;
+    INT_VECT3_ZERO( wtposctrl_tm_velocity_now );
+    wtposctrl_tm_velocity_cmd_f = 0.;
+    wtposctrl_tm_velocity_now_f = 0.;
 
 #if GUIDANCE_H_MODE_MODULE_SETTING == GUIDANCE_H_MODE_MODULE
     guidance_h_module_init();
@@ -74,7 +104,11 @@ void wtposctrl_init (void) {
 
 void wtposctrl_set_velocity_ref ( struct Int32Vect2 velocity_2d /*in ENU_i, with INT32_SPEED_FRAC */ ) {
 
-    VECT2_COPY( wtposctrl_guidance_h_speed_sp, velocity_2d );
+    INT32_VECT2_NED_OF_ENU( wtposctrl_guidance_h_speed_sp /*NED_i*/, velocity_2d /*ENU_i*/ );
+
+    /* telemetry only -- written in positionctrl_windtunnel.c */
+    VECT2_SPEEDS_FLOAT_OF_BFP( wtposctrl_tm_velocity_cmd, velocity_2d );
+    wtposctrl_tm_velocity_cmd_f = FLOAT_VECT3_NORM( wtposctrl_tm_velocity_cmd );
 }
 
 void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_FRAC */ ) {
@@ -267,6 +301,13 @@ void guidance_h_module_run ( bool_t in_flight ) {
     INT32_ANGLE_NORMALIZE(guidance_h_heading_sp);
     /* compute x,y earth commands */
     guidance_h_traj_run(in_flight);
+
+    /* telemetry */
+    VECT2_COPY( wtposctrl_tm_velocity_now, *stateGetSpeedEnu_f() );
+    ECEF_FLOAT_OF_BFP( velocity_gps_ned_f /* NED_f in m/s */, gps.ned_vel /* NED_i in cm/s */ );
+    INT32_VECT2_ENU_OF_NED( wtposctrl_tm_velocity_gps, velocity_gps_ned_f );
+    wtposctrl_tm_velocity_now_f = FLOAT_VECT3_NORM( wtposctrl_tm_velocity_now );
+
     /* set final attitude setpoint */
     stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
                                            guidance_h_heading_sp);

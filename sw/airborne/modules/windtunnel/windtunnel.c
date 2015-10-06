@@ -103,7 +103,7 @@ void windtunnel_periodic () {
     
     time_moving += WINDTUNNEL_PERIODIC_PERIOD;
 
-    if ( time_moving < windtunnel_delay )
+    if ( time_moving < 0 )
         return; //nothing to do within delay
     
     // navt = from + distance_vector*( V_w * t / |dist|)
@@ -118,7 +118,7 @@ void windtunnel_periodic () {
     }
 }
 
-void windtunnel_start_periodic (void) { time_moving = 0.0; }
+void windtunnel_start_periodic (void) { time_moving = -windtunnel_delay; /* set delay as negative count-down */ }
 void windtunnel_stop_periodic (void) {}
 
 bool_t windtunnel_set_periodic ( bool_t bStart ) {

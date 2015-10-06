@@ -31,10 +31,14 @@
 #include "std.h"
 
 /* Telemetry data */
-extern struct EnuCoor_f wtposctrl_tm_position_now;
-extern struct EnuCoor_f wtposctrl_tm_position_ref;
-extern struct EnuCoor_f wtposctrl_tm_velocity_cmd;
-extern double wtposctrl_tm_velocity_cmd_f;
+extern struct EnuCoor_f wtposctrl_tm_position_ref,
+                        wtposctrl_tm_position_now,
+                        wtposctrl_tm_position_dif;
+extern struct EnuCoor_f wtposctrl_tm_velocity_cmd,
+                        wtposctrl_tm_velocity_now,
+                        wtposctrl_tm_velocity_gps;
+extern double wtposctrl_tm_velocity_cmd_f,
+              wtposctrl_tm_velocity_now_f;
 
 
 extern void wtposctrl_init ();
