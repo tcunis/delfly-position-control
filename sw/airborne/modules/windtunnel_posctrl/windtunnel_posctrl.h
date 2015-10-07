@@ -30,18 +30,33 @@
 #include "math/pprz_algebra_int.h"
 #include "std.h"
 
-/* Telemetry data */
-extern struct EnuCoor_f wtposctrl_tm_position_ref,
-                        wtposctrl_tm_position_now,
-                        wtposctrl_tm_position_dif;
-extern struct EnuCoor_f wtposctrl_tm_velocity_cmd,
-                        wtposctrl_tm_velocity_now,
-                        wtposctrl_tm_velocity_gps;
-extern double wtposctrl_tm_velocity_cmd_f,
+/* Telemetry data                                                                */
+/* Position in Enu_f -- [m]^3                                                    */
+extern struct EnuCoor_f wtposctrl_tm_position_ref,  /* reference position        */
+                        wtposctrl_tm_position_now,  /* current position          */
+                        wtposctrl_tm_position_err;  /* position error            */
+
+/* Control status in Enu_f -- [m*s]^3, [m/s]^3, and [m/s^2]^3, resp.             */
+extern struct EnuCoor_f wtposctrl_tm_position_err_int,  /* error integral        */
+                        wtposctrl_tm_position_err_drv,  /* 1st error derivative  */
+                        wtposctrl_tm_position_err_dv2;  /* 2nd error derivative  */
+
+/* Velocity in Enu_f -- [m/s]^3                                                  */
+extern struct EnuCoor_f wtposctrl_tm_velocity_cmd,  /* commanded velocity        */
+                        wtposctrl_tm_velocity_now,  /* current velocity          */
+                        wtposctrl_tm_velocity_gps;  /* current velocity (gps)    */
+
+extern uint8_t wtposctrl_tm_posctrl_freq;
+
+extern double wtposctrl_tm_position_err_f,
+              wtposctrl_tm_position_err_int_f,
+              wtposctrl_tm_position_err_drv_f,
+              wtposctrl_tm_position_err_dv2_f,
+              wtposctrl_tm_velocity_cmd_f,
               wtposctrl_tm_velocity_now_f;
 
 
-extern void wtposctrl_init ();
+extern void wtposctrl_init (void);
 
 extern void wtposctrl_set_velocity_ref ( struct Int32Vect2 velocity_2d /*in ENU_i, with INT32_SPEED_FRAC */ );
 extern void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_FRAC */ );
@@ -61,7 +76,7 @@ extern void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_F
 //#error "GUIDANCE_H_USE_SPEED_REF has to be set in order to use this module's guidance mode."
 #else
 
-inline void guidance_h_module_init (void) { /*nothing to do yet*/ }
+extern void guidance_h_module_init (void);
 
 extern void guidance_h_module_enter (void);
 

@@ -35,8 +35,11 @@
 
 extern double posctrl_vel_Kp;
 extern double posctrl_vel_Ki;
+extern double posctrl_vel_Kd;
+extern double posctrl_vel_Kd2;
 
 
+extern bool_t nav_InitPosControl (void);
 
 /*********** Moving waypoint *********************************************/
 extern bool_t nav_StayWtNavTarget( int8_t wpTemp );

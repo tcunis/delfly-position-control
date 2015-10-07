@@ -42,7 +42,7 @@ extern struct EnuCoor_f windtunnel_navigation_target;
 
 
 extern void windtunnel_init (void);
-extern void windtunnel_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
+extern bool_t windtunnel_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
 
 extern bool_t windtunnel_set_periodic ( bool_t );
 

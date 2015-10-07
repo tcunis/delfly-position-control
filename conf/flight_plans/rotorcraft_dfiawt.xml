@@ -82,6 +82,7 @@
       <call fun="nav_StayWtNavTarget(WP_TD)" />
     </block>
     <block name="WindtunnelControl2 (Follow Windtunnel)">
+      <call fun="nav_InitPosControl()" />
       <call fun="{ windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2); FALSE; }" />
       <call fun="{ windtunnel_set_periodic(TRUE); FALSE; }" />
       <call fun="nav_FollowWtNavTarget(WP_TD)" />

@@ -199,8 +199,21 @@
     <field name="pos_ref_y" type="float" unit="m" />
     <field name="pos_now_x" type="float" unit="m" />
     <field name="pos_now_y" type="float" unit="m" />
-    <field name="pos_dif_x" type="float" unit="m" />
-    <field name="pos_dif_y" type="float" unit="m" />
+    <field name="pos_err"  type="double" unit="m" />
+    <field name="pos_err_x" type="float" unit="m" />
+    <field name="pos_err_y" type="float" unit="m" />
+
+    <!-- position control: status -->
+    <field name="pos_ctrl_freq" type="uint8" unit="1/s" />
+    <field name="pos_err_int"  type="double" unit="m*s" />
+    <field name="pos_err_int_x" type="float" unit="m*s" />
+    <field name="pos_err_int_y" type="float" unit="m*s" />
+    <field name="pos_err_drv"  type="double" unit="m/s" />
+    <field name="pos_err_drv_x" type="float" unit="m/s" />
+    <field name="pos_err_drv_y" type="float" unit="m/s" />
+    <field name="pos_err_dv2"  type="double" unit="m/s^2" />
+    <field name="pos_err_dv2_x" type="float" unit="m/s^2" />
+    <field name="pos_err_dv2_y" type="float" unit="m/s^2" />
 
     <!-- position / velocity control -->
     <field name="vel_cmd"  type="double" unit="m/s" />
@@ -211,6 +224,8 @@
     <field name="vel_now"  type="double" unit="m/s" />
     <field name="vel_now_x" type="float" unit="m/s" />
     <field name="vel_now_y" type="float" unit="m/s" />
+    <field name="vel_gps_x" type="float" unit="m/s" />
+    <field name="vel_gps_y" type="float" unit="m/s" />
 
   </message>
 

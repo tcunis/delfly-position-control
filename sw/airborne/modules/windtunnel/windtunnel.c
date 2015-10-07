@@ -79,7 +79,7 @@ void windtunnel_init ( void ) {
 
 
 /** Set moving waypoint / target */
-void windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
+bool_t windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
     
     VECT3_COPY( waypoint_from /*in ENU_f*/, waypoints[wpFrom].enu_f );
     wp_temporary = wpTemp;
@@ -97,6 +97,8 @@ void windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) 
     VECT3_SMUL( windtunnel_velocity_vector /*in ENU_f -- [m/s]^3*/, distance_normed /*in ENU_f*/, windtunnel_velocity /*in m/s*/ );
     
     VECT3_COPY( windtunnel_navigation_target /*in ENU_f*/, waypoint_from /*in ENU_f*/ );
+
+    return FALSE;
 }
 
 void windtunnel_periodic () {
@@ -128,5 +130,5 @@ bool_t windtunnel_set_periodic ( bool_t bStart ) {
         windtunnel_windtunnel_periodic_status = MODULES_STOP;
     }
     
-    return ( windtunnel_windtunnel_periodic_status == MODULES_START || windtunnel_windtunnel_periodic_status == MODULES_RUN );
+    return FALSE;
 }
