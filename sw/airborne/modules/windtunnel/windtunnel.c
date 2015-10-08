@@ -43,6 +43,7 @@ uint8_t windtunnel_delay = WINDTUNNEL_DELAY_TIME;           // in s
 
 
 struct EnuCoor_f waypoint_from;                     // in ENU_f -- [m]^3
+struct EnuCoor_f windtunnel_direction;              // in ENU_f -- [m]^3
 struct EnuCoor_f windtunnel_velocity_vector;        // in ENU_f -- [m]^3
 struct EnuCoor_f windtunnel_navigation_target;      // in ENU_f -- [m]^3
 
@@ -78,25 +79,55 @@ void windtunnel_init ( void ) {
 }
 
 
+
+
+static inline void updateWindVelocityVector (void) {
+
+    // velo = direct * V_w
+    VECT3_SMUL( windtunnel_velocity_vector  /*in ENU_f -- [m/s]^3*/, 
+                windtunnel_direction        /*in ENU_f*/, 
+                windtunnel_velocity         /*in m/s*/ );
+}
+
+
+bool_t windtunnel_setWindVelocity ( double velocity_new ) {
+
+    windtunnel_velocity = velocity_new;
+
+    if ( time_moving > 0 ) {
+        updateWindVelocityVector();
+        VECT3_COPY( waypoint_from, windtunnel_navigation_target );
+        time_moving = 0.0;
+    }
+    
+    return FALSE; //call one
+}
+
+
 /** Set moving waypoint / target */
-bool_t windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo ) {
+bool_t windtunnel_setMovingWaypoint ( int8_t wpTemp, int8_t wpFrom, int8_t wpTo, double default_velocity /*= 0.5*/, bool_t set_periodic /*=FALSE*/ ) {
+    
+    if ( windtunnel_velocity == 0.0 )
+        windtunnel_velocity = default_velocity;
     
     VECT3_COPY( waypoint_from /*in ENU_f*/, waypoints[wpFrom].enu_f );
     wp_temporary = wpTemp;
     time_moving = 0.0;
     
     struct EnuCoor_f distance_vector;       // in ENU_f -- [m]^3
-    struct EnuCoor_f distance_normed;       // in ENU_f -- [m]^3, |d_no| = 1 m
+//    struct EnuCoor_f distance_normed;       // in ENU_f -- [m]^3, |d_no| = 1 m
     
     // dist = to - from
     VECT3_DIFF( distance_vector /*in ENU_f*/, waypoints[wpTo].enu_f, waypoints[wpFrom].enu_f );
-    // d_no = dist / |dist|
+    // direct = dist / |dist|
     double distance /*in m*/ = FLOAT_VECT3_NORM(distance_vector /*in ENU_f*/);
-    VECT3_SDIV( distance_normed /*in ENU_f*/, distance_vector /*in ENU_f -- [m]^3*/, distance /*in m*/ );
-    // velo = d_no * V_w
-    VECT3_SMUL( windtunnel_velocity_vector /*in ENU_f -- [m/s]^3*/, distance_normed /*in ENU_f*/, windtunnel_velocity /*in m/s*/ );
+    VECT3_SDIV( windtunnel_direction /*in ENU_f*/, distance_vector /*in ENU_f -- [m]^3*/, distance /*in m*/ );
+
+    updateWindVelocityVector();
     
     VECT3_COPY( windtunnel_navigation_target /*in ENU_f*/, waypoint_from /*in ENU_f*/ );
+    
+    windtunnel_set_periodic( set_periodic );
 
     return FALSE;
 }
@@ -121,7 +152,7 @@ void windtunnel_periodic () {
 }
 
 void windtunnel_start_periodic (void) { time_moving = -windtunnel_delay; /* set delay as negative count-down */ }
-void windtunnel_stop_periodic (void) {}
+void windtunnel_stop_periodic (void) { time_moving = 0.0; }
 
 bool_t windtunnel_set_periodic ( bool_t bStart ) {
     if ( bStart ) {

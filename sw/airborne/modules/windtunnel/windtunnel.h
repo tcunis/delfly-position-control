@@ -41,9 +41,12 @@ extern uint8_t windtunnel_delay;
 extern struct EnuCoor_f windtunnel_navigation_target;
 
 
-extern void windtunnel_init (void);
-extern bool_t windtunnel_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo );
 
+extern void windtunnel_init (void);
+
+
+extern bool_t windtunnel_setWindVelocity( double velocity_new );
+extern bool_t windtunnel_setMovingWaypoint( int8_t wpTemp, int8_t wpFrom, int8_t wpTo, double default_velocity, bool_t );
 extern bool_t windtunnel_set_periodic ( bool_t );
 
 extern void windtunnel_periodic (void);

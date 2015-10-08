@@ -169,6 +169,17 @@ bool_t nav_InitPosControl (void) {
 }
 
 
+bool_t nav_StopPosControl (void) {
+
+    wtposctrl_stop();
+    
+    /* reset control data */
+    nav_InitPosControl();
+    
+    return FALSE; // call once
+}
+
+
 static double control_velocity ( struct EnuCoor_f* velocity_cmd_f /*in ENU_f -- [m]^3*/, //struct Int32Vect2* velocity_cmd /*in ENU_i -- [m]^2 with INT32_SPEED_FRAC*/, 
                           struct EnuCoor_f position_ref, struct EnuCoor_f position_now /*both in ENU_f -- [m]^3*/ 
                         ) {

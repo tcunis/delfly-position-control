@@ -57,6 +57,7 @@ extern double wtposctrl_tm_position_err_f,
 
 
 extern void wtposctrl_init (void);
+extern void wtposctrl_stop (void);
 
 extern void wtposctrl_set_velocity_ref ( struct Int32Vect2 velocity_2d /*in ENU_i, with INT32_SPEED_FRAC */ );
 extern void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_FRAC */ );
@@ -77,6 +78,7 @@ extern void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_F
 #else
 
 extern void guidance_h_module_init (void);
+extern void guidance_h_module_stop (void);
 
 extern void guidance_h_module_enter (void);
 
