@@ -1,0 +1,18 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="gps_diagnostics">
+  <doc>
+    <description></description>
+  </doc>
+  <header>
+    <file name="gps_diagnostics.h"/>
+  </header>
+  <init fun="gps_diagnostics_init()"/>
+  <periodic fun="gps_diagnostics_periodic()" freq="256"/>
+  <datalink message="REMOTE_GPS" fun="gps_diagnostics_datalink_event()"/>
+  <datalink message="REMOTE_GPS_SMALL" fun="gps_diagnostics_datalink_small_event()"/>
+  <makefile>
+    <file name="gps_diagnostics.c"/>
+  </makefile>
+</module>
+
