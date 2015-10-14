@@ -28,6 +28,7 @@
 
   <modules main_freq="512">
     <load name="bat_voltage_ardrone2.xml"/>
+    <load name="gps_diagnostics.xml"/>
   </modules>
 
   <commands>

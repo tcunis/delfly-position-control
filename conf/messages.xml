@@ -1899,8 +1899,11 @@
     <field name="dl_pkg_count" type="uint16"/>
     <field name="gps_freq" type="double" unit="Hz"/>
     <field name="gps_period" type="double" unit="s"/>
+    <field name="dl_freq" type="double" unit="Hz"/>
+    <field name="dl_period" type="double" unit="s"/>
     <field name="last_msgtimediff" type="uint32" unit="usec"/>
     <field name="avrg_msgtimediff" type="double" unit="usec"/>
+    <field name="dl_pkgtimediff" type="uint32" unit="usec"/>
     <field name="count" type="uint8"/>
   </message>
 

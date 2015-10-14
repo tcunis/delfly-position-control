@@ -36,21 +36,30 @@
 
 
 uint16_t msg_count;         // total number of gps messages received since start-up
-uint16_t dl_pkg_count;      // total number of datalink "gps" packages received
+uint16_t dlpkg_count;      // total number of datalink "gps" packages received
 
 double   gps_freq;          // estimated frequence of gps message reception, in Hz
 double   gps_period;        // estimated perdiod of gps message reception, in s
 
-uint32_t last_msgtimediff;  // time-difference of last and last-but-one gps message, in usec
-uint32_t totl_msgtimediff;  // in usec
-double   avrg_msgtimediff;  // average time-difference between gps messages, in usec
+double   dl_freq;
+double   dl_period;
+
+uint32_t prev_msgtimediff;  // previous time-difference of last and last-but-one gps message, in μs
+uint32_t totl_msgtimediff;  // in μs
+double   avrg_msgtimediff;  // average time-difference between gps messages, in μs
+
+uint32_t dl_pkgtimediff;    // in μs
+
+uint32_t prev_dlpkg_time;   // time of reception of previous datalink gps package in μs
 
 uint8_t  count;
 
-struct GpsState last_gps_state;
-uint32_t last_msg_time;     // time of reception of last gps message, in usec
+struct GpsState prev_gps_state; // last gps state received
+uint32_t prev_msg_time;     // previous time of reception of last gps message, in μs
 
-uint8_t  count_iteration;   // number of iterations since last gps message
+
+
+uint8_t  count_iteration;   // number of iterations since previous gps message
 
 
 
@@ -58,11 +67,14 @@ static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct
 
     DOWNLINK_SEND_GPS_DIAGNOSTICS( DefaultChannel, DefaultDevice,
         &msg_count,
-        &dl_pkg_count,
+        &dlpkg_count,
         &gps_freq,
         &gps_period,
-        &last_msgtimediff,
+        &dl_freq,
+        &dl_period,
+        &prev_msgtimediff,
         &avrg_msgtimediff,
+        &dl_pkgtimediff,
         &count
     );
 }
@@ -70,16 +82,21 @@ static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct
 void gps_diagnostics_init(void) {
 
     msg_count = 0;
-    dl_pkg_count = 0;;
+    dlpkg_count = 0;;
     gps_freq = 0.0;
-    gps_period = 0;
-    last_msgtimediff = 0;
+    gps_period = 0.0;
+    dl_freq = 0.0;
+    dl_period = 0.0;
+    prev_msgtimediff = 0;
     totl_msgtimediff = 0;
     avrg_msgtimediff = 0.0;
+    dl_pkgtimediff = 0;
     count = -1;
 
-    last_gps_state = gps;
-    last_msg_time = USEC_OF_GPS_MSG(gps);
+    prev_gps_state = gps;
+    prev_msg_time = USEC_OF_GPS_MSG(gps);
+    
+    prev_dlpkg_time = 0;
     
     count_iteration = 0;
 
@@ -88,28 +105,63 @@ void gps_diagnostics_init(void) {
 
 void gps_diagnostics_periodic(void) {
 
+    // calculate time of last gps message received -- in us
     uint32_t msg_time = USEC_OF_GPS_MSG(gps);
 
-    if ( msg_time <= last_msg_time ) {
+    // if time of last received message is equals to (or lower than) previous,
+    // nothing to do for no new message received.
+    if ( msg_time <= prev_msg_time ) {
         count_iteration++;
         return; //nothing to do    
     }
     
     //else:
+    // another message received:
     msg_count++;
     
-    uint32_t msg_timediff = ( msg_time - last_msg_time );
+    // calculate time-difference between last and last-but-one gps message;
+    uint32_t msg_timediff = ( msg_time - prev_msg_time );
+
+    // add recent time-difference to total,
     totl_msgtimediff += msg_timediff;
+    // calculate current average time-difference,
     avrg_msgtimediff = ( totl_msgtimediff * 1.0 / msg_count );
-    last_msgtimediff = msg_timediff;
+    // store current time-difference for next iteration;
+    prev_msgtimediff = msg_timediff;
     
-    gps_period = SEC_OF_USEC(avrg_msgtimediff);
+    // store current gps state,get_sys_time_usec();
+    prev_gps_state = gps;
+    // store time of current last gps message received;
+    prev_msg_time = msg_time;
+    
+    // calculate period of gps message reception as current time difference,
+    gps_period = SEC_OF_USEC(msg_timediff);
+    // calculate frequency of gps message reception;
     gps_freq   = ( 1 / gps_period );
     
+    // set number of iterations between last and last-but-one 6836gps messages,
     count = count_iteration;
+    // reset iteration counter.
     count_iteration = 0;
 }
 
-void gps_diagnostics_datalink_event(void) { dl_pkg_count++; }
-void gps_diagnostics_datalink_small_event(void) { dl_pkg_count++; }
+void gps_diagnostics_datalink_event(void) {
+
+    dlpkg_count++;
+    uint32_t dlpkg_time = get_sys_time_usec();
+    
+    if ( dlpkg_time <= prev_dlpkg_time )
+        return;
+        
+    //else:
+    if ( prev_dlpkg_time > 0 ) {
+        dl_pkgtimediff = ( dlpkg_time - prev_dlpkg_time );
+        
+        dl_period = SEC_OF_USEC(dl_pkgtimediff);
+        dl_freq   = ( 1 / dl_period );
+    }
+    prev_dlpkg_time = dlpkg_time;
+}
+
+void gps_diagnostics_datalink_small_event(void) { /*dlpkg_count++;*/ }
 
