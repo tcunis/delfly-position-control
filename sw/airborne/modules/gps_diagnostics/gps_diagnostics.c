@@ -50,7 +50,7 @@ uint8_t  count;
 struct GpsState last_gps_state;
 uint32_t last_msg_time;     // time of reception of last gps message, in usec
 
-
+uint8_t  count_iteration;   // number of iterations since last gps message
 
 
 
@@ -76,10 +76,12 @@ void gps_diagnostics_init(void) {
     last_msgtimediff = 0;
     totl_msgtimediff = 0;
     avrg_msgtimediff = 0.0;
-    count = 0;
+    count = -1;
 
     last_gps_state = gps;
     last_msg_time = USEC_OF_GPS_MSG(gps);
+    
+    count_iteration = 0;
 
     register_periodic_telemetry(DefaultPeriodic, "GPS_DIAGNOSTICS", &gps_diagnostics_send_diagnostics);
 }
@@ -89,7 +91,7 @@ void gps_diagnostics_periodic(void) {
     uint32_t msg_time = USEC_OF_GPS_MSG(gps);
 
     if ( msg_time <= last_msg_time ) {
-        count++;
+        count_iteration++;
         return; //nothing to do    
     }
     
@@ -104,7 +106,8 @@ void gps_diagnostics_periodic(void) {
     gps_period = SEC_OF_USEC(avrg_msgtimediff);
     gps_freq   = ( 1 / gps_period );
     
-    count = 0;
+    count = count_iteration;
+    count_iteration = 0;
 }
 
 void gps_diagnostics_datalink_event(void) { dl_pkg_count++; }
