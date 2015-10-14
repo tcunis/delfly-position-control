@@ -1894,7 +1894,15 @@
     <field name="g2_r" type="float"/>
   </message>
 
-  <!--217 is free -->
+  <message name="GPS_DIAGNOSTICS" id="217">
+    <field name="msg_count" type="uint16"/>
+    <field name="dl_pkg_count" type="uint16"/>
+    <field name="gps_freq" type="double" unit="Hz"/>
+    <field name="gps_period" type="double" unit="s"/>
+    <field name="last_msgtimediff" type="uint32" unit="usec"/>
+    <field name="avrg_msgtimediff" type="double" unit="usec"/>
+    <field name="count" type="uint8"/>
+  </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
     <field name="cmd_thrust" type="int32"/>
