@@ -25,8 +25,10 @@
 
 #include "modules/gps_diagnostics/gps_diagnostics.h"
 
-#include "gps.h"
+#include "subsystems/gps.h"
 #include "subsystems/datalink/telemetry.h"
+
+//#include "generated/airframe.h"
 
 
 #define SEC_OF_USEC(_USEC_)         ( (_USEC_)*1.0/USEC_OF_SEC(1) )
@@ -52,11 +54,11 @@ uint32_t last_msg_time;     // time of reception of last gps message, in usec
 
 
 
-void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* device ) {
+static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* device ) {
 
     DOWNLINK_SEND_GPS_DIAGNOSTICS( DefaultChannel, DefaultDevice,
         &msg_count,
-        &dl_pgk_count,
+        &dl_pkg_count,
         &gps_freq,
         &gps_period,
         &last_msgtimediff,
@@ -65,7 +67,7 @@ void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_d
     );
 }
 
-void gps_diagnostics_init() {
+void gps_diagnostics_init(void) {
 
     msg_count = 0;
     dl_pkg_count = 0;;
@@ -82,7 +84,7 @@ void gps_diagnostics_init() {
     register_periodic_telemetry(DefaultPeriodic, "GPS_DIAGNOSTICS", &gps_diagnostics_send_diagnostics);
 }
 
-void gps_diagnostics_periodic() {
+void gps_diagnostics_periodic(void) {
 
     uint32_t msg_time = USEC_OF_GPS_MSG(gps);
 
@@ -105,6 +107,6 @@ void gps_diagnostics_periodic() {
     count = 0;
 }
 
-void gps_diagnostics_datalink_event() { dl_pkg_count++; }
-void gps_diagnostics_datalink_small_event() { dl_pkg_count++; }
+void gps_diagnostics_datalink_event(void) { dl_pkg_count++; }
+void gps_diagnostics_datalink_small_event(void) { dl_pkg_count++; }
 

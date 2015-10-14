@@ -26,12 +26,11 @@
 #ifndef GPS_DIAGNOSTICS_H
 #define GPS_DIAGNOSTICS_H
 
-extern void gps_diagnostics_send_diagnostics();
 
-extern void gps_diagnostics_init();
-extern void gps_diagnostics_periodic();
-extern void gps_diagnostics_datalink_event();
-extern void gps_diagnostics_datalink_small_event();
+extern void gps_diagnostics_init(void);
+extern void gps_diagnostics_periodic(void);
+extern void gps_diagnostics_datalink_event(void);
+extern void gps_diagnostics_datalink_small_event(void);
 
 #endif
 

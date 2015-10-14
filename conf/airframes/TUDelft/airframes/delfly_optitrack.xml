@@ -240,10 +240,11 @@
    <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_default.h&quot;"/>
  </section>
 
- <!--modules main_freq="512"-->
+ <modules main_freq="512">
+   <load name="gps_diagnostics.xml"/>
    <!--load name="gps_ubx_ucenter.xml"/-->
    <!--load name="send_imu_mag_current.xml"/-->
- <!--/modules-->
+ </modules>
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
