@@ -163,5 +163,21 @@ void gps_diagnostics_datalink_event(void) {
     prev_dlpkg_time = dlpkg_time;
 }
 
-void gps_diagnostics_datalink_small_event(void) { /*dlpkg_count++;*/ }
+void gps_diagnostics_datalink_small_event(void) {
+
+    dlpkg_count++;
+    uint32_t dlpkg_time = get_sys_time_usec();
+    
+    if ( dlpkg_time <= prev_dlpkg_time )
+        return;
+        
+    //else:
+    if ( prev_dlpkg_time > 0 ) {
+        dl_pkgtimediff = ( dlpkg_time - prev_dlpkg_time );
+        
+        dl_period = SEC_OF_USEC(dl_pkgtimediff);
+        dl_freq   = ( 1 / dl_period );
+    }
+    prev_dlpkg_time = dlpkg_time;
+}
 
