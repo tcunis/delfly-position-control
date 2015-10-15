@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="delfly_utils">
+  <doc>
+    <description></description>
+  </doc>
+  <header>
+    <file name="delfly_utils.h"/>
+  </header>
+  <init fun="util_init()"/>
+  <makefile>
+    <file name="delfly_utils.c"/>
+  </makefile>
+</module>
+
