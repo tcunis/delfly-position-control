@@ -44,6 +44,13 @@
     <servo name="BOTTOM_RIGHT" no="2" min="0" neutral="1" max="500"/>
     <servo name="BOTTOM_LEFT" no="3" min="0" neutral="1" max="500"/>
   </servos>
+  
+  <section name="GPS" prefix="GPS_">
+   <define name="USE_DATALINK_SMALL" value="1"/>
+   <define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/>
+   <define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/>
+   <define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/>
+ </section>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="TRIM_ROLL" value="0"/>

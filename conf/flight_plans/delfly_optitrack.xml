@@ -6,7 +6,7 @@
 </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
-    <waypoint name="HOME_mm" x="0.0" y="0.0" alt="0.1"/>
+    <waypoint name="HOME_mm" x="0.0" y="0.0" alt="0.3"/>
     <waypoint name="CLIMB" x="1.2" y="-0.6"/>
     <waypoint name="STDBY" x="-0.7" y="-0.8"/>
     <waypoint name="TD" x="0.8" y="-1.7"/>
@@ -38,8 +38,9 @@
       <call fun="NavSetWaypointHere(WP_HOME_mm)"/>
       <!--call fun="NavSetWaypointHere(WP_CLIMB)"/-->
       <call fun="{ waypoint_set_xy_i( WP_CLIMB, POS_BFP_OF_REAL(1.5), 0 ); FALSE; }"/>
+      <call fun="{ waypoint_set_xy_i( WP_TD, POS_BFP_OF_REAL(3.0), 0 ); FALSE; }"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <!--call fun="NavSetWaypointHere(WP_TD)"/-->
       <call fun="NavSetAltitudeReferenceHere()"/>
     </block>
     <block name="Holding point">
@@ -51,10 +52,13 @@
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <call fun="nav_set_heading_deg(0)"/>
+      <!--call fun="nav_set_heading_deg(0)"/-->
+      <stay wp="HOME_mm" />
       <go from="HOME_mm" wp="CLIMB" approaching_time="1" />
+      <!--go wp="CLIMB" approaching_time="1" throttle="0.75" /-->
     </block>
-    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+    <block name="Standby" strip_button="Standby" strip_icon="home.png" key="1">
+      <go wp="TD" approaching_time="1" />
       <circle wp="STDBY" radius="3"/>
     </block>
     <block name="route">
