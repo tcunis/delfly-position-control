@@ -1,0 +1,137 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="2" ground_alt="0.0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
+  <header>
+#include "autopilot.h"
+#include "guidance.h"
+#include "positionctrl_windtunnel.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="1.2" y="-0.6"/>
+    <waypoint name="STDBY" x="-0.7" y="-0.8"/>
+    <waypoint name="TD" x="0.8" y="-1.7"/>
+    <waypoint alt="1" lat="51.9906420" lon="4.3768256" name="TARGET"/>
+    <waypoint alt="1" lat="51.9906308" lon="4.3767945" name="p1"/>
+    <waypoint lat="51.9906420" lon="4.3768256" name="p2"/>
+    <waypoint lat="51.9906316" lon="4.3768384" name="_FA1"/>
+    <waypoint lat="51.9906120" lon="4.3767901" name="_FA2"/>
+    <waypoint lat="51.9906309" lon="4.3767675" name="_FA3"/>
+    <waypoint lat="51.9906522" lon="4.3768134" name="_FA4"/>
+  </waypoints>
+  <sectors>
+    <sector color="red" name="FlightArea">
+      <corner name="_FA1"/>
+      <corner name="_FA2"/>
+      <corner name="_FA3"/>
+      <corner name="_FA4"/>
+    </sector>
+  </sectors>
+  <exceptions>
+    <exception cond="! InsideFlightArea( GetPosX(), GetPosY() )" deroute="Standby"/>
+  </exceptions>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 1)"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Start Engine" strip_button="Start Engine" strip_icon="flat_theme/on.png">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="flat_theme/launch.png">
+      <exception cond="stateGetPositionEnu_f()->z > 1.5" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
+    </block>
+    <block key="1" name="Standby" strip_button="Standby" strip_icon="flat_theme/home.png">
+      <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="StartWindtunnel" strip_button="Start windtunnel" group="windtunnel" strip_icon="flat_theme/start_motors.png">
+      <call fun="windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2, 0.5, TRUE)"/>
+      <return/>
+    </block>
+    <block name="StopWindtunnel">
+      <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
+      <return/>
+    </block>
+    <block name="SetWindtunnel_slow" strip_button="Set windtunnel slow (0.1 m/s)" group="windtunnel2" strip_icon="flat_theme/waypoint_one.png">
+      <call fun="windtunnel_setWindVelocity( 0.1 )"/>
+      <return/>
+    </block>
+    <block name="SetWindtunnel_midd" strip_button="Set windtunnel middle (0.5 m/s)" group="windtunnel2" strip_icon="flat_theme/waypoint_five.png">
+      <call fun="windtunnel_setWindVelocity( 0.5 )"/>
+      <return/>
+    </block>
+    <block name="SetWindtunnel_fast" strip_button="Set windtunnel fast (1.0 m/s)" group="windtunnel2" strip_icon="flat_theme/waypoint_ten.png">
+      <call fun="windtunnel_setWindVelocity( 1.0 )"/>
+      <return/>
+    </block>
+    <block key="+" name="IncreaseWindtunnel" strip_button="Increase windtunnel" group="windtunnel" strip_icon="flat_theme/upup.png">
+      <call fun="windtunnel_setWindVelocity( windtunnel_velocity + 0.1 )"/>
+      <return/>
+    </block>
+    <block key="-" name="DecreaseWindtunnel" strip_button="Decrease windtunnel" group="windtunnel" strip_icon="flat_theme/downdown.png">
+      <call fun="windtunnel_setWindVelocity( windtunnel_velocity - 0.1 )"/>
+      <return/>
+    </block>
+    <block name="stay_p1" strip_button="Stay p1" strip_icon="flat_theme/circle-right.png">
+      <stay wp="p1"/>
+    </block>
+    <block key="V" name="VelocityControl" strip_button="Set velocity ref" group="control" strip_icon="flat_theme/right.png">
+      <go wp="p1"/>
+      <call fun="nav_SetVelocityRef(WP_TD, 0.5, 0, 0)"/>
+    </block>
+    <block key="F" name="WindtunnelControl" strip_button="Set windtunnel control" group="control" strip_icon="flat_theme/target.png">
+      <go wp="p1"/>
+      <call fun="nav_InitPosControl()"/>
+      <call fun="windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2, 0.5, TRUE)"/>
+      <call fun="nav_FollowWtNavTarget(WP_TD)"/>
+    </block>
+    <block key="S" name="WindtunnelStay" strip_button="Set windtunnel stay" group="control" strip_icon="flat_theme/pano_run.png">
+      <go wp="p1"/>
+      <call fun="windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2, 0.5, TRUE)"/>
+      <call fun="nav_StayWtNavTarget(WP_TD)"/>
+    </block>
+    <block name="Decrease Altitude">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="{ waypoint_set_alt( WP_TD, GetPosAlt() - 1 ); FALSE; }"/>
+      <stay wp="TD"/>
+    </block>
+    <block name="Descend">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <stay climb="-0.1" vmode="climb" wp="TD"/>
+    </block>
+    <block key="0" name="land_stdby" strip_button="Land home" group="land" strip_icon="flat_theme/land.png">
+      <go wp="STDBY"/>
+    </block>
+    <block key="l" name="land here" strip_button="Land here" group="land" strip_icon="flat_theme/land-left.png">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+    </block>
+    <block name="land">
+      <go wp="TD"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
+      <exception cond="!nav_is_in_flight() /*|| 0.1 > GetPosAlt()*/" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
+    </block>
+    <block name="landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+  </blocks>
+</flight_plan>

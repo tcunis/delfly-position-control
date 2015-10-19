@@ -48,9 +48,9 @@
    ac_id="11"
    airframe="airframes/TUDelft/airframes/ardrone2_optitrack.xml"
    radio="radios/dummy.xml"
-   telemetry="telemetry/default_rotorcraft.xml"
-   flight_plan="flight_plans/rotorcraft_optitrack.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/estimation/ahrs_int_cmpl_quat.xml settings/estimation/body_to_imu.xml settings/control/stabilization_att_indi.xml"
+   telemetry="telemetry/dfiawt_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_dfiawt_ojf.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/estimation/ahrs_int_cmpl_quat.xml settings/estimation/body_to_imu.xml settings/control/stabilization_att_indi.xml settings/modules/windtunnel.xml"
    settings_modules=""
    gui_color="red"
   />
