@@ -49,7 +49,7 @@ struct EnuCoor_f windtunnel_navigation_target;      // in ENU_f -- [m]^3
 
 int8_t wp_temporary;
 
-volatile double time_moving;                        // in s
+double time_moving;                        // in s
 
 
 

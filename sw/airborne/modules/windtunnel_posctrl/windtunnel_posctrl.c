@@ -202,6 +202,17 @@ void wtposctrl_set_heading ( int32_t heading /*in rad, with INT32_ANGLE_FRAC */ 
 #include "firmwares/rotorcraft/navigation.h"
 
 
+struct Int32Vect2 wtposctrl_guidance_h_pos_err;
+struct Int32Vect2 wtposctrl_guidance_h_speed_err;
+struct Int32Vect2 wtposctrl_guidance_h_trim_att_int;
+
+/** horizontal guidance command.
+ * In north/east with #INT32_ANGLE_FRAC
+ * @todo convert to real force command
+ */
+struct Int32Vect2  wtposctrl_guidance_h_cmd_earth;
+
+
 static inline void reset_guidance_reference_from_current_position (void);
 static void guidance_h_update_reference (void);
 static void guidance_h_traj_run ( bool_t in_flight );
@@ -209,7 +220,14 @@ static void guidance_h_traj_run ( bool_t in_flight );
 static inline void guidance_h_set_velocity_tm (void);
 
 
-void guidance_h_module_init (void) { /*nothing to do yet*/ }
+void guidance_h_module_init (void) { 
+
+    INT_VECT2_ZERO( wtposctrl_guidance_h_pos_err );
+    INT_VECT2_ZERO( wtposctrl_guidance_h_speed_err );
+    INT_VECT2_ZERO( wtposctrl_guidance_h_trim_att_int );
+    
+    INT_VECT2_ZERO( wtposctrl_guidance_h_cmd_earth );
+}
 
 void guidance_h_module_stop (void) {
     /* change guidance_h mode to navigation */
@@ -260,12 +278,12 @@ static inline void guidance_h_set_velocity_tm (void) {
 
 static inline void reset_guidance_reference_from_current_position(void)
 {
-  VECT2_COPY(guidance_h_pos_ref, *stateGetPositionNed_i());
-  VECT2_COPY(guidance_h_speed_ref, *stateGetSpeedNed_i());
-  INT_VECT2_ZERO(guidance_h_accel_ref);
-  gh_set_ref(guidance_h_pos_ref, guidance_h_speed_ref, guidance_h_accel_ref);
+  VECT2_COPY(guidance_h.ref.pos, *stateGetPositionNed_i());
+  VECT2_COPY(guidance_h.ref.speed, *stateGetSpeedNed_i());
+  INT_VECT2_ZERO(guidance_h.ref.accel);
+  gh_set_ref(guidance_h.ref.pos, guidance_h.ref.speed, guidance_h.ref.accel);
 
-  INT_VECT2_ZERO(guidance_h_trim_att_integrator);
+  INT_VECT2_ZERO(wtposctrl_guidance_h_trim_att_int);
 }
 
 
@@ -274,18 +292,18 @@ static void guidance_h_update_reference(void)
     gh_update_ref_from_speed_sp(wtposctrl_guidance_h_speed_sp);
 
     /* either use the reference or simply copy the pos setpoint */
-    if (guidance_h_use_ref) {
+    if (guidance_h.use_ref) {
         /* convert our reference to generic representation */
-        INT32_VECT2_RSHIFT(guidance_h_pos_ref,   gh_ref.pos, (GH_POS_REF_FRAC - INT32_POS_FRAC));
-        INT32_VECT2_LSHIFT(guidance_h_speed_ref, gh_ref.speed, (INT32_SPEED_FRAC - GH_SPEED_REF_FRAC));
-        INT32_VECT2_LSHIFT(guidance_h_accel_ref, gh_ref.accel, (INT32_ACCEL_FRAC - GH_ACCEL_REF_FRAC));
+        INT32_VECT2_RSHIFT(guidance_h.ref.pos,   gh_ref.pos, (GH_POS_REF_FRAC - INT32_POS_FRAC));
+        INT32_VECT2_LSHIFT(guidance_h.ref.speed, gh_ref.speed, (INT32_SPEED_FRAC - GH_SPEED_REF_FRAC));
+        INT32_VECT2_LSHIFT(guidance_h.ref.accel, gh_ref.accel, (INT32_ACCEL_FRAC - GH_ACCEL_REF_FRAC));
     } else {
-        VECT2_COPY(guidance_h_pos_ref, guidance_h_pos_sp);
-        INT_VECT2_ZERO(guidance_h_speed_ref);
-        INT_VECT2_ZERO(guidance_h_accel_ref);
+        VECT2_COPY(guidance_h.ref.pos, guidance_h.sp.pos);
+        INT_VECT2_ZERO(guidance_h.ref.speed);
+        INT_VECT2_ZERO(guidance_h.ref.accel);
     }
 
-//    VECT2_COPY(guidance_h_pos_sp, guidance_h_pos_ref); // for display only
+//    VECT2_COPY(guidance_h.sp.pos, guidance_h.ref.pos); // for display only
 }
 
 
@@ -297,33 +315,33 @@ static void guidance_h_traj_run(bool_t in_flight)
   static const int32_t total_max_bank = BFP_OF_REAL(RadOfDeg(45), INT32_ANGLE_FRAC);
 
 //  /* compute position error    */
-//  VECT2_DIFF(guidance_h_pos_err, guidance_h_pos_ref, *stateGetPositionNed_i());
+//  VECT2_DIFF(wtposctrl_guidance_h_pos_err, guidance_h_pos_ref, *stateGetPositionNed_i());
 //  /* saturate it               */
-//  VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
+//  VECT2_STRIM(wtposctrl_guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
 
   /* compute speed error    */
-  VECT2_DIFF(guidance_h_speed_err, guidance_h_speed_ref, *stateGetSpeedNed_i());
+  VECT2_DIFF(wtposctrl_guidance_h_speed_err, guidance_h.ref.speed, *stateGetSpeedNed_i());
   /* saturate it               */
-  VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+  VECT2_STRIM(wtposctrl_guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
   /* run PID */
   int32_t pd_x =
-//    ((guidance_h_pgain * guidance_h_pos_err.x) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h_dgain * (guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
+//    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.x) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
   int32_t pd_y =
-//    ((guidance_h_pgain * guidance_h_pos_err.y) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h_dgain * (guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
-  guidance_h_cmd_earth.x =
+//    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.y) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
+  wtposctrl_guidance_h_cmd_earth.x =
     pd_x +
-    ((guidance_h_vgain * guidance_h_speed_ref.x) >> 17) + /* speed feedforward gain */
-    ((guidance_h_again * guidance_h_accel_ref.x) >> 8);   /* acceleration feedforward gain */
-  guidance_h_cmd_earth.y =
+    ((guidance_h.gains.v * guidance_h.ref.speed.x) >> 17) + /* speed feedforward gain */
+    ((guidance_h.gains.a * guidance_h.ref.accel.x) >> 8);   /* acceleration feedforward gain */
+  wtposctrl_guidance_h_cmd_earth.y =
     pd_y +
-    ((guidance_h_vgain * guidance_h_speed_ref.y) >> 17) + /* speed feedforward gain */
-    ((guidance_h_again * guidance_h_accel_ref.y) >> 8);   /* acceleration feedforward gain */
+    ((guidance_h.gains.v * guidance_h.ref.speed.y) >> 17) + /* speed feedforward gain */
+    ((guidance_h.gains.a * guidance_h.ref.accel.y) >> 8);   /* acceleration feedforward gain */
 
   /* trim max bank angle from PD */
-  VECT2_STRIM(guidance_h_cmd_earth, -traj_max_bank, traj_max_bank);
+  VECT2_STRIM(wtposctrl_guidance_h_cmd_earth, -traj_max_bank, traj_max_bank);
 
   /* Update pos & speed error integral, zero it if not in_flight.
    * Integrate twice as fast when not only POS but also SPEED are wrong,
@@ -331,30 +349,30 @@ static void guidance_h_traj_run(bool_t in_flight)
    */
   if (in_flight) {
     /* ANGLE_FRAC (12) * GAIN (8) * LOOP_FREQ (9) -> INTEGRATOR HIGH RES ANGLE_FRAX (28) */
-    guidance_h_trim_att_integrator.x += (guidance_h_igain * pd_x);
-    guidance_h_trim_att_integrator.y += (guidance_h_igain * pd_y);
+    wtposctrl_guidance_h_trim_att_int.x += (guidance_h.gains.i * pd_x);
+    wtposctrl_guidance_h_trim_att_int.y += (guidance_h.gains.i * pd_y);
     /* saturate it  */
-    VECT2_STRIM(guidance_h_trim_att_integrator, -(traj_max_bank << 16), (traj_max_bank << 16));
+    VECT2_STRIM(wtposctrl_guidance_h_trim_att_int, -(traj_max_bank << 16), (traj_max_bank << 16));
     /* add it to the command */
-    guidance_h_cmd_earth.x += (guidance_h_trim_att_integrator.x >> 16);
-    guidance_h_cmd_earth.y += (guidance_h_trim_att_integrator.y >> 16);
+    wtposctrl_guidance_h_cmd_earth.x += (wtposctrl_guidance_h_trim_att_int.x >> 16);
+    wtposctrl_guidance_h_cmd_earth.y += (wtposctrl_guidance_h_trim_att_int.y >> 16);
   } else {
-    INT_VECT2_ZERO(guidance_h_trim_att_integrator);
+    INT_VECT2_ZERO(wtposctrl_guidance_h_trim_att_int);
   }
 
   /* compute a better approximation of force commands by taking thrust into account */
-  if (guidance_h_approx_force_by_thrust && in_flight) {
+  if (guidance_h.approx_force_by_thrust && in_flight) {
     static int32_t thrust_cmd_filt;
     int32_t vertical_thrust = (stabilization_cmd[COMMAND_THRUST] * guidance_v_thrust_coeff) >> INT32_TRIG_FRAC;
     thrust_cmd_filt = (thrust_cmd_filt * GUIDANCE_H_THRUST_CMD_FILTER + vertical_thrust) /
                       (GUIDANCE_H_THRUST_CMD_FILTER + 1);
-    guidance_h_cmd_earth.x = ANGLE_BFP_OF_REAL(atan2f((guidance_h_cmd_earth.x * MAX_PPRZ / INT32_ANGLE_PI_2),
+    wtposctrl_guidance_h_cmd_earth.x = ANGLE_BFP_OF_REAL(atan2f((wtposctrl_guidance_h_cmd_earth.x * MAX_PPRZ / INT32_ANGLE_PI_2),
                              thrust_cmd_filt));
-    guidance_h_cmd_earth.y = ANGLE_BFP_OF_REAL(atan2f((guidance_h_cmd_earth.y * MAX_PPRZ / INT32_ANGLE_PI_2),
+    wtposctrl_guidance_h_cmd_earth.y = ANGLE_BFP_OF_REAL(atan2f((wtposctrl_guidance_h_cmd_earth.y * MAX_PPRZ / INT32_ANGLE_PI_2),
                              thrust_cmd_filt));
   }
 
-  VECT2_STRIM(guidance_h_cmd_earth, -total_max_bank, total_max_bank);
+  VECT2_STRIM(wtposctrl_guidance_h_cmd_earth, -total_max_bank, total_max_bank);
 }
 
 /* End definition of static functions. */
@@ -392,16 +410,16 @@ void guidance_h_module_run ( bool_t in_flight ) {
     guidance_h_update_reference();
 
     /* set psi command */
-    guidance_h_heading_sp = wtposctrl_heading;
-    INT32_ANGLE_NORMALIZE(guidance_h_heading_sp);
+    guidance_h.sp.heading = wtposctrl_heading;
+    INT32_ANGLE_NORMALIZE(guidance_h.sp.heading);
     /* compute x,y earth commands */
     guidance_h_traj_run(in_flight);
 
     guidance_h_set_velocity_tm();
 
     /* set final attitude setpoint */
-    stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
-                                           guidance_h_heading_sp);
+    stabilization_attitude_set_earth_cmd_i(&wtposctrl_guidance_h_cmd_earth,
+                                           guidance_h.sp.heading);
     stabilization_attitude_run(in_flight);
 } 
 
