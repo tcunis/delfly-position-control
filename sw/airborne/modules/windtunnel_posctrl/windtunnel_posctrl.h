@@ -30,6 +30,9 @@
 #include "math/pprz_algebra_int.h"
 #include "std.h"
 
+extern bool_t velctrl_use_feedback;
+extern double velctrl_vel_Kf;
+
 /* Telemetry data                                                                */
 /* Position in Enu_f -- [m]^3                                                    */
 extern struct EnuCoor_f wtposctrl_tm_position_ref,  /* reference position        */

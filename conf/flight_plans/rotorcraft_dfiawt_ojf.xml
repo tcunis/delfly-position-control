@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="2" ground_alt="0.0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
+<flight_plan alt="47" ground_alt="45" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Open Jet Facility of the Delft University of Technology" security_height="0.3">
   <header>
 #include "autopilot.h"
 #include "guidance.h"
@@ -11,9 +11,9 @@
     <waypoint name="CLIMB" x="1.2" y="-0.6"/>
     <waypoint name="STDBY" x="-0.7" y="-0.8"/>
     <waypoint name="TD" x="0.8" y="-1.7"/>
-    <waypoint alt="1" lat="51.9906420" lon="4.3768256" name="TARGET"/>
-    <waypoint alt="1" lat="51.9906308" lon="4.3767945" name="p1"/>
-    <waypoint lat="51.9906420" lon="4.3768256" name="p2"/>
+    <waypoint lat="51.9906371" lon="4.3768132" alt="2" name="TARGET"/>
+    <waypoint lat="51.9906308" lon="4.3767945" alt="2" name="p1"/>
+    <waypoint lat="51.9906420" lon="4.3768256" alt="2" name="p2"/>
     <waypoint lat="51.9906316" lon="4.3768384" name="_FA1"/>
     <waypoint lat="51.9906120" lon="4.3767901" name="_FA2"/>
     <waypoint lat="51.9906309" lon="4.3767675" name="_FA3"/>
@@ -40,7 +40,8 @@
       <call fun="NavSetWaypointHere(WP_HOME)"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavSetAltitudeReferenceHere()"/>
+      <!--call fun="NavSetAltitudeReferenceHere()"/-->
+      <call fun="NavSetGroundReferenceHere()"/>
     </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>
@@ -125,7 +126,7 @@
     </block>
     <block name="flare">
       <exception cond="NavDetectGround()" deroute="Holding point"/>
-      <exception cond="!nav_is_in_flight() /*|| 0.1 > GetPosAlt()*/" deroute="landed"/>
+      <exception cond="!nav_is_in_flight() || 0.1 > GetPosAlt()" deroute="landed"/>
       <call fun="NavStartDetectGround()"/>
       <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
     </block>

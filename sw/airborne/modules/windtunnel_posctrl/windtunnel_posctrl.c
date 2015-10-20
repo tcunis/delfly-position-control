@@ -31,12 +31,24 @@
 #include "math/pprz_algebra_int.h"
 
 
+#ifndef WINDTUNNEL_POSCTRL_USE_FEEDBACK
+#define WINDTUNNEL_POSCTRL_USE_FEEDBACK		0
+#endif
+
+#ifndef WINDTUNNEL_POSCTRL_VELOCITY_FGAIN
+#define WINDTUNNEL_POSCTRL_VELOCITY_FGAIN	1
+#endif
+
 
 #define VECT2_SPEEDS_FLOAT_OF_BFP(_ef, _ei) {      \
     (_ef).x = SPEED_FLOAT_OF_BFP((_ei).x);   \
     (_ef).y = SPEED_FLOAT_OF_BFP((_ei).y);   \
   }
 
+
+
+bool_t velctrl_use_feedback = WINDTUNNEL_POSCTRL_USE_FEEDBACK;
+double velctrl_vel_Kf		= WINDTUNNEL_POSCTRL_VELOCITY_FGAIN;
 
 struct Int32Vect2 wtposctrl_guidance_h_speed_sp;    // in NED_i (!), with #INT32_SPEED_FRAC
 
@@ -325,20 +337,24 @@ static void guidance_h_traj_run(bool_t in_flight)
   VECT2_STRIM(wtposctrl_guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
   /* run PID */
-  int32_t pd_x =
+  int32_t pd_x = velctrl_use_feedback * (
 //    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.x) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
-  int32_t pd_y =
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2))
+  );
+  int32_t pd_y = velctrl_use_feedback * (
 //    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.y) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2))
+  );
   wtposctrl_guidance_h_cmd_earth.x =
-    pd_x +
+    pd_x + ( velctrl_use_feedback + (1-velctrl_use_feedback)*velctrl_vel_Kf ) * (
     ((guidance_h.gains.v * guidance_h.ref.speed.x) >> 17) + /* speed feedforward gain */
-    ((guidance_h.gains.a * guidance_h.ref.accel.x) >> 8);   /* acceleration feedforward gain */
+    ((guidance_h.gains.a * guidance_h.ref.accel.x) >> 8)    /* acceleration feedforward gain */
+  );
   wtposctrl_guidance_h_cmd_earth.y =
-    pd_y +
+    pd_y + ( velctrl_use_feedback + (1-velctrl_use_feedback)*velctrl_vel_Kf ) * (
     ((guidance_h.gains.v * guidance_h.ref.speed.y) >> 17) + /* speed feedforward gain */
-    ((guidance_h.gains.a * guidance_h.ref.accel.y) >> 8);   /* acceleration feedforward gain */
+    ((guidance_h.gains.a * guidance_h.ref.accel.y) >> 8)    /* acceleration feedforward gain */
+  );
 
   /* trim max bank angle from PD */
   VECT2_STRIM(wtposctrl_guidance_h_cmd_earth, -traj_max_bank, traj_max_bank);

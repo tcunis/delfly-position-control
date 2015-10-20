@@ -238,10 +238,15 @@
   </section>
   
   <section name="POSITIONCTRL" prefix="POSITIONCTRL_">
-    <define name="VELOCITY_PGAIN" value="0.7" />
-    <define name="VELOCITY_IGAIN" value="0.3" />
-    <define name="VELOCITY_DGAIN" value="0.2" />
-    <define name="VELOCITY_D2GAIN" value="0.0" />
+    <define name="POSITION_PGAIN" value="0.7" />
+    <define name="POSITION_IGAIN" value="0.3" />
+    <define name="POSITION_DGAIN" value="0.2" />
+    <define name="POSITION_D2GAIN" value="0.0" />
+  </section>
+  
+  <section name="VELOCITYCTRL" prefix="WINDTUNNEL_POSCTRL_">
+    <define name="USE_FEEDBACK" value="1" />
+    <define name="VELOCIY_FGAIN" value="0.5" />
   </section>
   
   <section name="WINDTUNNEL" prefix="WINDTUNNEL_">

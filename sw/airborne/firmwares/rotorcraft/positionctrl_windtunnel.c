@@ -28,7 +28,7 @@
 
 #include "firmwares/rotorcraft/positionctrl_windtunnel.h"
 
-//#include "generated/airframe.h"
+#include "generated/airframe.h"
 #include "state.h"
 
 #include "navigation.h"
@@ -63,10 +63,10 @@
 
 //volatile uint8_t windtunnel_velocity = POSITIONCTRL_WINDTUNNEL_WIND_VELOCITY;
 
-double posctrl_vel_Kp  = POSITIONCTRL_VELOCITY_PGAIN;
-double posctrl_vel_Ki  = POSITIONCTRL_VELOCITY_IGAIN;
-double posctrl_vel_Kd  = POSITIONCTRL_VELOCITY_DGAIN;
-double posctrl_vel_Kd2 = POSITIONCTRL_VELOCITY_D2GAIN;
+double posctrl_pos_Kp  = POSITIONCTRL_POSITION_PGAIN;
+double posctrl_pos_Ki  = POSITIONCTRL_POSITION_IGAIN;
+double posctrl_pos_Kd  = POSITIONCTRL_POSITION_DGAIN;
+double posctrl_pos_Kd2 = POSITIONCTRL_POSITION_D2GAIN;
 
 
 struct Int32Vect2 velocity_cmd; ///< with INT32_SPEED_FRAC
@@ -191,22 +191,22 @@ static double control_velocity ( struct EnuCoor_f* velocity_cmd_f /*in ENU_f -- 
     position_err.z = 0; // regret z-axis error here
     
     // vel = Kp*diff + Ki*sum(diff*T)[0:t] + Kd*D(diff)/T + Kd2*D(D(diff))/T^2
-    VECT3_SMUL( velocity_f, position_err, posctrl_vel_Kp );    // vel_p = Kp*diff
+    VECT3_SMUL( velocity_f, position_err, posctrl_pos_Kp );    // vel_p = Kp*diff
 
-    if ( posctrl_vel_Ki == 0 ) {
+    if ( posctrl_pos_Ki == 0 ) {
         // sum(diff) := 0
         VECT3_ASSIGN( position_error_int, 0, 0, 0 );
     } else {
         // sum(diff*T)[0:t] = sum(diff*T)[0:t-1] + diff(t)*T
         VECT3_ADD_SCALED( position_error_int, position_err, POSCTRL_CONTROL_PERIOD );
     }
-    VECT3_ADD_SCALED( velocity_f, position_error_int, posctrl_vel_Ki );                      // vel_i = Ki*sum(diff*T)[0:t]
+    VECT3_ADD_SCALED( velocity_f, position_error_int, posctrl_pos_Ki );                      // vel_i = Ki*sum(diff*T)[0:t]
 
     VECT3_DIFF( position_err_drv, position_err, last_position_error );                      // D(diff) = diff(t) - diff(t-1)
-    VECT3_ADD_SCALED( velocity_f, position_err_drv, posctrl_vel_Kd*POSCTRL_CONTROL_FREQ );   // vel_d = Kd*D(diff)/T = Kd*D(diff)*f
+    VECT3_ADD_SCALED( velocity_f, position_err_drv, posctrl_pos_Kd*POSCTRL_CONTROL_FREQ );   // vel_d = Kd*D(diff)/T = Kd*D(diff)*f
 
     VECT3_DIFF( position_err_dv2, position_err_drv, last_position_error_drv );              // D(D(diff)) = D(diff)[t] - D(diff)[t-1]
-    VECT3_ADD_SCALED( velocity_f, position_err_dv2, posctrl_vel_Kd2*POSCTRL_CONTROL_FREQ2 ); // vel_d2 = Kd2*D(D(diff))/T^2 = Kd2*D(D(diff))*f^2
+    VECT3_ADD_SCALED( velocity_f, position_err_dv2, posctrl_pos_Kd2*POSCTRL_CONTROL_FREQ2 ); // vel_d2 = Kd2*D(D(diff))/T^2 = Kd2*D(D(diff))*f^2
 
 
     VECT2ptr_COPY( velocity_cmd_f, velocity_f );

@@ -33,10 +33,10 @@
 #include "math/pprz_geodetic_float.h"
 
 
-extern double posctrl_vel_Kp;
-extern double posctrl_vel_Ki;
-extern double posctrl_vel_Kd;
-extern double posctrl_vel_Kd2;
+extern double posctrl_pos_Kp;
+extern double posctrl_pos_Ki;
+extern double posctrl_pos_Kd;
+extern double posctrl_pos_Kd2;
 
 
 extern bool_t nav_InitPosControl (void);
