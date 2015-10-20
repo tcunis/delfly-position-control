@@ -14,22 +14,22 @@
     <waypoint lat="51.9906371" lon="4.3768132" alt="2" name="TARGET"/>
     <waypoint lat="51.9906308" lon="4.3767945" alt="2" name="p1"/>
     <waypoint lat="51.9906420" lon="4.3768256" alt="2" name="p2"/>
-    <waypoint lat="51.9906316" lon="4.3768384" name="_FA1"/>
-    <waypoint lat="51.9906120" lon="4.3767901" name="_FA2"/>
-    <waypoint lat="51.9906309" lon="4.3767675" name="_FA3"/>
-    <waypoint lat="51.9906522" lon="4.3768134" name="_FA4"/>
+    <waypoint lat="51.9906316" lon="4.3768384" name="FA1"/>
+    <waypoint lat="51.9906120" lon="4.3767901" name="FA2"/>
+    <waypoint lat="51.9906309" lon="4.3767675" name="FA3"/>
+    <waypoint lat="51.9906522" lon="4.3768134" name="FA4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="FlightArea">
-      <corner name="_FA1"/>
-      <corner name="_FA2"/>
-      <corner name="_FA3"/>
-      <corner name="_FA4"/>
+      <corner name="FA1"/>
+      <corner name="FA2"/>
+      <corner name="FA3"/>
+      <corner name="FA4"/>
     </sector>
   </sectors>
-  <exceptions>
+  <!--exceptions>
     <exception cond="! InsideFlightArea( GetPosX(), GetPosY() )" deroute="Standby"/>
-  </exceptions>
+  </exceptions-->
   <blocks>
     <block name="Wait GPS">
       <call fun="NavKillThrottle()"/>
@@ -89,11 +89,12 @@
       <return/>
     </block>
     <block name="stay_p1" strip_button="Stay p1" strip_icon="flat_theme/circle-right.png">
+      <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
       <stay wp="p1"/>
     </block>
     <block key="V" name="VelocityControl" strip_button="Set velocity ref" group="control" strip_icon="flat_theme/right.png">
       <go wp="p1"/>
-      <call fun="nav_SetVelocityRef(WP_TD, 0.5, 0, 0)"/>
+      <call fun="nav_SetVelocityRef(WP_p1, -windtunnel_velocity, 0, 0)"/>
     </block>
     <block key="F" name="WindtunnelControl" strip_button="Set windtunnel control" group="control" strip_icon="flat_theme/target.png">
       <go wp="p1"/>

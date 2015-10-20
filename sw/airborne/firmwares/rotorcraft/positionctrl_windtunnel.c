@@ -103,7 +103,7 @@ bool_t nav_StayWtNavTarget( int8_t wpTemp ) {
 
 static void setVelocityRef( int8_t wpTemp, struct Int32Vect2 velocity_i /*in ENU_i, with INT32_SPEED_FRAC */, int32_t heading_i /*in rad, with INT32_ANGLE_FRAC */ ) {
 
-    wtposctrl_set_heading( heading_i /*in rad, with INT32_ANGLE_FRAC */ );
+    //wtposctrl_set_heading( heading_i /*in rad, with INT32_ANGLE_FRAC */ );
     wtposctrl_set_velocity_ref( velocity_i /*in ENU_i -- [m]^2, with INT32_SPEED_FRAC*/ );
     guidance_h_mode_changed( GUIDANCE_H_MODE_MODULE );
 
