@@ -43,7 +43,7 @@
   <command_laws>
     <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
-    <set servo="RUDDER" value="(1-SRVO_kill)*@YAW"/>
+    <set servo="RUDDER" value="(1-SRVO_kill)*@ROLL"/>
     <set servo="ELEVATOR" value="(1-SRVO_kill)*@PITCH"/>
     <set servo="LEDS" value="$ledscontrol"/>
   </command_laws>
@@ -92,7 +92,8 @@
    <define name="MODE_STARTUP" value="AP_MODE_RC_DIRECT"/>
    <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
    <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+   <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
+   <define name="MODE_AUTO2" value="AP_MODE_HOVER_DIRECT"/>
 
     <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
@@ -123,7 +124,7 @@
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
 
     <!-- setpoints -->
-    <define name="SP_MAX_PHI" value="45." unit="deg"/>
+    <define name="SP_MAX_PHI" value="15." unit="deg"/>
     <define name="SP_MAX_THETA" value="45." unit="deg"/>
     <define name="SP_MAX_PSI" value="45." unit="deg"/>
     <define name="SP_MAX_R" value="90." unit="deg/s"/>
@@ -180,8 +181,8 @@
    <define name="HOVER_KP" value="276"/>
    <define name="HOVER_KD" value="455"/>
    <define name="HOVER_KI" value="100"/>
-   <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.5"/>
-   <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+   <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.75"/>
+   <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -199,6 +200,8 @@
    <define name="PGAIN" value="90"/>
    <define name="DGAIN" value="50"/>
    <define name="IGAIN" value="24"/>
+   <define name="USE_SPEED_REF" value="FALSE"/>
+   <define name="USE_REF" value="FALSE"/>
  </section>
 
  <section name="SIMULATOR" prefix="NPS_">
@@ -215,7 +218,7 @@
  </section>
  
  <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
-   <define name="LEDS_SWITCH" value="0"/>
+   <define name="LEDS_SWITCH" value="1"/>
    <define name="SRVO_KILL" value="0"/>
  </section>
 
@@ -228,14 +231,7 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
-      <!--
-      <subsystem name="radio_control" type="superbitrf_rc">
-        <define name="RADIO_MODE" value="RADIO_GEAR"/>
-        <!--<define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
-        <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
-      </subsystem>
-      -->
-
+      <configure name="USE_BARO_BOARD" value="FALSE" />
       <subsystem name="radio_control" type="superbitrf_rc">
         <!--TX 10 (DEVO-10) : 0x13C478F7 -->
         <define name="RADIO_TRANSMITTER_ID" value="331643127"/> 
@@ -244,10 +240,11 @@
         
         <define name="RADIO_MODE" value="RADIO_FLAP"/>
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
+	<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
       </subsystem>
 
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
-      <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
+      <!--define name="USE_PERSISTENT_SETTINGS" value="TRUE"/-->
     </target>
 
     <target name="nps" board="pc">

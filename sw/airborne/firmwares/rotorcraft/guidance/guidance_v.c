@@ -428,7 +428,7 @@ static void run_hover_loop(bool_t in_flight)
 
   guidance_v_ff_cmd = g_m_zdd / inv_m;
   /* feed forward command */
-  guidance_v_ff_cmd = (guidance_v_ff_cmd << INT32_TRIG_FRAC) / guidance_v_thrust_coeff;
+//guidance_v_ff_cmd = (guidance_v_ff_cmd << INT32_TRIG_FRAC) / guidance_v_thrust_coeff;
 
   /* bound the nominal command to 0.9*MAX_PPRZ */
   Bound(guidance_v_ff_cmd, 0, 8640);

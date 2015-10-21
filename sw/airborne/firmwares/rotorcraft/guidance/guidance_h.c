@@ -96,6 +96,7 @@ struct Int32Vect2  guidance_h_cmd_earth;
 
 static void guidance_h_update_reference(void);
 static void guidance_h_traj_run(bool_t in_flight);
+static void guidance_h_adjust_heading(bool_t in_flight); 
 static void guidance_h_hover_enter(void);
 static void guidance_h_nav_enter(void);
 static inline void transition_run(void);
@@ -378,6 +379,9 @@ void guidance_h_run(bool_t  in_flight)
 #else
       /* compute x,y earth commands */
       guidance_h_traj_run(in_flight);
+
+      guidance_h_adjust_heading(in_flight);	
+
       /* set final attitude setpoint */
       stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
                                              guidance_h.sp.heading);
@@ -540,6 +544,24 @@ static void guidance_h_traj_run(bool_t in_flight)
   }
 
   VECT2_STRIM(guidance_h_cmd_earth, -total_max_bank, total_max_bank);
+}
+
+static void guidance_h_adjust_heading(bool_t in_flight) {
+
+  // compute forward / sideways error
+  /* Rotate horizontal error to body frame by psi */
+  int32_t headingWT = ARC_BFP_OF_REAL(0); //in radians
+  int32_t s_psi, c_psi;
+  PPRZ_ITRIG_SIN(s_psi, headingWT);
+  PPRZ_ITRIG_COS(c_psi, headingWT);
+  int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  int32_t side_err = -(c_psi * guidance_h_pos_err.x + s_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  
+  int32_t guidance_h_hidden_waypoint_distance = POS_BFP_OF_REAL( 3. );
+  int32_t virtual_heading;
+  INT32_ATAN2( virtual_heading, side_err, guidance_h_hidden_waypoint_distance ); // in INT32_ANGLE_FRAC
+  
+  guidance_h.sp.heading = virtual_heading + headingWT;  
 }
 
 static void guidance_h_hover_enter(void)
