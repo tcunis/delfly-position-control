@@ -94,7 +94,7 @@
     </block>
     <block key="V" name="VelocityControl" strip_button="Set velocity ref" group="control" strip_icon="flat_theme/right.png">
       <go wp="p1"/>
-      <call fun="nav_SetVelocityRef(WP_p1, -windtunnel_velocity, 0, 0)"/>
+      <call fun="nav_SetVelocityRef(WP_p1, -windtunnel_velocity, -windtunnel_velocity, 0)"/>
     </block>
     <block key="F" name="WindtunnelControl" strip_button="Set windtunnel control" group="control" strip_icon="flat_theme/target.png">
       <go wp="p1"/>
@@ -117,6 +117,7 @@
       <stay climb="-0.1" vmode="climb" wp="TD"/>
     </block>
     <block key="0" name="land_stdby" strip_button="Land home" group="land" strip_icon="flat_theme/land.png">
+      <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
       <go wp="STDBY"/>
     </block>
     <block key="l" name="land here" strip_button="Land here" group="land" strip_icon="flat_theme/land-left.png">

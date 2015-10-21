@@ -336,25 +336,29 @@ static void guidance_h_traj_run(bool_t in_flight)
   /* saturate it               */
   VECT2_STRIM(wtposctrl_guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
-  /* run PID */
-  int32_t pd_x = velctrl_use_feedback * (
+  /* run feedback */
+  int32_t feedbck_pd_x =
 //    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.x) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2))
-  );
-  int32_t pd_y = velctrl_use_feedback * (
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.x >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
+  int32_t feedbck_pd_y =
 //    ((guidance_h_pgain * wtposctrl_guidance_h_pos_err.y) >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +
-    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2))
-  );
-  wtposctrl_guidance_h_cmd_earth.x =
-    pd_x + ( velctrl_use_feedback + (1-velctrl_use_feedback)*velctrl_vel_Kf ) * (
+    ((guidance_h.gains.d * (wtposctrl_guidance_h_speed_err.y >> 2)) >> (INT32_SPEED_FRAC - GH_GAIN_SCALE - 2));
+
+  /* run feed-forward */
+  int32_t feedfwd_x =
     ((guidance_h.gains.v * guidance_h.ref.speed.x) >> 17) + /* speed feedforward gain */
-    ((guidance_h.gains.a * guidance_h.ref.accel.x) >> 8)    /* acceleration feedforward gain */
-  );
-  wtposctrl_guidance_h_cmd_earth.y =
-    pd_y + ( velctrl_use_feedback + (1-velctrl_use_feedback)*velctrl_vel_Kf ) * (
+    ((guidance_h.gains.a * guidance_h.ref.accel.x) >> 8);   /* acceleration feedforward gain */
+  int32_t feedfwd_y =
     ((guidance_h.gains.v * guidance_h.ref.speed.y) >> 17) + /* speed feedforward gain */
-    ((guidance_h.gains.a * guidance_h.ref.accel.y) >> 8)    /* acceleration feedforward gain */
-  );
+    ((guidance_h.gains.a * guidance_h.ref.accel.y) >> 8);   /* acceleration feedforward gain */
+
+  if ( velctrl_use_feedback ) {
+    wtposctrl_guidance_h_cmd_earth.x = feedbck_pd_x + feedfwd_x;
+    wtposctrl_guidance_h_cmd_earth.y = feedbck_pd_y + feedfwd_y;
+  } else {
+	  wtposctrl_guidance_h_cmd_earth.x = velctrl_vel_Kf * feedfwd_x;
+	  wtposctrl_guidance_h_cmd_earth.y = velctrl_vel_Kf * feedfwd_y;
+  }
 
   /* trim max bank angle from PD */
   VECT2_STRIM(wtposctrl_guidance_h_cmd_earth, -traj_max_bank, traj_max_bank);
@@ -363,10 +367,10 @@ static void guidance_h_traj_run(bool_t in_flight)
    * Integrate twice as fast when not only POS but also SPEED are wrong,
    * but do not integrate POS errors when the SPEED is already catching up.
    */
-  if (in_flight) {
+  if (in_flight && velctrl_use_feedback) {
     /* ANGLE_FRAC (12) * GAIN (8) * LOOP_FREQ (9) -> INTEGRATOR HIGH RES ANGLE_FRAX (28) */
-    wtposctrl_guidance_h_trim_att_int.x += (guidance_h.gains.i * pd_x);
-    wtposctrl_guidance_h_trim_att_int.y += (guidance_h.gains.i * pd_y);
+    wtposctrl_guidance_h_trim_att_int.x += (guidance_h.gains.i * feedbck_pd_x);
+    wtposctrl_guidance_h_trim_att_int.y += (guidance_h.gains.i * feedbck_pd_y);
     /* saturate it  */
     VECT2_STRIM(wtposctrl_guidance_h_trim_att_int, -(traj_max_bank << 16), (traj_max_bank << 16));
     /* add it to the command */
@@ -383,7 +387,9 @@ static void guidance_h_traj_run(bool_t in_flight)
     thrust_cmd_filt = (thrust_cmd_filt * GUIDANCE_H_THRUST_CMD_FILTER + vertical_thrust) /
                       (GUIDANCE_H_THRUST_CMD_FILTER + 1);
     wtposctrl_guidance_h_cmd_earth.x = ANGLE_BFP_OF_REAL(atan2f((wtposctrl_guidance_h_cmd_earth.x * MAX_PPRZ / INT32_ANGLE_PI_2),
-                             thrust_cmd_filt));
+                             thrust_cmd_filt));    wtposctrl_guidance_h_cmd_earth.x = feedbck_pd_x + feedfwd_x;
+    wtposctrl_guidance_h_cmd_earth.y = feedbck_pd_y + feedfwd_y;
+
     wtposctrl_guidance_h_cmd_earth.y = ANGLE_BFP_OF_REAL(atan2f((wtposctrl_guidance_h_cmd_earth.y * MAX_PPRZ / INT32_ANGLE_PI_2),
                              thrust_cmd_filt));
   }

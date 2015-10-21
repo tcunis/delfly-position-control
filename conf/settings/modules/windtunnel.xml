@@ -12,7 +12,7 @@
       <dl_setting var="posctrl_pos_Kd2" min="0" step="0.1" max="10" module="positionctrl_windtunnel" shortname="ð_Vs" param="POSITIONCTRL_POSITION_D2GAIN"/>
     
       <dl_setting var="velctrl_use_feedback" min="0" step="1" max="1" module="windtunnel_posctrl/windtunnel_posctrl" shortname="feedback" param="WINDTUNNEL_POSCTRL_USE_FEEDBACK"/>
-      <dl_setting var="velctrl_vel_Kf" min="0.1" step="0.1" max="10" module="windtunnel_posctrl/windtunnel_posctrl" shortname="f_VV" param="WINDTUNNEL_POSCTRL_VELOCITY_FGAIN"/>
+      <dl_setting var="velctrl_vel_Kf" min="-5" step="0.1" max="5" module="windtunnel_posctrl/windtunnel_posctrl" shortname="f_VV" param="WINDTUNNEL_POSCTRL_VELOCITY_FGAIN"/>
     
     </dl_settings>
   </dl_settings>
