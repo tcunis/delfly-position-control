@@ -30,7 +30,7 @@
 
 uint8_t LEDS_switch = DELFLY_UTILS_LEDS_SWITCH;
 uint8_t SRVO_kill = DELFLY_UTILS_SRVO_KILL;
-
+uint8_t P_WT_heading = DELFLY_UTILS_P_WT_HEADING;
 
 extern void util_init(void) {
 }

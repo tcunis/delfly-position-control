@@ -43,7 +43,7 @@
   <command_laws>
     <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
-    <set servo="RUDDER" value="(1-SRVO_kill)*@ROLL"/>
+    <set servo="RUDDER" value="(1-SRVO_kill)*@YAW"/>
     <set servo="ELEVATOR" value="(1-SRVO_kill)*@PITCH"/>
     <set servo="LEDS" value="$ledscontrol"/>
   </command_laws>
@@ -220,6 +220,7 @@
  <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
    <define name="LEDS_SWITCH" value="1"/>
    <define name="SRVO_KILL" value="0"/>
+   <define name="P_WT_HEADING" value="20"/>
  </section>
 
  <modules main_freq="512">

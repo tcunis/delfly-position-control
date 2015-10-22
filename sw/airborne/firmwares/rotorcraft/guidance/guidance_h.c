@@ -96,7 +96,7 @@ struct Int32Vect2  guidance_h_cmd_earth;
 
 static void guidance_h_update_reference(void);
 static void guidance_h_traj_run(bool_t in_flight);
-static void guidance_h_adjust_heading(bool_t in_flight); 
+static void guidance_h_adjust_heading(void); 
 static void guidance_h_hover_enter(void);
 static void guidance_h_nav_enter(void);
 static inline void transition_run(void);
@@ -379,8 +379,11 @@ void guidance_h_run(bool_t  in_flight)
 #else
       /* compute x,y earth commands */
       guidance_h_traj_run(in_flight);
-
-      guidance_h_adjust_heading(in_flight);	
+      
+      if ( P_WT_heading > 0 ) {
+      /* Setting the psi command as heading inside the windtunel */
+      guidance_h_adjust_heading();	
+      }
 
       /* set final attitude setpoint */
       stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
@@ -546,22 +549,44 @@ static void guidance_h_traj_run(bool_t in_flight)
   VECT2_STRIM(guidance_h_cmd_earth, -total_max_bank, total_max_bank);
 }
 
-static void guidance_h_adjust_heading(bool_t in_flight) {
+#define HEADING_WT	0	//33./57.3	 //in radians
+/*static double sin_psiWT = 0, //sin( HEADING_WT ),
+			  cos_psiWT = 1; //cos( HEADING_WT );
+*/
 
-  // compute forward / sideways error
-  /* Rotate horizontal error to body frame by psi */
-  int32_t headingWT = ARC_BFP_OF_REAL(0); //in radians
-  int32_t s_psi, c_psi;
-  PPRZ_ITRIG_SIN(s_psi, headingWT);
-  PPRZ_ITRIG_COS(c_psi, headingWT);
-  int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
-  int32_t side_err = -(c_psi * guidance_h_pos_err.x + s_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+static void guidance_h_adjust_heading(void) {
+
+  struct EnuCoor_f pos_err_f = { .x = POS_FLOAT_OF_BFP(guidance_h_pos_err.x), .y = POS_FLOAT_OF_BFP(guidance_h_pos_err.y) };
+
+  /* compute forward / sideways error */
+  /* Rotate horizontal error to windtunnel frame by headingWT */  
+  // int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  double side_err = pos_err_f.y; // (cos_psiWT * pos_err_f.x + sin_psiWT * pos_err_f.y);
   
-  int32_t guidance_h_hidden_waypoint_distance = POS_BFP_OF_REAL( 3. );
-  int32_t virtual_heading;
-  INT32_ATAN2( virtual_heading, side_err, guidance_h_hidden_waypoint_distance ); // in INT32_ANGLE_FRAC
+  /* compute heading towards a virtual point inside the windtunnel at a defined distance */ 
+  double guidance_h_virtual_waypoint_distance = 3.;
+  double virtual_heading = atan2( side_err, guidance_h_virtual_waypoint_distance ); //in radians
   
-  guidance_h.sp.heading = virtual_heading + headingWT;  
+  /* Set the heading command */ 
+  guidance_h.sp.heading = ANGLE_BFP_OF_REAL( HEADING_WT + P_WT_heading*1.0/100*virtual_heading ); //in radians
+
+
+  /* compute forward / sideways error */
+  /* Rotate horizontal error to windtunnel frame by headingWT */
+  //int32_t headingWT = ANGLE_BFP_OF_REAL(33); //in radians
+  //int32_t s_psi, c_psi;
+  //PPRZ_ITRIG_SIN(s_psi, headingWT);
+  //PPRZ_ITRIG_COS(c_psi, headingWT);
+  // int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  //int32_t side_err = (c_psi * guidance_h_pos_err.x + s_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  
+  /* compute heading towards a virtual point inside the windtunnel at a defined distance */ 
+  //int32_t guidance_h_virtual_waypoint_distance = POS_BFP_OF_REAL( 3. );
+  //int32_t virtual_heading;
+  //INT32_ATAN2( virtual_heading, side_err, guidance_h_virtual_waypoint_distance ); // in INT32_ANGLE_FRAC
+  
+  /* Set the heading command */ 
+  //guidance_h.sp.heading = virtual_heading + P_WT_heading/100*headingWT;  
 }
 
 static void guidance_h_hover_enter(void)
