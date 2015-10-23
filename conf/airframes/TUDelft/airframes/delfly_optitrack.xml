@@ -149,17 +149,17 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="1"/>
+    <define name="PHI_PGAIN" value="2224"/>
     <define name="PHI_DGAIN" value="1"/>
     <define name="PHI_IGAIN" value="0"/>
 
-    <define name="THETA_PGAIN" value="2000"/>
+    <define name="THETA_PGAIN" value="2024"/>
     <define name="THETA_DGAIN" value="200"/>
     <define name="THETA_IGAIN" value="800"/>
 
-    <define name="PSI_PGAIN" value="1000"/>
-    <define name="PSI_DGAIN" value="0"/>
-    <define name="PSI_IGAIN" value="10"/>
+    <define name="PSI_PGAIN" value="1012"/>
+    <define name="PSI_DGAIN" value="213"/>
+    <define name="PSI_IGAIN" value="129"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
@@ -178,9 +178,9 @@
   </section>
 
  <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-   <define name="HOVER_KP" value="276"/>
-   <define name="HOVER_KD" value="455"/>
-   <define name="HOVER_KI" value="100"/>
+   <define name="HOVER_KP" value="600"/>
+   <define name="HOVER_KD" value="401"/>
+   <define name="HOVER_KI" value="155"/>
    <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.75"/>
    <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
@@ -197,9 +197,9 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="90"/>
-   <define name="DGAIN" value="50"/>
-   <define name="IGAIN" value="24"/>
+   <define name="PGAIN" value="808"/>
+   <define name="DGAIN" value="150"/>
+   <define name="IGAIN" value="0"/>
    <define name="USE_SPEED_REF" value="FALSE"/>
    <define name="USE_REF" value="FALSE"/>
  </section>
@@ -220,19 +220,20 @@
  <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
    <define name="LEDS_SWITCH" value="1"/>
    <define name="SRVO_KILL" value="0"/>
-   <define name="P_WT_HEADING" value="20"/>
+   <define name="P_WT_HEADING" value="250"/>
  </section>
 
  <modules main_freq="512">
    <load name="gps_diagnostics.xml"/>
    <load name="delfly_utils.xml"/>
+   <load name="sys_mon.xml"/>
    <!--load name="gps_ubx_ucenter.xml"/-->
    <!--load name="send_imu_mag_current.xml"/-->
  </modules>
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
-      <configure name="USE_BARO_BOARD" value="FALSE" />
+      <configure name="USE_BARO_BOARD" value="FALSE"/>
       <subsystem name="radio_control" type="superbitrf_rc">
         <!--TX 10 (DEVO-10) : 0x13C478F7 -->
         <define name="RADIO_TRANSMITTER_ID" value="331643127"/> 

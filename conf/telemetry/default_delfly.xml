@@ -144,24 +144,25 @@
       <message name="INS_REF"           period="5.1"/>
     </mode>
 
-	<mode name="tune_delfly_lateral">
-      <message name="ROTORCRAFT_STATUS" period="1.2"/>
-      <message name="STAB_ATTITUDE"     period=".03"/>
-      <message name="STAB_ATTITUDE_REF" period=".03"/>
-      <message name="STAB_ATTITUDE_INDI"     period=".25"/>
-      <message name="GUIDANCE_H_INT"    period="0.1"/>
-      <message name="ROTORCRAFT_TUNE_HOVER"    period=".1"/>
+	<mode name="tune_delfly">
+	  <message name="ROTORCRAFT_STATUS" period="1.2"/>
+	  <message name="SYS_MON"			period="1."/>
+      <message name="STAB_ATTITUDE"     period=".125"/>
+      <!--message name="STAB_ATTITUDE_REF" period=".125"/-->
+      <message name="STAB_ATTITUDE_INDI"     period=".125"/>
+      <!--message name="GUIDANCE_H_INT"    period="0.1"/-->
+      <message name="ROTORCRAFT_TUNE_HOVER"    period=".25"/>
+      <message name="VERT_LOOP"         period=".25"/>
+      <message name="HOVER_LOOP"            period="0.25"/>
+      <!--message name="INS_Z"             period=".1"/>
+      <message name="INS"               period=".11"/>
+      <message name="INS_REF"           period="5.1"/-->
 	</mode>
 
-	<mode name="tune_delfly_height">
-      <message name="VERT_LOOP"         period=".1"/>
-      <message name="GUIDANCE_H_REF"        period="0.1"/>
-      <message name="HOVER_LOOP"            period="0.1"/>
-      <message name="INS_Z"             period=".1"/>
-      <message name="INS"               period=".11"/>
-      <message name="INS_REF"           period="5.1"/>
-      <message name="GPS_INT"                period=".25"/>
-	</mode>
+	<mode name="mute">
+	  <message name="ROTORCRAFT_STATUS" period="1.2"/>
+	  <message name="SYS_MON"			period="1."/>
+    </mode>
 
   </process>
 

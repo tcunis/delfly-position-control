@@ -549,10 +549,23 @@ static void guidance_h_traj_run(bool_t in_flight)
   VECT2_STRIM(guidance_h_cmd_earth, -total_max_bank, total_max_bank);
 }
 
+#define HEADING_CTRL_MODE_PROP			0
+#define HEADING_CTRL_MODE_TWOPOINT		1
+#define HEADING_CTRL_MODE_THREEPOINT	2
+
+#define HEADING_CTRL_MODE	HEADING_CTRL_MODE_PROP
+
 #define HEADING_WT	0	//33./57.3	 //in radians
+#define HEADING_CMD_MAX	5./57.3	//33./57.3	 //in radians
 /*static double sin_psiWT = 0, //sin( HEADING_WT ),
 			  cos_psiWT = 1; //cos( HEADING_WT );
 */
+
+#if HEADING_CTRL_MODE == HEADING_CTRL_MODE_THREEPOINT
+#define HEADING_ERR_BOUND				0.3
+#elif HEADING_CTRL_MODE == HEADING_CTRL_MODE_TWOPOINT
+#define HEADING_ERR_BOUND				0
+#endif
 
 static void guidance_h_adjust_heading(void) {
 
@@ -560,13 +573,23 @@ static void guidance_h_adjust_heading(void) {
 
   /* compute forward / sideways error */
   /* Rotate horizontal error to windtunnel frame by headingWT */  
-  // int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
+  // int32_t frwd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
   double side_err = pos_err_f.y; // (cos_psiWT * pos_err_f.x + sin_psiWT * pos_err_f.y);
   
   /* compute heading towards a virtual point inside the windtunnel at a defined distance */ 
-  double guidance_h_virtual_waypoint_distance = 3.;
-  double virtual_heading = atan2( side_err, guidance_h_virtual_waypoint_distance ); //in radians
+  //double guidance_h_virtual_waypoint_distance = 3.;
+  //double virtual_heading = atan2( side_err, guidance_h_virtual_waypoint_distance ); //in radians
+
+  double virtual_heading;
   
+#if HEADING_CTRL_MODE == HEADING_CTRL_MODE_TWOPOINT || HEADING_CTRL_MODE == HEADING_CTRL_MODE_THREEPOINT
+  if (side_err > HEADING_ERR_BOUND) { virtual_heading = HEADING_CMD_MAX; } //in radians
+  else if (side_err < -HEADING_ERR_BOUND) { virtual_heading = -HEADING_CMD_MAX; } //in radians
+  else { virtual_heading = 0; } //in radians
+#elif HEADING_CTRL_MODE == HEADING_CTRL_MODE_PROP
+  virtual_heading = side_err/0.3*HEADING_CMD_MAX;
+#endif
+
   /* Set the heading command */ 
   guidance_h.sp.heading = ANGLE_BFP_OF_REAL( HEADING_WT + P_WT_heading*1.0/100*virtual_heading ); //in radians
 
