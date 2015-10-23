@@ -11,20 +11,20 @@
     <waypoint name="CLIMB" x="1.2" y="-0.6"/>
     <waypoint name="STDBY" x="-0.7" y="-0.8"/>
     <waypoint name="TD" x="0.8" y="-1.7"/>
-    <waypoint lat="51.9906371" lon="4.3768132" alt="2" name="TARGET"/>
+    <waypoint name="TARGET" x="0.0" y="0.0"/>
     <waypoint lat="51.9906308" lon="4.3767945" alt="2" name="p1"/>
     <waypoint lat="51.9906420" lon="4.3768256" alt="2" name="p2"/>
-    <waypoint lat="51.9906316" lon="4.3768384" name="FA1"/>
-    <waypoint lat="51.9906120" lon="4.3767901" name="FA2"/>
-    <waypoint lat="51.9906309" lon="4.3767675" name="FA3"/>
-    <waypoint lat="51.9906522" lon="4.3768134" name="FA4"/>
+    <waypoint lat="51.9906316" lon="4.3768384" name="_FA1"/>
+    <waypoint lat="51.9906120" lon="4.3767901" name="_FA2"/>
+    <waypoint lat="51.9906309" lon="4.3767675" name="_FA3"/>
+    <waypoint lat="51.9906522" lon="4.3768134" name="_FA4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="FlightArea">
-      <corner name="FA1"/>
-      <corner name="FA2"/>
-      <corner name="FA3"/>
-      <corner name="FA4"/>
+      <corner name="_FA1"/>
+      <corner name="_FA2"/>
+      <corner name="_FA3"/>
+      <corner name="_FA4"/>
     </sector>
   </sectors>
   <!--exceptions>
@@ -60,7 +60,7 @@
       <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
       <stay wp="STDBY"/>
     </block>
-    <block name="StartWindtunnel" strip_button="Start windtunnel" group="windtunnel" strip_icon="flat_theme/start_motors.png">
+    <!--block name="StartWindtunnel" strip_button="Start windtunnel" group="windtunnel" strip_icon="flat_theme/start_motors.png">
       <call fun="windtunnel_setMovingWaypoint(WP_TD, WP_p1, WP_p2, 0.5, TRUE)"/>
       <return/>
     </block>
@@ -87,10 +87,45 @@
     <block key="-" name="DecreaseWindtunnel" strip_button="Decrease windtunnel" group="windtunnel" strip_icon="flat_theme/downdown.png">
       <call fun="windtunnel_setWindVelocity( windtunnel_velocity - 0.1 )"/>
       <return/>
-    </block>
-    <block name="stay_p1" strip_button="Stay p1" strip_icon="flat_theme/circle-right.png">
+    </block-->
+    <block name="Stay Wind-tunnel" strip_button="Stay Wind-tunnel" group="windtunnel" strip_icon="flat_theme/recenter.png">
       <call fun="{ nav_StopPosControl(); windtunnel_set_periodic( FALSE ); FALSE; }"/>
-      <stay wp="p1"/>
+      <call fun="{ waypoint_copy( WP_TARGET, WP_p1 ); FALSE; }"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 1.0, -0.5, -0.5 )"/>
+      <stay wp="TARGET"/>
+    </block>
+    <block name="Step For and Back" strip_button="Step Fwd/Bck" group="windtunnel2" strip_icon="flat_theme/mob.png">
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 1.0, 0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 15"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, -1.0, 0, 0 )"/>
+      <stay wp="TARGET"/>
+    </block>
+    <block name="Step Up and Down" strip_button="Step Up/Down" group="windtunnel2" strip_icon="flat_theme/survey_rect_ns.png">
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 0, 1.0 )"/>
+      <stay wp="TARGET" until="stage_time > 15"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 0, -1.0 )"/>
+      <stay wp="TARGET"/>
+    </block>
+    <block name="Step Left and Right" strip_button="Step Left/Right" group="windtunnel2" strip_icon="flat_theme/survey_rect_we.png">
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 1.0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 15"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, -1.0, 0 )"/>
+      <stay wp="TARGET"/>
+    </block>
+    <block name="Step Cube" strip_button="Step Cube" group="windtunnel" strip_icon="flat_theme/switch_background.png">
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 1.0, 0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 0, 1.0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 1.0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, -1.0, 0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, 0, -1.0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <call fun="nav_ShiftWaypointRelativeEnu_f( WP_TARGET, 0, -1.0, 0 )"/>
+      <stay wp="TARGET" until="stage_time > 5"/>
+      <stay wp="TARGET"/>
     </block>
     <block key="V" name="VelocityControl" strip_button="Set velocity ref" group="control" strip_icon="flat_theme/right.png">
       <go wp="p1"/>

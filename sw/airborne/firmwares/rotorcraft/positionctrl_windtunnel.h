@@ -43,6 +43,11 @@ extern bool_t nav_InitPosControl (void);
 
 extern bool_t nav_StopPosControl (void);
 
+
+/*********** Windtunnel steps ********************************************/
+extern bool_t nav_ShiftWaypointRelativeEnu_f ( int8_t wp, double x, double y, double z );
+
+
 /*********** Moving waypoint *********************************************/
 extern bool_t nav_StayWtNavTarget( int8_t wpTemp );
 

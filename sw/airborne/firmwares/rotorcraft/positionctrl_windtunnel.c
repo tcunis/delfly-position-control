@@ -180,6 +180,19 @@ bool_t nav_StopPosControl (void) {
 }
 
 
+bool_t nav_ShiftWaypointRelativeEnu_f ( int8_t wp, double _x, double _y, double _z ) {
+
+    if ( wp < nb_waypoint ) {
+        struct EnuCoor_f* pos = &waypoints[wp].enu_f;
+        struct EnuCoor_f new_pos = { .x = pos->x + _x, .y = pos->y + _y, .z = pos->z + _z };
+
+        waypoint_set_enu( wp, &new_pos );
+    }
+
+    return FALSE; // call once
+}
+
+
 static double control_velocity ( struct EnuCoor_f* velocity_cmd_f /*in ENU_f -- [m]^3*/, //struct Int32Vect2* velocity_cmd /*in ENU_i -- [m]^2 with INT32_SPEED_FRAC*/, 
                           struct EnuCoor_f position_ref, struct EnuCoor_f position_now /*both in ENU_f -- [m]^3*/ 
                         ) {
