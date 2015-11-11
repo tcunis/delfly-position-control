@@ -1,8 +1,7 @@
 <!--
-  This is a DelFly Optitrack airframe equiped with Lisa/S 1.0
-  this version of DelFly is equipped with 2 motors driving independently left and right wingpair
-  A 'dihedral' servo controls the dihedral angle
-  A 'wing_def' servo deflects the wing roots asymmetrically for yaw control
+  This is a DelFly Optitrack airframe equiped with Lisa/S 1.0;
+  this version of DelFly is equipped with elevator and rudder to control attitude.
+  Furthermore, a set of IR leds allows tracking by the OptiTrack motion tracking system.
 -->
 
 <!--
@@ -31,15 +30,6 @@
     <axis name="YAW" failsafe_value="0"/>
   </commands>
 
-<!--
-  <rc_commands>
-    <set command="THRUST" value="@THRUST"/>
-    <set command="ROLL" value="@ROLL"/>
-    <set command="PITCH" value="@PITCH"/>
-    <set command="YAW" value="@YAW"/>
-  </rc_commands>
--->
-   
   <command_laws>
     <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
@@ -61,14 +51,9 @@
   </section>
 
   <section name="IMU" prefix="IMU_">
-    <!--define name="BODY_TO_IMU_PHI"   value="-5." unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="240." unit="deg"/>
-    <define name="BODY_TO_IMU_PSI"   value="0." unit="deg"/-->
-    
     <define name="BODY_TO_IMU_PHI" value="-5." unit="deg"/>
     <define name="BODY_TO_IMU_THETA" value="245." unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
-
 
     <define name="ACCEL_X_NEUTRAL" value="0"/>
     <define name="ACCEL_Y_NEUTRAL" value="0"/>
@@ -203,6 +188,10 @@
    <define name="USE_SPEED_REF" value="FALSE"/>
    <define name="USE_REF" value="FALSE"/>
  </section>
+ 
+ <section name="GUIDANCE_LAT" prefix="GUIDANCE_LAT_">
+   <define name="PGAIN" value="250"/>
+ </section>
 
  <section name="SIMULATOR" prefix="NPS_">
    <define name="ACTUATOR_NAMES" value="{&quot;ne_motor&quot;, &quot;se_motor&quot;, &quot;sw_motor&quot;, &quot;nw_motor&quot;}"/>
@@ -242,7 +231,7 @@
         
         <define name="RADIO_MODE" value="RADIO_FLAP"/>
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
-	<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
+		<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
       </subsystem>
 
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
@@ -263,11 +252,6 @@
       <define name="USE_SERVOS_1AND2"/>
     </subsystem>
 
-<!--
-    <subsystem name="actuators" type="dualpwm">
-      <define name="DUAL_PWM_ON"/>
-    </subsystem>
-  -->
     <subsystem name="telemetry" type="superbitrf"/>
     <!-- Comment the previous line and uncomment the following one if you need
          to use the debug serial interface for telemetry. -->
@@ -280,8 +264,6 @@
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="0"/>
-      <!--configure name="USE_MAGNETOMETER" value="1"/>
-      <define name="AHRS_USE_GPS_HEADING" value="0"/-->
     </subsystem>
     <subsystem name="ins"/>
   </firmware>
