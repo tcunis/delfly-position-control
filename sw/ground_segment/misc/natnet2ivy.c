@@ -763,7 +763,7 @@ int main(int argc, char** argv)
   tracking_ecef.x = 3924332;
   tracking_ecef.y = 300362;
   tracking_ecef.z = 5002197;
-  tracking_offset_angle = 33.0 / 57.6;
+  tracking_offset_angle = 0.0 / 57.6;
   ltp_def_from_ecef_d(&tracking_ltp, &tracking_ecef);
 
   // Parse the options from cmdline
