@@ -262,6 +262,7 @@
     <subsystem name="imu" type="lisa_s_v1.0"/>
     <!--subsystem name="gps" type="ublox"/-->
     <subsystem name="stabilization" type="int_quat"/>
+    <subsystem name="guidance" type="delfly"/>
     <subsystem name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="0"/>
     </subsystem>

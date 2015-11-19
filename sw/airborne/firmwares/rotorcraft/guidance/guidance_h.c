@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2008-2009 Antoine Drouin <poinix@gmail.com>
  *
+ * DelFly extension 2015 by Torbjoern Cunis <t.cunis@tudelft.nl>
+ *
  * This file is part of paparazzi.
  *
  * paparazzi is free software; you can redistribute it and/or modify
@@ -20,13 +22,14 @@
  */
 
 /** @file firmwares/rotorcraft/guidance/guidance_h.c
- *  Horizontal guidance for rotorcrafts.
+ *  Horizontal guidance for rotorcrafts and the DelFly.
  *
  */
 
 #include "generated/airframe.h"
 
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
+#include "firmwares/rotorcraft/guidance/guidance_lat.h"
 #include "firmwares/rotorcraft/guidance/guidance_flip.h"
 #include "firmwares/rotorcraft/guidance/guidance_indi.h"
 #include "firmwares/rotorcraft/guidance/guidance_module.h"
@@ -76,6 +79,10 @@ PRINT_CONFIG_VAR(GUIDANCE_H_USE_SPEED_REF)
 #define GUIDANCE_INDI FALSE
 #endif
 
+#ifndef GUIDANCE_DELFLY
+#define GUIDANCE_DELFLY FALSE
+#endif
+
 struct HorizontalGuidance guidance_h;
 
 int32_t transition_percentage;
@@ -93,10 +100,14 @@ struct Int32Vect2 guidance_h_trim_att_integrator;
  * @todo convert to real force command
  */
 struct Int32Vect2  guidance_h_cmd_earth;
+/** heading command;
+ * allows heading deviation from overall set-point.
+ * In rad with #INT32_ANGLE_FRAC
+ */
+int32_t guidance_h_cmd_heading;
 
 static void guidance_h_update_reference(void);
 static void guidance_h_traj_run(bool_t in_flight);
-static void guidance_h_adjust_heading(void); 
 static void guidance_h_hover_enter(void);
 static void guidance_h_nav_enter(void);
 static inline void transition_run(void);
@@ -122,6 +133,7 @@ static void send_hover_loop(struct transport_tx *trans, struct link_device *dev)
   pprz_msg_send_HOVER_LOOP(trans, dev, AC_ID,
                            &guidance_h.sp.pos.x,
                            &guidance_h.sp.pos.y,
+                           &guidance_h.sp.heading,
                            &(pos->x), &(pos->y),
                            &(speed->x), &(speed->y),
                            &(accel->x), &(accel->y),
@@ -133,7 +145,7 @@ static void send_hover_loop(struct transport_tx *trans, struct link_device *dev)
                            &guidance_h_trim_att_integrator.y,
                            &guidance_h_cmd_earth.x,
                            &guidance_h_cmd_earth.y,
-                           &guidance_h.sp.heading);
+                           &guidance_h_cmd_heading);
 }
 
 static void send_href(struct transport_tx *trans, struct link_device *dev)
@@ -199,6 +211,10 @@ void guidance_h_init(void)
 #if GUIDANCE_INDI
   guidance_indi_enter();
 #endif
+
+#if GUIDANCE_DELFLY
+  guidance_lat_enter();
+#endif
 }
 
 
@@ -248,6 +264,8 @@ void guidance_h_mode_changed(uint8_t new_mode)
     case GUIDANCE_H_MODE_HOVER:
 #if GUIDANCE_INDI
       guidance_indi_enter();
+#elif GUIDANCE_DELFLY // INDI and DelFly (lat) are exlusive.
+	  guidance_lat_enter();
 #endif
       guidance_h_hover_enter();
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
@@ -274,6 +292,10 @@ void guidance_h_mode_changed(uint8_t new_mode)
           guidance_h.mode == GUIDANCE_H_MODE_RC_DIRECT)
 #endif
         stabilization_attitude_enter();
+        
+#if GUIDANCE_DELFLY
+	  guidance_lat_enter();
+#endif  
       break;
 
     case GUIDANCE_H_MODE_FLIP:
@@ -380,14 +402,17 @@ void guidance_h_run(bool_t  in_flight)
       /* compute x,y earth commands */
       guidance_h_traj_run(in_flight);
       
-      if ( P_WT_heading > 0 ) {
-      /* Setting the psi command as heading inside the windtunel */
-      guidance_h_adjust_heading();	
-      }
+#if GUIDANCE_DELFLY
+      /* compute heading */
+      guidance_lat_adjust_heading(in_flight, &guidance_h_cmd_heading,
+      										 guidance_h_pos_err);
+#else
+	  guidance_h_cmd_heading = guidance_h.sp.heading;
+#endif
 
       /* set final attitude setpoint */
       stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
-                                             guidance_h.sp.heading);
+                                             guidance_h_cmd_heading);
 #endif
       stabilization_attitude_run(in_flight);
       break;
@@ -416,9 +441,18 @@ void guidance_h_run(bool_t  in_flight)
 #else
         /* compute x,y earth commands */
         guidance_h_traj_run(in_flight);
+        
+#if GUIDANCE_DELFLY
+      /* compute heading */
+      guidance_lat_adjust_heading(in_flight, &guidance_h_cmd_heading,
+      										 guidance_h_pos_err);
+#else
+	  guidance_h_cmd_heading = guidance_h.sp.heading;
+#endif
+
         /* set final attitude setpoint */
         stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
-                                               guidance_h.sp.heading);
+                                               guidance_h_cmd_heading);
 #endif
       }
       stabilization_attitude_run(in_flight);
@@ -549,68 +583,6 @@ static void guidance_h_traj_run(bool_t in_flight)
   VECT2_STRIM(guidance_h_cmd_earth, -total_max_bank, total_max_bank);
 }
 
-#define HEADING_CTRL_MODE_PROP			0
-#define HEADING_CTRL_MODE_TWOPOINT		1
-#define HEADING_CTRL_MODE_THREEPOINT	2
-
-#define HEADING_CTRL_MODE	HEADING_CTRL_MODE_PROP
-
-#define HEADING_WT	0	//33./57.3	 //in radians
-#define HEADING_CMD_MAX	5./57.3	//33./57.3	 //in radians
-/*static double sin_psiWT = 0, //sin( HEADING_WT ),
-			  cos_psiWT = 1; //cos( HEADING_WT );
-*/
-
-#if HEADING_CTRL_MODE == HEADING_CTRL_MODE_THREEPOINT
-#define HEADING_ERR_BOUND				0.3
-#elif HEADING_CTRL_MODE == HEADING_CTRL_MODE_TWOPOINT
-#define HEADING_ERR_BOUND				0
-#endif
-
-static void guidance_h_adjust_heading(void) {
-
-  struct EnuCoor_f pos_err_f = { .x = POS_FLOAT_OF_BFP(guidance_h_pos_err.x), .y = POS_FLOAT_OF_BFP(guidance_h_pos_err.y) };
-
-  /* compute forward / sideways error */
-  /* Rotate horizontal error to windtunnel frame by headingWT */  
-  // int32_t frwd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
-  double side_err = pos_err_f.y; // (cos_psiWT * pos_err_f.x + sin_psiWT * pos_err_f.y);
-  
-  /* compute heading towards a virtual point inside the windtunnel at a defined distance */ 
-  //double guidance_h_virtual_waypoint_distance = 3.;
-  //double virtual_heading = atan2( side_err, guidance_h_virtual_waypoint_distance ); //in radians
-
-  double virtual_heading;
-  
-#if HEADING_CTRL_MODE == HEADING_CTRL_MODE_TWOPOINT || HEADING_CTRL_MODE == HEADING_CTRL_MODE_THREEPOINT
-  if (side_err > HEADING_ERR_BOUND) { virtual_heading = HEADING_CMD_MAX; } //in radians
-  else if (side_err < -HEADING_ERR_BOUND) { virtual_heading = -HEADING_CMD_MAX; } //in radians
-  else { virtual_heading = 0; } //in radians
-#elif HEADING_CTRL_MODE == HEADING_CTRL_MODE_PROP
-  virtual_heading = side_err/0.3*HEADING_CMD_MAX;
-#endif
-
-  /* Set the heading command */ 
-  guidance_h.sp.heading = ANGLE_BFP_OF_REAL( HEADING_WT + P_WT_heading*1.0/100*virtual_heading ); //in radians
-
-
-  /* compute forward / sideways error */
-  /* Rotate horizontal error to windtunnel frame by headingWT */
-  //int32_t headingWT = ANGLE_BFP_OF_REAL(33); //in radians
-  //int32_t s_psi, c_psi;
-  //PPRZ_ITRIG_SIN(s_psi, headingWT);
-  //PPRZ_ITRIG_COS(c_psi, headingWT);
-  // int32_t fwrd_err = (-s_psi * guidance_h_pos_err.x + c_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
-  //int32_t side_err = (c_psi * guidance_h_pos_err.x + s_psi * guidance_h_pos_err.y) >> INT32_POS_FRAC;
-  
-  /* compute heading towards a virtual point inside the windtunnel at a defined distance */ 
-  //int32_t guidance_h_virtual_waypoint_distance = POS_BFP_OF_REAL( 3. );
-  //int32_t virtual_heading;
-  //INT32_ATAN2( virtual_heading, side_err, guidance_h_virtual_waypoint_distance ); // in INT32_ANGLE_FRAC
-  
-  /* Set the heading command */ 
-  //guidance_h.sp.heading = virtual_heading + P_WT_heading/100*headingWT;  
-}
 
 static void guidance_h_hover_enter(void)
 {

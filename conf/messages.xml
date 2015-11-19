@@ -1234,6 +1234,7 @@
   <message name="HOVER_LOOP" id="146">
     <field name="sp_x"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
     <field name="sp_y"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+    <field name="sp_heading"  type="int32" alt_unit="rad" alt_unit_coef="0.0002441"/>
     <field name="est_x"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
     <field name="est_y"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
     <field name="est_xd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
@@ -1247,8 +1248,8 @@
     <field name="err_sum_x" type="int32"/>
     <field name="err_sum_y" type="int32"/>
     <field name="cmd_x"     type="int32"/>
-    <field name="cmd_y"     type="int32"/>
-    <field name="cmd_heading" type="int32"/>
+    <field name="cmd_y"     type="int32"/>    
+    <field name="cmd_heading" type="int32" alt_unit="rad" alt_unit_coef="0.0002441"/>
   </message>
 
   <message name="ROTORCRAFT_FP" id="147">

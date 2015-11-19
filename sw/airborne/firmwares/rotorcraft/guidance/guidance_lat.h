@@ -45,4 +45,10 @@ struct LateralGuidance {
 
 extern struct LateralGuidance guidance_lat;
 
-#endif /* GUIDANCE_H_H */
+extern void guidance_lat_init(void);
+extern void guidance_lat_enter(void);
+
+extern void guidance_lat_adjust_heading(bool_t, int32_t* cmd_heading,
+												struct Int32Vect2 h_pos_err );
+
+#endif /* GUIDANCE_L_H */
