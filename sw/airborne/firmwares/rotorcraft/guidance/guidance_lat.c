@@ -73,7 +73,12 @@ void guidance_lat_init(void) {
 
 void guidance_lat_adjust_heading(bool_t in_flight, int32_t* cmd_heading, struct Int32Vect2 h_pos_err) {
 
-  /* heading correction w.r.t. sp (rad) in order to reduce lateral error */
+  /* lateral offset (error) to trajectory along heading sp -- with #INT32_POS_FRAC */
+  int32_t virtual_y_err = (  h_pos_err.x*pprz_itrig_sin(guidance_h.sp.heading)
+  	  	  	  	  	  	   + h_pos_err.y*pprz_itrig_sin(guidance_h.sp.heading)
+  	  	  	  	  	  	  )/(1<<INT32_TRIG_FRAC);
+
+  /* heading correction w.r.t. sp (rad) in order to reduce lateral error -- with #INT32_ANGLE_FRAC */
   int32_t heading_correct = h_pos_err.y*guidance_lat.gains.p*GL_GAIN_SCALE/(1<<(GL_GAIN_FRAC+INT32_POS_FRAC-INT32_ANGLE_FRAC));
 
   /* trim */
@@ -81,7 +86,7 @@ void guidance_lat_adjust_heading(bool_t in_flight, int32_t* cmd_heading, struct 
   heading_correct = (heading_correct >  adj_max_corr) ?  adj_max_corr : (
 		  	  	  	(heading_correct < -adj_max_corr) ? -adj_max_corr : heading_correct );
 
-  /* Set the heading command */ 
+  /* set the heading command */
   *cmd_heading =  guidance_h.sp.heading + heading_correct; //in radians
 }
 
