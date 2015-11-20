@@ -79,7 +79,7 @@ void guidance_lat_adjust_heading(bool_t in_flight, int32_t* cmd_heading, struct 
   	  	  	  	  	  	  )/(1<<INT32_TRIG_FRAC);
 
   /* heading correction w.r.t. sp (rad) in order to reduce lateral error -- with #INT32_ANGLE_FRAC */
-  int32_t heading_correct = h_pos_err.y*guidance_lat.gains.p*GL_GAIN_SCALE/(1<<(GL_GAIN_FRAC+INT32_POS_FRAC-INT32_ANGLE_FRAC));
+  int32_t heading_correct = virtual_y_err*guidance_lat.gains.p*GL_GAIN_SCALE/(1<<(GL_GAIN_FRAC+INT32_POS_FRAC-INT32_ANGLE_FRAC));
 
   /* trim */
   static const int32_t adj_max_corr = ANGLE_BFP_OF_REAL(GUIDANCE_LAT_MAX_HEAD_CORR);

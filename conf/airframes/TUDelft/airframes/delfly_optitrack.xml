@@ -213,6 +213,7 @@
  </section>
 
  <modules main_freq="512">
+   <load name="delfly_control.xml"/>
    <load name="gps_diagnostics.xml"/>
    <load name="delfly_utils.xml"/>
    <load name="sys_mon.xml"/>
