@@ -11,6 +11,11 @@
   <periodic fun="delfly_control_run()" freq="256" start="delfly_control_start()" stop="delfly_control_stop()" autorun="FALSE"/>
   <makefile>
     <file name="delfly_control.c"/>
+    <file name="guidance_h_module.c"/>
+    <file name="guidance_v_module.c"/>
+    <file name="speed_control.c"/>
+    <file name="state_estimation.c"/>
+    <file name="matlab_include.c"/>
   </makefile>
 </module>
 

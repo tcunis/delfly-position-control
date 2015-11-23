@@ -33,8 +33,10 @@
 
 #include "modules/delfly_control/delfly_control.h"
 
-#include "guidance/guidance_h.h";
-#include "guidance/guidance_v.h";
+#include "state_estimation.h"
+
+#include "guidance/guidance_h.h"
+#include "guidance/guidance_v.h"
 
 #include "state.h"
 
@@ -49,6 +51,7 @@ void delfly_control_init(void){
   h_mode_alt = -1;
   v_mode_alt = -1;
 
+  state_estimation_init();
   speed_control_init();
 }
 
@@ -63,6 +66,7 @@ void delfly_control_start(void){
   guidance_h_mode_changed(GUIDANCE_H_MODE_MODULE);
   guidance_v_mode_changed(GUIDANCE_V_MODE_MODULE);
 
+  state_estimation_enter();
   speed_control_enter();
 }
 
@@ -77,7 +81,9 @@ void delfly_control_stop(void){
 /*    delfly control periodic       */
 void delfly_control_run(void) {
 
-  //TODO: determin in_flight status.
+  state_estimation_run();
+
+  //TODO: determine in_flight status.
   speed_control_run(TRUE);
 }
 

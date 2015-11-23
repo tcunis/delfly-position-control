@@ -206,6 +206,13 @@
    <define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/>
  </section>
  
+ <section name="DELFLY_CONTROL" prefix="SPEED_CONTROL_">
+   <define name="FB_PGAIN" value="100"/>
+   <define name="FB_IGAIN" value="100"/>
+   <define name="FF_PITCH_GAIN"     value="100"/>
+   <define name="FF_THROTTLE_GAIN"  value="100"/>
+ </section>
+ 
  <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
    <define name="LEDS_SWITCH" value="1"/>
    <define name="SRVO_KILL" value="0"/>

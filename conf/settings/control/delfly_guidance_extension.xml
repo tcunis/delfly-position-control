@@ -12,7 +12,9 @@
     
     <dl_settings NAME="Speed/thrust loop">
       <dl_setting var="speed_control.fb_gains.p" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_kp" param="SPEED_CONTROL_FB_PGAIN" type="int32" persistent="true"/>
-	  <dl_setting var="speed_control.fb_gains.i" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>      	      
+	  <dl_setting var="speed_control.fb_gains.i" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>
+	  <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
+	  <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
     </dl_settings>
 
   </dl_settings>

@@ -1,13 +1,8 @@
 /*
  * Copyright (C) 2015 Torbjoern Cunis <t.cunis@tudelft.nl>
  *
- * The DelFly Control module provides submodules and functions necessary
- * for control of the DelFly:
- *
- *  -	Guidance h/v submodule implements guidance_module.h in order to
- *    	control vertical and horizontal position and velocity;
- *  - 	Speed/thrust Control submodule controls commanded horizontal and
- *    	vertical acceleration.
+ * Speed/thrust Control submodule controls commanded horizontal and
+ * vertical acceleration.
  *
  * This file is part of paparazzi:
  *
@@ -34,24 +29,20 @@
 #define SPEED_CONTROL_H_
 
 
-union Int32Vect2hv {
-	struct Int32Vect2 xy;
-	struct {
-		int32_t horizontal;
-		int32_t vertical;
-	} hv;
-};
+#include "delfly_state.h"
+#include "math/pprz_algebra_int.h"
+
 
 /**
  * Command to speed/thrust control.
  */
-struct SpeedControlCmd {
-	/** h/v acceleration cmd
+struct SpeedControlSetPoint {
+	/** h/v acceleration sp
 	 * .x = h, .y = v
 	 * in m/s2, with #INT32_ACCEL_FRAC */
-	struct Int32Vect2 acceleration;
+	union Int32VectLong acceleration;
 
-	/** heading cmd
+	/** heading s
 	 * in rad, with #INT32_ANGLE_FRAC  */
 	int32_t heading;
 };
@@ -64,10 +55,19 @@ struct SpeedControlFeedBackGains {
 	int32_t i;
 };
 
+/**
+ * Speed/thrust control feed-forward gains.
+ */
+struct SpeedControlFeedForwardGains {
+  int32_t pitch;
+  int32_t throttle;
+};
+
 
 struct SpeedControl {
-	struct SpeedControlCmd cmd;
+	struct SpeedControlSetPoint sp;
 	struct SpeedControlFeedBackGains fb_gains;
+	struct SpeedControlFeedForwardGains ff_gains;
 };
 
 

@@ -35,7 +35,14 @@
 #define DELFLY_CONTROL_H
 
 
+#include "generated/modules.h"
 #include "std.h"
+
+
+#ifndef SPEED_CONTROL_RUN_PERIOD
+#define SPEED_CONTROL_RUN_PERIOD  DELFLY_CONTROL_RUN_PERIOD
+#define SPEED_CONTROL_RUN_FREQ    DELFLY_CONTROL_RUN_FREQ
+#endif
 
 
 /*    general module functions      */
@@ -48,6 +55,7 @@ extern void delfly_control_run(void);
 
 
 /*    speed/thrust control          */
+extern void speed_control_init(void);
 extern void speed_control_enter(void);
 extern void speed_control_run(bool_t in_flight);
 
