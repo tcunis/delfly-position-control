@@ -1,7 +1,15 @@
 /*
- * Copyright (C) cunis
+ * Copyright (C) Torbjoern Cunis <t.cunis@tudelft.nl>
  *
- * This file is part of paparazzi
+ * The DelFly Control module provides submodules and functions necessary
+ * for control of the DelFly:
+ *
+ *  -	Guidance h/v submodule implements guidance_module.h in order to
+ *    	control vertical and horizontal position and velocity;
+ *  - 	Speed/thrust Control submodule controls commanded horizontal and
+ *    	vertical acceleration.
+ *
+ * This file is part of paparazzi:
  *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +27,7 @@
  */
 /**
  * @file "modules/delfly_control/delfly_control.c"
- * @author cunis
+ * @author Torbjoern Cunis
  * 
  */
 
@@ -31,30 +39,36 @@
 #include "state.h"
 
 
-uint8_t h_mode_alt = 0;
-uint8_t v_mode_alt = 0;
+uint8_t h_mode_alt;
+uint8_t v_mode_alt;
 
 
 /*    general module functions      */
 void delfly_control_init(void){
 
-  //nothing to do yet
+  h_mode_alt = -1;
+  v_mode_alt = -1;
+
+  speed_control_init();
 }
 
 void delfly_control_start(void){
 
-  speed_control_start();
+//  speed_control_start();
 
+  //remember previous horizontal/vertical guidance mode
   h_mode_alt = guidance_h.mode;
   v_mode_alt = guidance_v_mode;
 
   guidance_h_mode_changed(GUIDANCE_H_MODE_MODULE);
   guidance_v_mode_changed(GUIDANCE_V_MODE_MODULE);
+
+  speed_control_enter();
 }
 
 
 void delfly_control_stop(void){
-  speed_control_stop();
+//  speed_control_stop();
 
   guidance_h_mode_changed(h_mode_alt);
   guidance_v_mode_changed(v_mode_alt);

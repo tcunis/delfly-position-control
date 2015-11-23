@@ -6,8 +6,13 @@
   	<!-- This settings file for the delfy guidance module contains ONLY the additional settings 
   	 	 w.r.t. rotorcraft_guidance.xml. In order to use all settings, load the latter as well! -->
   	
-    <dl_settings NAME="Lat Loop">
+    <dl_settings NAME="Lateral loop">
       <dl_setting var="guidance_lat.gains.p" min="1" step="1" max="1000" module="guidance/guidance_lat" shortname="kp" param="GUIDANCE_LAT_PGAIN" type="int32" persistent="true"/>
+    </dl_settings>
+    
+    <dl_settings NAME="Speed/thrust loop">
+      <dl_setting var="speed_control.fb_gains.p" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_kp" param="SPEED_CONTROL_FB_PGAIN" type="int32" persistent="true"/>
+	  <dl_setting var="speed_control.fb_gains.i" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>      	      
     </dl_settings>
 
   </dl_settings>

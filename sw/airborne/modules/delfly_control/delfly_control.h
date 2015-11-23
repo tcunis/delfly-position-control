@@ -1,7 +1,15 @@
 /*
- * Copyright (C) cunis
+ * Copyright (C) Torbjoern Cunis <t.cunis@tudelft.nl>
  *
- * This file is part of paparazzi
+ * The DelFly Control module provides submodules and functions necessary
+ * for control of the DelFly:
+ *
+ *  -	Guidance h/v submodule implements guidance_module.h in order to
+ *    	control vertical and horizontal position and velocity;
+ *  - 	Speed/thrust Control submodule controls commanded horizontal and
+ *    	vertical acceleration.
+ *
+ * This file is part of paparazzi:
  *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +27,7 @@
  */
 /**
  * @file "modules/delfly_control/delfly_control.h"
- * @author cunis
+ * @author Torbjoern Cunis
  * 
  */
 
@@ -40,16 +48,13 @@ extern void delfly_control_run(void);
 
 
 /*    speed/thrust control          */
-extern void speed_control_start(void);
-extern void speed_control_stop(void);
-
 extern void speed_control_enter(void);
 extern void speed_control_run(bool_t in_flight);
 
 
 /*    guidance control h/v          */
-extern void guidance_control_start(void);
-extern void guidance_control_stop(void);
+//extern void guidance_control_start(void);
+//extern void guidance_control_stop(void);
 
 extern void guidance_h_module_init(void);
 extern void guidance_h_module_enter(void);
