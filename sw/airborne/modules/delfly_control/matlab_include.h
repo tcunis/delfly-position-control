@@ -30,6 +30,12 @@
 extern const uint8_t INT32_MATLAB_FRAC;
 
 
+/* optimal guidance forward and lateral */
+extern struct Int32Vect2 matlab_guidance_gain;
+extern struct Int32Vect2 matlab_guidance_gain_fwd;
+extern struct Int32Vect2 matlab_guidance_gain_lat;
+
+
 /* pitch angle at equilibrium, in rad with #INT32_MATLAB_FRAC */
 extern int32_t matlab_pitch_equilibrium_v04;
 extern int32_t matlab_pitch_equilibrium_v08;
