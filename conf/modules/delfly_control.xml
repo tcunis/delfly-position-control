@@ -16,6 +16,8 @@
     <file name="speed_control.c"/>
     <file name="state_estimation.c"/>
     <file name="matlab_include.c"/>
+    <file name="matlab_include_speed_controller.c"/>
+    <file name="matlab_include_guidance_optimal.c"/>
   </makefile>
 </module>
 
