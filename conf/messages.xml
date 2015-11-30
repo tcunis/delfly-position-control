@@ -879,7 +879,7 @@
     filtered data is given by message DELFLY_STATE.</description>
   </message>
   
-  <!--<message name="DELFLY_STATEESTIMATION" id="108">
+  <message name="DELFLY_STATEESTIMATION" id="108">
    <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module.</description>
    <field name="mode" type="uint8" values="ON|OFF">State estimator mode</field>
    <field name="wind_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in x-axis (geographic frame)</field>
@@ -933,7 +933,7 @@
    <field name="cmd_h" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Horizontal acceleration command (in xy-plane, geographic frame)</field>
    <field name="cmd_v" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Vertical acceleration command (in z-axis, geographic frame)</field>
    <field name="cmd_psi" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Heading command</field>
-  </message>-->
+  </message>
   <!-- end module -->
 
   <message name="DC_SHOT" id="111">

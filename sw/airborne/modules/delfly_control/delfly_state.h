@@ -76,9 +76,11 @@ struct DelflyHorizontalState {
 struct DelflyVerticalState {
   /* z-position in m, with #INT32_POS_FRAC */
   int32_t pos;
-  /* z-velocity in m/s, with #INT32_VEL_FRAC */
+  /* z-velocity in m/s, with #INT32_SPEED_FRAC */
   int32_t vel;
-  /* z-acceleration in m/s2, with #INT32_ACC_FRAC */
+  /* z-airspeed in m/s, with #INT32_SPEED_FRAC */
+  int32_t air;
+  /* z-acceleration in m/s2, with #INT32_ACCEL_FRAC */
   int32_t acc;
 };
 
@@ -125,7 +127,10 @@ static inline int32_t set_vertical_velocity ( int32_t vel ) {
   return delfly_state.v.vel         =
          delfly_state.fv.vel.fv.ver = vel;
 }
-static inline int32_t set_vertical_airspeed ( int32_t air ) { return delfly_state.fv.air.fv.ver = air; }
+static inline int32_t set_vertical_airspeed ( int32_t air ) {
+  return delfly_state.v.air         =
+         delfly_state.fv.air.fv.ver = air;
+}
 static inline int32_t set_vertical_acceleration ( int32_t acc ) {
   return delfly_state.v.acc         =
          delfly_state.fv.acc.fv.ver = acc;

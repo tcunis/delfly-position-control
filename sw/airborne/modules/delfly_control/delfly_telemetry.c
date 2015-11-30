@@ -27,36 +27,61 @@
 
 #include "delfly_telemetry.h"
 
+#include "delfly_state.h"
 
-static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*) {
-	DOWNLINK_SEND_DELFLY_GUIDANCE( DefaultChannel, DefaultDevice,
-		&guidance_h.mode,
-		&guidance_v_mode
+
+static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
+
+static void delfly_telemetry_send_state (struct transport_tx*, struct link_device*);
+static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*);
+static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*);
+
+static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*);
+
+
+static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct link_device* dev) {
+//	DOWNLINK_SEND_DELFLY_GUIDANCE( DefaultChannel, DefaultDevice,
+//		&guidance_h.mode,
+//		&guidance_v_mode
+//	);
+}
+
+static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
+	DOWNLINK_SEND_DELFLY_STATE( DefaultChannel, DefaultDevice,
+	    &delfly_state.h.pos.x,
+	    &delfly_state.h.pos.y,
+	    &delfly_state.v.pos,
+	    &delfly_state.h.vel.x,
+	    &delfly_state.h.vel.y,
+	    &delfly_state.v.vel,
+	    &delfly_state.h.air.x,
+	    &delfly_state.h.air.y,
+	    &delfly_state.v.air,
+	    &delfly_state.h.acc.x,
+	    &delfly_state.h.acc.y,
+	    &delfly_state.v.acc,
+	    &delfly_state.fv.air.fv.fwd,
+	    &delfly_state.fv.vel.fv.fwd
 	);
 }
 
-static void delfly_telemetry_send_state (struct transport_tx*, struct link_device*) {
-	DOWNLINK_SEND_DELFLY_STATE( DefaultChannel, DefaultDevice
-	);
+static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct link_device* dev) {
+//	DOWNLINK_SEND_DELFLY_STATERAW( DefaultChannel, DefaultDevice
+//	);
 }
 
-static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*) {
-	DOWNLINK_SEND_DELFLY_STATERAW( DefaultChannel, DefaultDevice
-	);
+static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
+//	DOWNLINK_SEND_DELFLY_STATEESTIMATION (struct transport_tx*, struct link_device*
+//	);
 }
 
-static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*) {
-	DOWNLINK_SEND_DELFLY_STATEESTIMATION (struct transport_tx*, struct link_device*
-	);
-}
-
-static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*) {
-	DOWNLINK_SEND_DELFLY_SPEEDCONTROL (struct transport_tx*, struct link_device*
-	);
+static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {
+//	DOWNLINK_SEND_DELFLY_SPEEDCONTROL (struct transport_tx*, struct link_device*
+//	);
 }
 
 
-void delfly_telemetry_init (void) {
+void delfly_telemetry_init_all (void) {
 
 	register_periodic_telemetry(DefaultPeriodic, "DELFLY_GUIDANCE", &delfly_telemetry_send_guidance);
 	register_periodic_telemetry(DefaultPeriodic, "DELFLY_STATE", &delfly_telemetry_send_state);

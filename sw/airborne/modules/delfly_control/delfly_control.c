@@ -31,12 +31,14 @@
  * 
  */
 
-#include "modules/delfly_control/delfly_control.h"
+#include "delfly_control.h"
 
 #include "state_estimation.h"
 
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
+
+#include "delfly_telemetry.h"
 
 #include "state.h"
 
@@ -53,6 +55,8 @@ void delfly_control_init(void){
 
   state_estimation_init();
   speed_control_init();
+
+  delfly_telemetry_init_all();
 }
 
 void delfly_control_start(void){

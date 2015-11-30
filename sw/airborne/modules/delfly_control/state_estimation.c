@@ -51,6 +51,7 @@ void state_estimation_init (void) {
 
   INT32_ZERO( delfly_state.v.pos );
   INT32_ZERO( delfly_state.v.vel );
+  INT32_ZERO( delfly_state.v.air );
   INT32_ZERO( delfly_state.v.acc );
 
   VECT2_ZERO( delfly_state.fv.vel.xy );

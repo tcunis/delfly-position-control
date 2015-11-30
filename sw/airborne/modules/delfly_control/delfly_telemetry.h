@@ -32,15 +32,15 @@
 #include "subsystems/datalink/telemetry.h"
 
 
-extern static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
+//static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
+//
+//static void delfly_telemetry_send_state (struct transport_tx*, struct link_device*);
+//static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*);
+//static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*);
+//
+//static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*);
 
-extern static void delfly_telemetry_send_state (struct transport_tx*, struct link_device*);
-extern static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*);
-extern static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*);
-
-extern static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*);
-
-extern void delfly_telemetry_init (void);
+extern void delfly_telemetry_init_all (void);
 
 
 #endif /* DELFLY_TELEMETRY_H_ */
