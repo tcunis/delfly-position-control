@@ -856,7 +856,7 @@
   <!-- module Delfly Control telemetry -->
   <message name="DELFLY_STATE" id="106">
    <description>States of Delfly MAV, estimated and/or filtered if necessary;
-    raw sensor data is given by message DELFLY_STATERAW.</description>
+    raw sensor data is given by message DELFLY_STATERAW. 68 bytes</description>
    <field name="pos_x" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in x-axis (geographic frame)</field>
    <field name="pos_y" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in y-axis (geographic frame)</field>
    <field name="pos_z" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in z-axis (geographic frame)</field>
@@ -871,7 +871,10 @@
    <field name="acc_z" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Acceleration in z-axis (geographic frame)</field>
    <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air speed in xy-plane (geographic frame)</field>
    <field name="ground_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Ground speed in xy-plane (geographic frame)</field>
-   
+   <field name="heading" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Heading</field>
+   <field name="head_rate" type="int32" alt_unit="deg/s" alt_unit_coef="0.01398823">Heading rate</field>
+   <field name="azimuth" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Azimuth</field>
+   <!-- TODO: add attitude, and rates -->
   </message>
   
   <message name="DELFLY_STATERAW" id="107">
@@ -880,7 +883,7 @@
   </message>
   
   <message name="DELFLY_STATEESTIMATION" id="108">
-   <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module.</description>
+   <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module. 13 bytes</description>
    <field name="mode" type="uint8" values="ON|OFF">State estimator mode</field>
    <field name="wind_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in x-axis (geographic frame)</field>
    <field name="wind_y" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in y-axis (geographic frame)</field>
@@ -888,12 +891,12 @@
   </message>
   
   <message name="DELFLY_SPEEDCONTROL"  id="109">
-   <description>Input, states, and output of the Delfly control speed control sub-module.</description>
+   <description>Input, states, and output of the Delfly control speed control sub-module. 77 bytes</description>
    <field name="mode" type="uint8" values="ON|OFF">Speed control mode</field>
    <field name="sp_h" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
    <field name="sp_v" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
    <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air speed</field>
-   <field name="eq_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Equilibrii pitch angle</field>
+   <field name="eq_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
    <field name="eq_throttle" type="int32" alt_unit="%" alt_unit_coef="0.00006104">Equilibrii throttle frequency</field>
    <field name="inv_lift_pitch" type="int32" alt_unit="m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>
    <field name="inv_lift_throttle" type="int32" alt_unit="m/(% s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. throttle frequency</field>
@@ -903,23 +906,23 @@
    <field name="err_v" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Vertical acceleration error</field>
    <field name="err_h_int" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Integrated horizontal error</field>
    <field name="err_v_int" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Integrated vertical error</field>
-   <field name="cmd_ff_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Feed-forward pitch command</field>
+   <field name="cmd_ff_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Feed-forward pitch command</field>
    <field name="cmd_ff_throttle" type="int32" alt_unit="%" alt_unit_coef="0.01041667">Feed-forward throttle frequency command</field>
-   <field name="cmd_fb_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Feed-back pitch command</field>
+   <field name="cmd_fb_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Feed-back pitch command</field>
    <field name="cmd_fb_throttle" type="int32" alt_unit="%" alt_unit_coef="0.01041667">Feed-back throttle frequency command</field>
-   <field name="cmd_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Pitch command</field>
+   <field name="cmd_pitch" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Pitch command</field>
    <field name="cmd_throttle" type="int32" alt_unit="%" alt_unit_coef="0.01041667">Throttle frequency command</field>
   </message>
   
   <message name="DELFLY_GUIDANCE" id="110">
-   <description>Input, states, and output of the Delfly control guidance sub-module.</description>
+   <description>Input, states, and output of the Delfly control guidance sub-module. 74 bytes</description>
    <field name="h_mode" type="uint8">Horizontal guidance mode</field>
    <field name="v_mode" type="uint8">Vertical guidance mode</field>
    <field name="sp_x" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position set-point in x-axis (geographic frame)</field>
    <field name="sp_y" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position set-point in y-axis (geographic frame)</field>
    <field name="sp_z" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position set-point in z-axis (geographic frame)</field>
-   <field name="ref_vel" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Speed reference in xy-plane (geographic frame)</field>
-   <field name="ref_psi" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Heading reference</field>
+   <field name="ref_air" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air speed reference in xy-plane (geographic frame)</field>
+   <field name="ref_psi" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Heading reference</field>
    <field name="err_x" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position error in x-axis (geographic frame)</field>
    <field name="err_y" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position error in x-axis (geographic frame)</field>
    <field name="err_z" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position error in x-axis (geographic frame)</field>
@@ -932,7 +935,7 @@
    <field name="err_dlat" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Lateral velocity error in xy-plane (geographic frame)</field>
    <field name="cmd_h" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Horizontal acceleration command (in xy-plane, geographic frame)</field>
    <field name="cmd_v" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Vertical acceleration command (in z-axis, geographic frame)</field>
-   <field name="cmd_psi" type="int32" alt_unit="deg" alt_unit_coef="0.00024414">Heading command</field>
+   <field name="cmd_psi" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Heading command</field>
   </message>
   <!-- end module -->
 
@@ -1972,16 +1975,16 @@
   </message>
 
   <message name="GPS_DIAGNOSTICS" id="217">
-    <field name="msg_count" type="uint16"/>
+    <!--field name="msg_count" type="uint16"/-->
     <field name="dl_pkg_count" type="uint16"/>
-    <field name="gps_freq" type="double" unit="Hz"/>
-    <field name="gps_period" type="double" unit="s"/>
+    <!--field name="gps_freq" type="double" unit="Hz"/>
+    <field name="gps_period" type="double" unit="s"/-->
     <field name="dl_freq" type="double" unit="Hz"/>
     <field name="dl_period" type="double" unit="s"/>
-    <field name="last_msgtimediff" type="uint32" unit="usec"/>
-    <field name="avrg_msgtimediff" type="double" unit="usec"/>
+    <!--field name="last_msgtimediff" type="uint32" unit="usec"/>
+    <field name="avrg_msgtimediff" type="double" unit="usec"/-->
     <field name="dl_pkgtimediff" type="uint32" unit="usec"/>
-    <field name="count" type="uint8"/>
+    <!--field name="count" type="uint8"/-->
   </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
