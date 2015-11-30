@@ -264,7 +264,7 @@
     <!-- Comment the previous line and uncomment the following one if you need
          to use the debug serial interface for telemetry. -->
     <subsystem name="telemetry" type="transparent">
-        <configure name="MODEM_BAUD" value="B57600"/>
+        <configure name="MODEM_BAUD" value="B115200"/>
         <configure name="MODEM_PORT" value="UART1"/>
     </subsystem>
     <subsystem name="imu" type="lisa_s_v1.0"/>
