@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <!DOCTYPE protocol SYSTEM "messages.dtd">
 <protocol>
  <!-- messages from modem or sim to server -->
@@ -853,12 +853,90 @@
     <field name="values" type="int16[]" unit="none"/>
   </message>
 
-  <!--106 is free -->
-  <!--107 is free -->
-  <!--108 is free -->
-  <!--109 is free -->
+  <!-- module Delfly Control telemetry -->
+  <message name="DELFLY_STATE" id="106">
+   <description>States of Delfly MAV, estimated and/or filtered if necessary;
+    raw sensor data is given by message DELFLY_STATERAW.</description>
+   <field name="pos_x" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position in x-axis (geographic frame)</field>
+   <field name="pos_y" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position in y-axis (geographic frame)</field>
+   <field name="pos_z" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position in z-axis (geographic frame)</field>
+   <field name="vel_x" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Path velocity in x-axis (geographic frame)</field>
+   <field name="vel_y" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Path velocity in y-axis (geographic frame)</field>
+   <field name="vel_z" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Path velocity in z-axis (geographic frame)</field>
+   <field name="air_x" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Air velocity in x-axis (geographic frame)</field>
+   <field name="air_y" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Air velocity in y-axis (geographic frame)</field>
+   <field name="air_z" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Air velocity in z-axis (geographic frame)</field>
+   <field name="acc_x" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Acceleration in x-axis (geographic frame)</field>
+   <field name="acc_y" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Acceleration in y-axis (geographic frame)</field>
+   <field name="acc_z" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Acceleration in z-axis (geographic frame)</field>
+   <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Air speed in xy-plane (geographic frame)</field>
+   <field name="ground_speed" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Ground speed in xy-plane (geographic frame)</field>
+   
+  </message>
+  
+  <message name="DELFLY_STATERAW" id="107">
+   <description>Raw sensor data of states of Delfly MAV;
+    filtered data is given by message DELFLY_STATE.</description>
+  </message>
+  
+  <message name="DELFLY_STATEESTIMATION" id="108">
+   <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module.</description>
+   <field name="mode" type="uint8" values="ON|OFF">State estimator mode</field>
+   <field name="wind_x" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Wind velocity in x-axis (geographic frame)</field>
+   <field name="wind_y" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Wind velocity in y-axis (geographic frame)</field>
+   <field name="wind_speed" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Wind speed in xy-plane (geographic frame)</field>
+  </message>
+  
+  <message name="DELFLY_SPEEDCONTROL"  id="109">
+   <description>Input, states, and output of the Delfly control speed control sub-module.</description>
+   <field name="mode" type="uint8" values="ON|OFF">Speed control mode</field>
+   <field name="sp_h" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Horizontal acceleration set-point</field>
+   <field name="sp_v" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Vertical acceleration set-point</field>
+   <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Air speed</field>
+   <field name="eq_pitch" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Equilibrii pitch angle</field>
+   <field name="eq_throttle" type="int32" alt_unit="%" alt_unit_coef="INT32_PERC_FRAC">Equilibrii throttle frequency</field>
+   <field name="inv_lift_pitch" type="int32" alt_unit="m/(rad s2)" alt_unit_coef="INT32_MATLAB_FRAC">Inverse derivative lift w.r.t. pitch</field>
+   <field name="inv_lift_throttle" type="int32" alt_unit="m/(% s2)" alt_unit_coef="-INT32_MATLAB_FRAC">Inverse derivative lift w.r.t. throttle frequency</field>
+   <field name="inv_drag_pitch" type="int32" alt_unit="m/(rad s2)" alt_unit_coef="-INT32_MATLAB_FRAC">Inverse derivative drag w.r.t. pitch</field>
+   <field name="inv_drag_throttle" type="int32" alt_unit="m/(% s2)" alt_unit_coef="INT32_MATLAB_FRAC">Inverse derivative drag w.r.t. throttle frequency</field>
+   <field name="err_h" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Horizontal acceleration error</field>
+   <field name="err_v" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Vertical acceleration error</field>
+   <field name="err_h_int" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Integrated horizontal error</field>
+   <field name="err_v_int" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Integrated vertical error</field>
+   <field name="cmd_ff_pitch" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Feed-forward pitch command</field>
+   <field name="cmd_ff_throttle" type="int32" alt_unit="%" alt_unit_coef="INT32_PERC_FRAC">Feed-forward throttle frequency command</field>
+   <field name="cmd_fb_pitch" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Feed-back pitch command</field>
+   <field name="cmd_fb_throttle" type="int32" alt_unit="%" alt_unit_coef="INT32_PERC_FRAC">Feed-back throttle frequency command</field>
+   <field name="cmd_pitch" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Pitch command</field>
+   <field name="cmd_throttle" type="int32" alt_unit="%" alt_unit_coef="INT32_PERC_FRAC">Throttle frequency command</field>
+  </message>
+  
+  <message name="DELFLY_GUIDANCE" id="110">
+   <description>Input, states, and output of the Delfly control guidance sub-module.</description>
+   <field name="h_mode" type="uint8">Horizontal guidance mode</field>
+   <field name="v_mode" type="uint8">Vertical guidance mode</field>
+   <field name="sp_x" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position set-point in x-axis (geographic frame)</field>
+   <field name="sp_y" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position set-point in y-axis (geographic frame)</field>
+   <field name="sp_z" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position set-point in z-axis (geographic frame)</field>
+   <field name="ref_vel" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Speed reference in xy-plane (geographic frame)</field>
+   <field name="ref_psi" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Heading reference</field>
+   <field name="err_x" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position error in x-axis (geographic frame)</field>
+   <field name="err_y" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position error in x-axis (geographic frame)</field>
+   <field name="err_z" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Position error in x-axis (geographic frame)</field>
+   <field name="err_dx" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Position error in x-axis (geographic frame)</field>
+   <field name="err_dy" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Position error in y-axis (geographic frame)</field>
+   <field name="err_dz" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Position error in z-axis (geographic frame)</field>
+   <field name="err_fwd" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Forward position error in xy-plane (geographic frame)</field>
+   <field name="err_lat" type="int32" alt_unit="m" alt_unit_coef="INT32_POS_FRAC">Lateral position error in xy-plane (geographic frame)</field>
+   <field name="err_dfwd" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Forward velocity error in xy-plane (geographic frame)</field>
+   <field name="err_dlat" type="int32" alt_unit="m/s" alt_unit_coef="INT32_SPEED_FRAC">Lateral velocity error in xy-plane (geographic frame)</field>
+   <field name="cmd_h" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_ACCEL_FRAC">Horizontal acceleration command (in xy-plane, geographic frame)</field>
+   <field name="cmd_v" type="int32" alt_unit="m/s2" alt_unit_coef="INT32_AcCEL_FRAC">Vertical acceleration command (in z-axis, geographic frame)</field>
+   <field name="cmd_psi" type="int32" alt_unit="deg" alt_unit_coef="INT32_ANGLE_FRAC">Heading command</field>
+  </message>
+  <!-- end module -->
 
-  <message name="DC_SHOT" id="110">
+  <message name="DC_SHOT" id="111">
     <field name="photo_nr" type="int16"/>
     <field name="lat" type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001">Gedetic latitude</field>
     <field name="lon" type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001">Longitude</field>
@@ -872,13 +950,11 @@
     <field name="itow" type="uint32" unit="ms">GPS time of week</field>
   </message>
 
-  <message name="TEST_BOARD_RESULTS" id="111">
+  <message name="TEST_BOARD_RESULTS" id="112">
     <field name="uart" type="uint8"/>
     <field name="ppm" type="uint8"/>
     <field name="servo" type="uint16[]"/>
   </message>
-
-  <!--112 is free -->
 
   <message name="MLX_SERIAL" id="113">
     <field name="serial0" type="uint32"/>
