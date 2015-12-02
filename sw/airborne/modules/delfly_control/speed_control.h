@@ -90,6 +90,8 @@ struct SpeedControlFeedForwardGains {
 
 
 struct SpeedControl {
+	uint8_t mode;
+
 	struct SpeedControlSetPoint sp;
 	struct SpeedControlFeedBackGains fb_gains;
 	struct SpeedControlFeedForwardGains ff_gains;

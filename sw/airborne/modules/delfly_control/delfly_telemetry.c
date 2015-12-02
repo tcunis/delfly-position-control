@@ -28,6 +28,7 @@
 #include "delfly_telemetry.h"
 
 #include "delfly_state.h"
+#include "speed_control_var.h"
 
 
 static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
@@ -47,7 +48,7 @@ static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct l
 }
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
-	DOWNLINK_SEND_DELFLY_STATE( DefaultChannel, DefaultDevice,
+	DOWNLINK_SEND_DELFLY_STATE(DefaultChannel, DefaultDevice,
 	    &delfly_state.h.pos.x,
 	    &delfly_state.h.pos.y,
 	    &delfly_state.v.pos,
@@ -69,18 +70,38 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 }
 
 static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_STATERAW( DefaultChannel, DefaultDevice
+//	DOWNLINK_SEND_DELFLY_STATERAW(DefaultChannel, DefaultDevice
 //	);
 }
 
 static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_STATEESTIMATION (struct transport_tx*, struct link_device*
+//	DOWNLINK_SEND_DELFLY_STATEESTIMATION(struct transport_tx*, struct link_device*
 //	);
 }
 
 static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_SPEEDCONTROL (struct transport_tx*, struct link_device*
-//	);
+	DOWNLINK_SEND_DELFLY_SPEEDCONTROL(DefaultChannel, DefaultDevice,
+		&speed_control.mode,
+		&speed_control.sp.acceleration.fv.fwd,
+		&speed_control.sp.acceleration.fv.ver,
+		&speed_control_var.now.air_speed,
+		&speed_control_var.eq.pitch,
+		&speed_control_var.eq.throttle,
+		&speed_control_var.mat.pitch.y,
+		&speed_control_var.mat.pitch.x,
+		&speed_control_var.mat.throttle.y,
+		&speed_control_var.mat.throttle.x,
+		&speed_control_var.err.acceleration.fv.fwd,
+		&speed_control_var.err.acceleration.fv.ver,
+		&speed_control_var.err.velocity.fv.fwd,
+		&speed_control_var.err.velocity.fv.ver,
+		&speed_control_var.ff_cmd.pitch,
+		&speed_control_var.ff_cmd.throttle,
+		&speed_control_var.fb_cmd.pitch,
+		&speed_control_var.fb_cmd.throttle,
+		&speed_control_var.cmd.pitch,
+		&speed_control_var.cmd.throttle
+	);
 }
 
 
