@@ -43,8 +43,8 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.h.vel );
   VECT2_ZERO( delfly_state.h.air );
   VECT2_ZERO( delfly_state.h.acc );
-  INT32_ZERO( delfly_state.h.aero_dynamic_vel );
-  INT32_ZERO( delfly_state.h.aero_dynamic_acc );
+  INT32_ZERO( delfly_state.h.speed_air );
+  INT32_ZERO( delfly_state.h.speed_vel );
   INT32_ZERO( delfly_state.h.heading );
   INT32_ZERO( delfly_state.h.azimuth );
   INT32_ZERO( delfly_state.h.head_rate );
@@ -74,4 +74,8 @@ void state_estimation_enter (void) {
 void state_estimation_run (void) {
 
   state_estimation_enter();
+
+  set_speed_vel( int32_vect2_norm(&delfly_state.h.vel) );
+  set_speed_air( int32_vect2_norm(&delfly_state.h.air) );
+  set_speed_acc( int32_vect2_norm(&delfly_state.h.acc) );
 }

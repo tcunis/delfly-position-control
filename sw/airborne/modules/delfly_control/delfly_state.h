@@ -56,10 +56,12 @@ struct DelflyHorizontalState {
   /* xy-acceleration in m/s2, with #INT32_ACC_FRAC */
   struct Int32Vect2 acc;
 
-  /* aero-dynamic velocity in m/s, with #INT32_VEL_FRAC */
-  int32_t aero_dynamic_vel;
-  /* aero-dynamic acceleration in m/s2, with #INT32_ACC_FRAC */
-  int32_t aero_dynamic_acc;
+  /* ground-speed in m/s, with #INT32_VEL_FRAC */
+  int32_t speed_vel;
+  /* air-speed in m/s, with #INT32_VEL_FRAC */
+  int32_t speed_air;
+  /* speed acceleration in m/s2, with #INT32_ACC_FRAC */
+  int32_t speed_acc;
 
   /* heading in rad, with #INT32_ANGLE_FRAC */
   int32_t heading;
@@ -135,14 +137,17 @@ static inline int32_t set_vertical_acceleration ( int32_t acc ) {
   return delfly_state.v.acc         =
          delfly_state.fv.acc.fv.ver = acc;
 }
-
-static inline int32_t set_aero_dynamic_vel ( int32_t vel ) {
-  return delfly_state.h.aero_dynamic_vel =
-         delfly_state.fv.air.fv.fwd      = vel;
+static inline int32_t set_speed_vel ( int32_t vel ) {
+  return delfly_state.h.speed_vel   =
+         delfly_state.fv.vel.fv.fwd = vel;
 }
-static inline int32_t set_aero_dynamic_acc ( int32_t acc ) {
-  return delfly_state.h.aero_dynamic_acc =
-         delfly_state.fv.acc.fv.fwd      = acc;
+static inline int32_t set_speed_air ( int32_t air ) {
+  return delfly_state.h.speed_air   =
+         delfly_state.fv.air.fv.fwd = air;
+}
+static inline int32_t set_speed_acc ( int32_t acc ) {
+  return delfly_state.h.speed_acc   =
+         delfly_state.fv.acc.fv.fwd = acc;
 }
 
 static inline int32_t set_heading ( int32_t heading ) { return delfly_state.h.heading = heading; }
