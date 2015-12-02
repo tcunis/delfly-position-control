@@ -57,6 +57,8 @@ void delfly_control_init(void){
   speed_control_init();
 
   delfly_telemetry_init_all();
+
+  state_estimation_enter();
 }
 
 void delfly_control_start(void){
@@ -64,13 +66,12 @@ void delfly_control_start(void){
 //  speed_control_start();
 
   //remember previous horizontal/vertical guidance mode
-  h_mode_alt = guidance_h.mode;
-  v_mode_alt = guidance_v_mode;
+//  h_mode_alt = guidance_h.mode;
+//  v_mode_alt = guidance_v_mode;
+//
+//  guidance_h_mode_changed(GUIDANCE_H_MODE_MODULE);
+//  guidance_v_mode_changed(GUIDANCE_V_MODE_MODULE);
 
-  guidance_h_mode_changed(GUIDANCE_H_MODE_MODULE);
-  guidance_v_mode_changed(GUIDANCE_V_MODE_MODULE);
-
-  state_estimation_enter();
   speed_control_enter();
 }
 
@@ -78,14 +79,18 @@ void delfly_control_start(void){
 void delfly_control_stop(void){
 //  speed_control_stop();
 
-  guidance_h_mode_changed(h_mode_alt);
-  guidance_v_mode_changed(v_mode_alt);
+//  guidance_h_mode_changed(h_mode_alt);
+//  guidance_v_mode_changed(v_mode_alt);
 }
 
-/*    delfly control periodic       */
+/* all-time periodic function */
 void delfly_control_run(void) {
 
   state_estimation_run();
+}
+
+/* control module periodic function */
+void delfly_control_module_run(void) {
 
   //TODO: determine in_flight status.
   speed_control_run(TRUE);

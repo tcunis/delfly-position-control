@@ -52,6 +52,7 @@ extern void delfly_control_stop(void);
 
 /*    delfly control periodic       */
 extern void delfly_control_run(void);
+extern void delfly_control_module_run(void);
 
 
 /*    speed/thrust control          */

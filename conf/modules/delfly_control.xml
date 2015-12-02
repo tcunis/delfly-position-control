@@ -8,7 +8,8 @@
     <file name="delfly_control.h"/>
   </header>
   <init fun="delfly_control_init()"/>
-  <periodic fun="delfly_control_run()" freq="256" start="delfly_control_start()" stop="delfly_control_stop()" autorun="FALSE"/>
+  <periodic fun="delfly_control_run()" freq="256" autorun="TRUE"/>
+  <periodic fun="delfly_control_module_run()" freq="256" start="delfly_control_start()" stop="delfly_control_stop()" autorun="FALSE"/>
   <makefile>
     <file name="delfly_control.c"/>
     <file name="delfly_telemetry.c"/>

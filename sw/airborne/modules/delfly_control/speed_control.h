@@ -19,6 +19,31 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
+ *//*
+ * Copyright (C) 2015 Torbjoern Cunis <t.cunis@tudelft.nl>
+ *
+ * Speed/thrust Control submodule controls commanded horizontal and
+ * vertical acceleration.
+ *
+ * This file is part of paparazzi:
+ *
+ * paparazzi is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * paparazzi is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with paparazzi; see the file COPYING.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+/**
+ * @file /modules/delfly_control/speed_control.h
+ * @author Torbjoern Cunis
  */
 /**
  * @file /modules/delfly_control/speed_control.h
@@ -73,6 +98,9 @@ struct SpeedControl {
 
 extern struct SpeedControl speed_control;
 
+extern void speed_control_is_running(void);
+extern void speed_control_start_running(void);
+extern void speed_control_stop_running(void);
 
 extern void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading );
 extern void speed_control_set_cmd_v( int32_t cmd_v_acceleration );
