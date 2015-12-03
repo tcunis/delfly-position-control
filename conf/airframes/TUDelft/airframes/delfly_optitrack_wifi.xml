@@ -31,7 +31,7 @@
   </commands>
 
   <command_laws>
-    <let var="ledscontrol" value="MAX_PPRZ"/>
+    <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
     <set servo="RUDDER" value="(1-SRVO_kill)*@YAW"/>
     <set servo="ELEVATOR" value="(1-SRVO_kill)*@PITCH"/>
