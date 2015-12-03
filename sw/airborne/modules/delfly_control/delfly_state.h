@@ -109,6 +109,8 @@ struct DelflyLongitudinalState {
 
 
 struct DelflyState {
+  float flap_freq;
+
   struct DelflyHorizontalState h;
   struct DelflyVerticalState v;
 

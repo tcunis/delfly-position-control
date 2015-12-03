@@ -29,6 +29,7 @@
 #include "state_estimation.h"
 
 #include "state.h"
+#include "subsystems/sensors/rpm_sensor.h"
 
 
 #define INT32_ZERO(_i)    { _i = 0; }
@@ -57,6 +58,8 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.vel.xy );
   VECT2_ZERO( delfly_state.fv.air.xy );
   VECT2_ZERO( delfly_state.fv.acc.xy );
+
+  INT32_ZERO( delfly_state.flap_freq );
 }
 
 
@@ -66,6 +69,8 @@ void state_estimation_enter (void) {
   //TODO: get airspeed
   set_airspeed_ned_i( stateGetSpeedNed_i() );
   set_acceleration_ned_i( stateGetAccelNed_i() );
+
+  delfly_state.flap_freq = rpm_sensor.motor_frequency;
 
   //TODO: get heading, azimuth
   //TODO: get heading rate

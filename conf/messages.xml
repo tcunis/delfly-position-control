@@ -874,6 +874,7 @@
    <field name="heading" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Heading</field>
    <field name="head_rate" type="int32" alt_unit="deg/s" alt_unit_coef="0.01398823">Heading rate</field>
    <field name="azimuth" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Azimuth</field>
+   <field name="flap_freq" type="float" unit="Hz">Flapping frequency</field>
    <!-- TODO: add attitude, and rates -->
   </message>
   

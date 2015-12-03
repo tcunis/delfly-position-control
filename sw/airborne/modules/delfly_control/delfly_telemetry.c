@@ -65,7 +65,8 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 	    &delfly_state.fv.vel.fv.fwd,
 	    &delfly_state.h.heading,
 	    &delfly_state.h.head_rate,
-	    &delfly_state.h.azimuth
+	    &delfly_state.h.azimuth,
+		&delfly_state.flap_freq
 	);
 }
 
