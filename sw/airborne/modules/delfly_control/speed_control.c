@@ -79,7 +79,7 @@ void speed_control_init (void) {
 
   VECT2_ZERO(speed_control_var.ref.velocity.xy);
 
-  speed_control_var.now.acceleration = 0;
+  VECT2_ZERO(speed_control_var.now.acceleration.xy);
   VECT2_ZERO(speed_control_var.now.velocity.xy);
   VECT2_ZERO(speed_control_var.now.acceleration.xy);
 
