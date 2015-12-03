@@ -23,7 +23,7 @@
         <configure name="RADIO_CONTROL_PPM_PIN" value="SERVO6" />
         <!--define name="RADIO_YAW" value="RADIO_ROLL"/-->
         <!--define name="RADIO_MODE" value="RADIO_FLAP"></define-->
-        <!--define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"></define-->
+        <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"></define>
       </subsystem><!--radio_control-->
       
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500" />
@@ -73,7 +73,7 @@
 
   <!-- servos & commands -->
   <servos driver="Pwm">
-    <servo name="MOTOR" no="4" min="1100" neutral="1100" max="1900"/>
+    <servo name="MOTOR" no="4" min="1080" neutral="1100" max="1900"/>
     <servo name="ELEVATOR" no="5" min="1100" neutral="1500" max="1900"/>
     <servo name="RUDDER" no="0" min="1900" neutral="1500" max="1100"/>
     <servo name="LEDS" no="2" min="0" neutral="0" max="2500"/>
@@ -112,9 +112,16 @@
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
     <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
     <define name="MODE_AUTO2" value="AP_MODE_HOVER_DIRECT"/>
-    
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
-    <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
+    <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
+    <define name="AUTOPILOT_DISABLE_AHRS_KILL" value="TRUE"/>
+    <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
+    If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
+    <define name="UNLOCKED_HOME_MODE" value="TRUE"/>
+    <!-- RC_LOST_MODE means that if your RC Transmitter signal is not received anymore in the autopilot, e.g. you switch it off
+    or  fly a long range mission you define the wanted mode behaviour here.
+    If you do not define it, it defaults to flying to the flightplan HOME -->
+    <define name="RC_LOST_MODE" value="MODE_AUTO2"/>
   </section><!--AUTOPILOT-->
 
   <section name="BAT">
