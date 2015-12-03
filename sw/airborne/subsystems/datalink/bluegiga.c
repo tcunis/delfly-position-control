@@ -63,7 +63,6 @@ static int dev_check_free_space(struct bluegiga_periph *p, uint8_t len)
     return TRUE;
   }
 
-<<<<<<< HEAD
   return FALSE;
 }
 static void dev_put_byte(struct bluegiga_periph *p, uint8_t byte)
@@ -121,58 +120,6 @@ static void send_bluegiga(struct transport_tx *trans, struct link_device *dev)
 }
 #endif
 
-=======
-void bluegiga_transmit(struct bluegiga_periph *p, uint8_t data);
-void bluegiga_receive(struct spi_transaction *trans);
-
-// Functions for the generic link device device API
-static int dev_check_free_space(struct bluegiga_periph *p, uint8_t len)
-{
-  // check if there is enough space for message
-  // NB if BLUEGIGA_BUFFER_SIZE is smaller than 256 then an additional check is needed that len < BLUEGIGA_BUFFER_SIZE
-  if ( len - 1 <= ((p->tx_extract_idx - p->tx_insert_idx - 1 + BLUEGIGA_BUFFER_SIZE) % BLUEGIGA_BUFFER_SIZE))
-    return TRUE;
-
-  return FALSE;
-}
-static void dev_put_byte(struct bluegiga_periph *p, uint8_t byte)
-{
-  bluegiga_transmit(p, byte);
-}
-static void dev_send_message(struct bluegiga_periph *p)
-{
-  bluegiga_send(p);
-}
-static int dev_char_available(struct bluegiga_periph *p)
-{
-  return bluegiga_ch_available(p);
-}
-static uint8_t dev_get_byte(struct bluegiga_periph *p)
-{
-  uint8_t ret = p->rx_buf[p->rx_extract_idx];
-  bluegiga_increment_buf(&p->rx_extract_idx,1);
-  return ret;
-}
-
-// Functions for the generic spi device API
-static void trans_cb(struct spi_transaction *trans)
-{
-  bluegiga_receive(trans);
-}
-
-/* check if character available in receive buffer */
-bool_t bluegiga_ch_available(struct bluegiga_periph *p)
-{
-  return (p->rx_extract_idx != p->rx_insert_idx);
-}
-
-/* safe increment of circular buffer */
-void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len)
-{
-  *buf_idx = (*buf_idx + len) % BLUEGIGA_BUFFER_SIZE;
-}
-
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
 void bluegiga_init(struct bluegiga_periph *p)
 {
 #ifdef MODEM_LED
@@ -217,19 +164,15 @@ void bluegiga_init(struct bluegiga_periph *p)
     bluegiga_rssi[i] = 127;
   }
 
-<<<<<<< HEAD
   p->bytes_recvd_since_last = 0;
   p->end_of_msg = p->tx_insert_idx;
 
-=======
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
   // set DRDY interrupt pin for spi master triggered on falling edge
   gpio_setup_output(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
   gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
   coms_status = BLUEGIGA_UNINIT;
 
-<<<<<<< HEAD
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_BLUEGIGA, send_bluegiga);
 #endif
@@ -238,8 +181,6 @@ void bluegiga_init(struct bluegiga_periph *p)
   spi_slave_register(&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
 }
 
-=======
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
 /* Add one byte to the end of tx circular buffer */
 void bluegiga_transmit(struct bluegiga_periph *p, uint8_t data)
 {
@@ -249,51 +190,28 @@ void bluegiga_transmit(struct bluegiga_periph *p, uint8_t data)
   }
 }
 
-<<<<<<< HEAD
 /* Load waiting data into tx peripheral buffer */
 void bluegiga_load_tx(struct bluegiga_periph *p)
-=======
-/* Send data in transmit buffer to spi master */
-void bluegiga_send(struct bluegiga_periph *p)
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
 {
   // check data available in buffer to send
-<<<<<<< HEAD
   uint8_t packet_len = ((p->end_of_msg - p->tx_extract_idx + BLUEGIGA_BUFFER_SIZE) % BLUEGIGA_BUFFER_SIZE);
   if (packet_len > 19) {
     packet_len = 19;
-=======
-  packet_len = ((p->tx_insert_idx - p->tx_extract_idx + BLUEGIGA_BUFFER_SIZE) % BLUEGIGA_BUFFER_SIZE);
-  if (packet_len > 18) {
-    packet_len = 18;
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
   }
 
   if (packet_len && coms_status == BLUEGIGA_IDLE) {
     uint8_t i;
     // attach header with data length of real data in 20 char data string
-<<<<<<< HEAD
     p->work_tx[0] = packet_len;
 
     // copy data from working buffer to spi output buffer
     for (i = 0; i < packet_len; i++) {
       p->work_tx[i + 1] = p->tx_buf[(p->tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
-=======
-    p->work_tx[1] = packet_len;
-
-    // copy data from working buffer to spi output buffer
-    for (i = 0; i < packet_len; i++) {
-      p->work_tx[i + 2] = p->tx_buf[(p->tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
     }
     bluegiga_increment_buf(&p->tx_extract_idx, packet_len);
 
     // clear unused bytes
-<<<<<<< HEAD
     for (i = packet_len + 1; i < bluegiga_spi.output_length; i++) {
-=======
-    for (i = packet_len + 2; i < bluegiga_spi.output_length; i++) {
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
       p->work_tx[i] = 0;
     }
 
@@ -301,7 +219,6 @@ void bluegiga_send(struct bluegiga_periph *p)
   }
 }
 
-<<<<<<< HEAD
 /* read data from dma if available, set as call back of successful spi exchange
  *
  * TODO Remove use of bluegiga_p global in following function
@@ -313,20 +230,10 @@ void bluegiga_receive(struct spi_transaction *trans)
     if (coms_status == BLUEGIGA_SENDING) {
       // empty transfer buffer
       for (uint8_t i = 0; i < trans->output_length; i++) {
-=======
-/* read data from dma if available, set as call back of successful spi exchange */
-void bluegiga_receive(struct spi_transaction *trans)
-{
-  if (trans->status == SPITransSuccess) {
-    if (coms_status == BLUEGIGA_SENDING) {
-      // Handle successful sent message
-      for (uint8_t i = 0; i < trans->output_length; i++) { // Clear tx buffer
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
         trans->output_buf[i] = 0;
       }
     }
 
-<<<<<<< HEAD
     /*
      * 0xff communication lost with ground station
      * 0xfe RSSI value from broadcaster
@@ -339,15 +246,6 @@ void bluegiga_receive(struct spi_transaction *trans)
     uint8_t read_offset = 0;
     switch (trans->input_buf[0]) {
       case 0xff:  // communication lost with ground station
-=======
-    uint8_t packet_len = trans->input_buf[3];                 // length of transmitted message
-
-    if (packet_len > trans->input_length) {
-      // Direct message from Bluegiga
-      // int k_rssi, i;
-      switch (packet_len) {
-        case 0xff:        // Connection lost with ground station!
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
 #ifdef MODEM_LED
         LED_OFF(MODEM_LED);
 #endif
@@ -367,7 +265,6 @@ void bluegiga_receive(struct spi_transaction *trans)
           coms_status = BLUEGIGA_BROADCASTING;
         } else {
           coms_status = BLUEGIGA_UNINIT;
-<<<<<<< HEAD
         }
         break;
       case 0xfc:  // Receive all recorded RSSI
@@ -385,37 +282,6 @@ void bluegiga_receive(struct spi_transaction *trans)
       // Handle received message
       for (uint8_t i = 0; i < packet_len; i++) {
         bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = trans->input_buf[i + read_offset];
-=======
-          gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
-          break;
-          /*case 0xfe:        // rssi data
-            k_rssi = trans->input_buf[2];
-            for (i = 0; i < k_rssi; i++) {
-              bluegiga_rssi[i] = trans->input_buf[3 + i];
-            }
-            break;*/
-        case 0xfd:        // interrupt handled on bluegiga
-          gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
-
-          // fetch scan status
-          if (trans->input_buf[2] == 1) {
-            coms_status = BLUEGIGA_SCANNING;
-          } else {
-            coms_status = BLUEGIGA_UNINIT;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-
-    // handle incoming datalink message
-    else if (packet_len > 0) {
-      bluegiga_rssi[trans->input_buf[1]] = trans->input_buf[2];
-      // Handle received message
-      for (uint8_t i = 0; i < packet_len; i++) {
-        bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = trans->input_buf[i + 4];
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
       }
       bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
       bluegiga_p.bytes_recvd_since_last += packet_len;
@@ -428,16 +294,9 @@ void bluegiga_receive(struct spi_transaction *trans)
       coms_status = BLUEGIGA_IDLE;
     }
 
-<<<<<<< HEAD
     // load next message to be sent into work buffer, needs to be loaded before calling spi_slave_register
     bluegiga_load_tx(&bluegiga_p);
 
-=======
-    // clear rx buffer
-    for (uint8_t i = 0; i < trans->input_length; i++) {
-      trans->input_buf[i] = 0;
-    }
->>>>>>> 2679831ff24e515cc629b8df449c9db5b0526f33
     // register spi slave read for next transaction
     spi_slave_register(&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
   }
