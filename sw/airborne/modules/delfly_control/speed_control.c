@@ -68,10 +68,7 @@ void speed_control_init (void) {
 
   speed_control.mode = SPEED_CONTROL_MODE_OFF;
 
-  VECT2_ZERO(speed_control.sp.acceleration.xy);static union Int32VectLong vel_now;// = delfly_state.fv.air;
-  static union Int32VectLong acc_now;// = delfly_state.fv.acc;
-
-
+  VECT2_ZERO(speed_control.sp.acceleration.xy);
   speed_control.sp.heading = 0;
 
   speed_control.fb_gains.p = SPEED_CONTROL_FB_PGAIN;
@@ -80,13 +77,26 @@ void speed_control_init (void) {
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
 
-  speed_control_var.cmd.pitch = 0;
-  speed_control_var.cmd.throttle = 0;
+  VECT2_ZERO(speed_control_var.ref.velocity.xy);
+
+  speed_control_var.now.acceleration = 0;
+  VECT2_ZERO(speed_control_var.now.velocity.xy);
+  VECT2_ZERO(speed_control_var.now.acceleration.xy);
 
   VECT2_ZERO(speed_control_var.err.acceleration.xy);
   VECT2_ZERO(speed_control_var.err.velocity.xy);
 
-  VECT2_ZERO(speed_control_var.ref.velocity.xy);
+  VECT2_ZERO(speed_control_var.cmd.acceleration.xy);
+  speed_control_var.cmd.pitch = 0;
+  speed_control_var.cmd.throttle = 0;
+
+  VECT2_ZERO(speed_control_var.ff_cmd.acceleration.xy);
+  speed_control_var.ff_cmd.pitch = 0;
+  speed_control_var.ff_cmd.throttle = 0;
+
+  VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
+  speed_control_var.fb_cmd.pitch = 0;
+  speed_control_var.fb_cmd.throttle = 0;
 }
 
 void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading ) {
@@ -107,7 +117,14 @@ void speed_control_enter (void) {
 
   VECT2_ZERO(speed_control_var.err.velocity.xy);
 
+  //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
+
+  /* TODO: gain scheduling w.r.t. air speed */
+  VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
+  VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
+  speed_control_var.eq.pitch 	= matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+  speed_control_var.eq.throttle = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
 }
 
 
@@ -143,6 +160,8 @@ void speed_control_estimate_error (void) {
 
 void speed_control_run (bool_t in_flight) {
 
+  speed_control_var.now.air_speed = delfly_state.h.speed_air;
+
   if (!in_flight || guidance_v_mode != GUIDANCE_V_MODE_MODULE)
 	  return speed_control_enter(); //nothing to do
 
@@ -156,18 +175,15 @@ void speed_control_run (bool_t in_flight) {
   /* feed-back */
   speed_control_estimate_error();
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
-  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy, speed_control_var.err.acceleration.xy, speed_control.fb_gains.p*1.0/100);
-  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy, speed_control_var.err.velocity.xy, speed_control.fb_gains.i*1.0/100);
-
+  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
+		  	  	   speed_control_var.err.acceleration.xy,
+				   speed_control.fb_gains.p*1.0/100);
+  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
+		  	  	   speed_control_var.err.velocity.xy,
+				   speed_control.fb_gains.i*1.0/100);
 
   /* pitch and throttle command */
-  speed_control_var.now.air_speed = delfly_state.h.speed_air;
-
-  VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
-  VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
-  speed_control_var.eq.pitch 	= matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
-  speed_control_var.eq.throttle = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
-
+  //cmd = ff_cmd + fb_cmd
   VECT2_SUM(speed_control_var.cmd.acceleration.xy,
 		    speed_control_var.ff_cmd.acceleration.xy,
 			speed_control_var.fb_cmd.acceleration.xy);
@@ -191,11 +207,11 @@ void speed_control_run (bool_t in_flight) {
 
 
 void speed_control_calculate_cmd( struct SpeedControlCmd* cmd, struct SpeedControlEquilibrium* eq, struct SpeedControlGainScheduling* mat ) {
-	// commanded pitch in rad, with #INT32_ANGLE_FRAC
+	//commanded pitch in rad, with #INT32_ANGLE_FRAC
 	cmd->pitch 	  = (eq->pitch * (1 << INT32_ACCEL_FRAC)
 			         + VECT2_DOT_PRODUCT(mat->pitch, cmd->acceleration.xy))
 			      / (1 << (INT32_ACCEL_FRAC + INT32_MATLAB_FRAC - INT32_ANGLE_FRAC));
-	// commanded throttle in 0:MAX_PPRZ
+	//commanded throttle in 0:MAX_PPRZ
 	cmd->throttle = (eq->throttle * (1 << INT32_ACCEL_FRAC)
 					 + VECT2_DOT_PRODUCT(mat->throttle, cmd->acceleration.xy))
 				  * MAX_PPRZ / (100 * (1 << (INT32_MATLAB_FRAC + INT32_ACCEL_FRAC)));
