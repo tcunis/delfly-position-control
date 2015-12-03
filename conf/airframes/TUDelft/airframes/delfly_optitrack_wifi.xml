@@ -49,6 +49,11 @@
     <subsystem name="imu" type="lisa_s_v1.0" />
     <subsystem name="ins" />
     <subsystem name="motor_mixing" />
+    
+    <subsystem name="rpm_sensor" type="eagletree">
+      <define name="PULSES_PER_ROTATION" value="5"/>
+    </subsystem><!--rpm_sensor-->
+    
     <subsystem name="stabilization" type="int_quat" />
     
     <subsystem name="telemetry" type="transparent">

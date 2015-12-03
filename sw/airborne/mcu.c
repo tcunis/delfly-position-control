@@ -61,6 +61,7 @@
 #ifdef USE_DAC
 #include "mcu_periph/dac.h"
 #endif
+#include "subsystems/sensors/rpm_sensor.h"
 #endif /* PERIPHERALS_AUTO_INIT */
 
 void WEAK board_init(void)
@@ -174,6 +175,8 @@ void mcu_init(void)
 #if USE_UDP0 || USE_UDP1 || USE_UDP2
   udp_arch_init();
 #endif
+
+  rpm_sensor_init();
 
 #else
   INFO("PERIPHERALS_AUTO_INIT not enabled! Peripherals (including sys_time) need explicit initialization.")
