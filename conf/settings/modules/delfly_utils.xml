@@ -5,7 +5,6 @@
     <dl_settings NAME="Delfly_Utils">
       <dl_setting var="LEDS_switch" min="0" step="1" max="1" module="delfly_utils/delfly_utils" shortname="LEDS" param="DELFLY_UTILS_LEDS_SWITCH"/>
       <dl_setting var="SRVO_kill" min="0" step="1" max="1" module="delfly_utils/delfly_utils" shortname="SRVO_kill" param="DELFLY_UTILS_SRVO_KILL"/>
-      <dl_setting var="P_WT_heading" min="0" step="1" max="1000" module="delfly_utils/delfly_utils" shortname="P_WT_heading" param="DELFLY_UTILS_P_WT_HEADING"/>
     </dl_settings>
   </dl_settings>
 </settings>

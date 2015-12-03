@@ -111,9 +111,7 @@ void speed_control_enter (void) {
 }
 
 
-void speed_control_estimate_error (void) {static union Int32VectLong vel_now;// = delfly_state.fv.air;
-static union Int32VectLong acc_now;// = delfly_state.fv.acc;
-
+void speed_control_estimate_error (void) {
 
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);

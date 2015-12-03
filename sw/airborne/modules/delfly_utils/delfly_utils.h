@@ -30,7 +30,6 @@
 
 extern uint8_t LEDS_switch;
 extern uint8_t SRVO_kill;
-extern uint16_t P_WT_heading;
 
 
 extern void util_init(void);
