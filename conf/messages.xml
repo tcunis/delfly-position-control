@@ -884,7 +884,7 @@
   
   <message name="DELFLY_STATEESTIMATION" id="108">
    <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module. 13 bytes</description>
-   <field name="mode" type="uint8" values="ON|OFF">State estimator mode</field>
+   <field name="mode" type="uint8" values="OFF|ESTIMATE">State estimator mode</field>
    <field name="wind_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in x-axis (geographic frame)</field>
    <field name="wind_y" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in y-axis (geographic frame)</field>
    <field name="wind_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind speed in xy-plane (geographic frame)</field>
@@ -892,7 +892,7 @@
   
   <message name="DELFLY_SPEEDCONTROL"  id="109">
    <description>Input, states, and output of the Delfly control speed control sub-module. 77 bytes</description>
-   <field name="mode" type="uint8" values="ON|OFF">Speed control mode</field>
+   <field name="mode" type="uint8" values="OFF|ENTER|CONTROL">Speed control mode</field>
    <field name="sp_h" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
    <field name="sp_v" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
    <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air speed</field>

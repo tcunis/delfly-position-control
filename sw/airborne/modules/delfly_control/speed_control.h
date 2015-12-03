@@ -58,13 +58,20 @@
 #include "math/pprz_algebra_int.h"
 
 
+#define SPEED_CONTROL_MODE_OFF		0
+#define SPEED_CONTROL_MODE_ENTER	1
+#define SPEED_CONTROL_MODE_CONTROL	2
+
+
 /**
  * Command to speed/thrust control.
  */
 struct SpeedControlSetPoint {
 	/** h/v acceleration sp
 	 * .x = h, .y = v
-	 * in m/s2, with #INT32_ACCEL_FRAC */
+	 * in m/s2, with #INT32_ACCEL_FRACstatic union Int32VectLong vel_now;// = delfly_state.fv.air;
+static union Int32VectLong acc_now;// = delfly_state.fv.acc;
+	 *  */
 	union Int32VectLong acceleration;
 
 	/** heading s

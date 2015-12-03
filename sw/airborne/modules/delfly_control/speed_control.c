@@ -66,7 +66,11 @@ static void speed_control_calculate_cmd( struct SpeedControlCmd* cmd, struct Spe
 
 void speed_control_init (void) {
 
-  VECT2_ZERO(speed_control.sp.acceleration.xy);
+  speed_control.mode = SPEED_CONTROL_MODE_OFF;
+
+  VECT2_ZERO(speed_control.sp.acceleration.xy);static union Int32VectLong vel_now;// = delfly_state.fv.air;
+  static union Int32VectLong acc_now;// = delfly_state.fv.acc;
+
 
   speed_control.sp.heading = 0;
 
@@ -98,15 +102,18 @@ void speed_control_set_cmd_v( int32_t cmd_v_acceleration ) {
 
 
 void speed_control_enter (void) {
+
+  speed_control.mode = SPEED_CONTROL_MODE_ENTER;
+
   VECT2_ZERO(speed_control_var.err.velocity.xy);
 
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
 }
 
-static union Int32VectLong vel_now;// = delfly_state.fv.air;
+
+void speed_control_estimate_error (void) {static union Int32VectLong vel_now;// = delfly_state.fv.air;
 static union Int32VectLong acc_now;// = delfly_state.fv.acc;
 
-void speed_control_estimate_error (void) {
 
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
@@ -140,6 +147,9 @@ void speed_control_run (bool_t in_flight) {
 
   if (!in_flight || guidance_v_mode != GUIDANCE_V_MODE_MODULE)
 	  return speed_control_enter(); //nothing to do
+
+  //else:
+  speed_control.mode = SPEED_CONTROL_MODE_CONTROL;
 
   /* feed-forward */
   //union Int32VectLong acceleration_cmd;
