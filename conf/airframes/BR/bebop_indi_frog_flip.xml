@@ -41,21 +41,10 @@
       <define name="VIDEO_THREAD_CAMERA" value="bottom_camera"/>
       <define name="VIDEO_THREAD_SHOT_PATH" value="/data/ftp/internal_000/images"/>
     </load>
-    <load name="cv_blob_locator.xml"/>
     <load name="video_rtp_stream.xml">
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="80"/>
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
     </load>
-    <load name="nav_survey_rectangle_rotorcraft.xml">
-      <define name="RECTANGLE_SURVEY_DEFAULT_SWEEP" value="10"/>
-    </load>
-    <load name="nav_survey_poly_rotorcraft.xml">
-      <define name="POLYSURVEY_DEFAULT_DISTANCE" value="10"/>
-    </load>
-    <load name="digital_cam_video.xml">
-      <define name="DC_AUTOSHOOT_DISTANCE_INTERVAL" value="5"/>
-    </load>
-    <load name="video_exif.xml"/>
   </modules>
 
   <commands>
@@ -141,7 +130,6 @@
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
     <define name="DEADBAND_R" value="200"/>
-    <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
@@ -152,10 +140,6 @@
     <define name="IGAIN_Q" value="75"/>
     <define name="IGAIN_R" value="50"/>
 
-    <!-- feedforward -->
-    <define name="DDGAIN_P" value="300"/>
-    <define name="DDGAIN_Q" value="300"/>
-    <define name="DDGAIN_R" value="300"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">

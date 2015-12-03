@@ -319,6 +319,8 @@ float desired_x, desired_y;
 pprz_t nav_throttle_setpoint;
 float nav_pitch; /* Rad */
 float fp_pitch; /* deg */
+float fp_throttle; /* [0-1] */
+float fp_climb; /* m/s */
 
 
 /** \brief Decide if the UAV is approaching the current waypoint.
@@ -535,18 +537,22 @@ void nav_init(void)
   nav_survey_shift = 2 * DEFAULT_CIRCLE_RADIUS;
   nav_mode = NAV_MODE_COURSE;
 
+  fp_pitch = 0.f;
+  fp_throttle = 0.f;
+  fp_climb = 0.f;
+
 #ifdef NAV_GROUND_SPEED_PGAIN
   nav_ground_speed_pgain = ABS(NAV_GROUND_SPEED_PGAIN);
   nav_ground_speed_setpoint = NOMINAL_AIRSPEED;
 #endif
 
 #if PERIODIC_TELEMETRY
-  register_periodic_telemetry(DefaultPeriodic, "NAVIGATION_REF", send_nav_ref);
-  register_periodic_telemetry(DefaultPeriodic, "NAVIGATION", send_nav);
-  register_periodic_telemetry(DefaultPeriodic, "WP_MOVED", send_wp_moved);
-  register_periodic_telemetry(DefaultPeriodic, "CIRCLE", send_circle);
-  register_periodic_telemetry(DefaultPeriodic, "SEGMENT", send_segment);
-  register_periodic_telemetry(DefaultPeriodic, "SURVEY", send_survey);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_NAVIGATION_REF, send_nav_ref);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_NAVIGATION, send_nav);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_WP_MOVED, send_wp_moved);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_CIRCLE, send_circle);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_SEGMENT, send_segment);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_SURVEY, send_survey);
 #endif
 }
 

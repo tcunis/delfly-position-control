@@ -66,6 +66,9 @@ struct IndiVariables indi = {
   {0., 0., 0.}
 };
 
+struct Int32Eulers stab_att_sp_euler;
+struct Int32Quat   stab_att_sp_quat;
+
 // Variables for adaptation
 struct FloatRates filtered_rate_estimation = {0., 0., 0.};
 struct FloatRates filtered_rate_deriv_estimation  = {0., 0., 0.};
@@ -129,10 +132,8 @@ static void send_att_indi(struct transport_tx *trans, struct link_device *dev)
 void stabilization_attitude_init(void)
 {
 
-  stabilization_attitude_ref_init();
-
 #if PERIODIC_TELEMETRY
-  register_periodic_telemetry(DefaultPeriodic, "STAB_ATTITUDE_INDI", send_att_indi);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STAB_ATTITUDE_INDI, send_att_indi);
 #endif
 }
 
@@ -141,8 +142,6 @@ void stabilization_attitude_enter(void)
 
   /* reset psi setpoint to current psi angle */
   stab_att_sp_euler.psi = stabilization_attitude_get_heading_i();
-
-  stabilization_attitude_ref_enter();
 
   FLOAT_RATES_ZERO(indi.filtered_rate);
   FLOAT_RATES_ZERO(indi.filtered_rate_deriv);
@@ -172,7 +171,7 @@ void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy)
   // stab_att_sp_euler.psi still used in ref..
   stab_att_sp_euler = *rpy;
 
-  quat_from_rpy_cmd_i(&stab_att_sp_quat, &stab_att_sp_euler);
+  int32_quat_of_eulers(&stab_att_sp_quat, &stab_att_sp_euler);
 }
 
 void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t heading)
@@ -192,16 +191,31 @@ void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t head
   quat_from_earth_cmd_i(&stab_att_sp_quat, cmd, heading);
 }
 
-static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err, bool_t in_flight)
+static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err, bool_t in_flight __attribute__((unused)))
 {
   //Calculate required angular acceleration
   struct FloatRates *body_rate = stateGetBodyRates_f();
+#if STABILIZATION_INDI_FILTER_ROLL_RATE
+  indi.angular_accel_ref.p = reference_acceleration.err_p * QUAT1_FLOAT_OF_BFP(att_err->qx)
+                             - reference_acceleration.rate_p * indi.filtered_rate.p;
+#else
   indi.angular_accel_ref.p = reference_acceleration.err_p * QUAT1_FLOAT_OF_BFP(att_err->qx)
                              - reference_acceleration.rate_p * body_rate->p;
+#endif
+#if STABILIZATION_INDI_FILTER_PITCH_RATE
+  indi.angular_accel_ref.q = reference_acceleration.err_q * QUAT1_FLOAT_OF_BFP(att_err->qy)
+                             - reference_acceleration.rate_q * indi.filtered_rate.q;
+#else
   indi.angular_accel_ref.q = reference_acceleration.err_q * QUAT1_FLOAT_OF_BFP(att_err->qy)
                              - reference_acceleration.rate_q * body_rate->q;
+#endif
+#if STABILIZATION_INDI_FILTER_YAW_RATE
+  indi.angular_accel_ref.r = reference_acceleration.err_r * QUAT1_FLOAT_OF_BFP(att_err->qz)
+                             - reference_acceleration.rate_r * indi.filtered_rate.r;
+#else
   indi.angular_accel_ref.r = reference_acceleration.err_r * QUAT1_FLOAT_OF_BFP(att_err->qz)
                              - reference_acceleration.rate_r * body_rate->r;
+#endif
 
   //Incremented in angular acceleration requires increment in control input
   //G1 is the actuator effectiveness. In the yaw axis, we need something additional: G2.

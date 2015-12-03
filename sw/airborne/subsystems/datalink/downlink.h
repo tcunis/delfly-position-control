@@ -36,7 +36,7 @@
 #include "messages.h"
 #include "generated/airframe.h" // AC_ID is required
 
-#if defined SITL
+#if defined SITL && !USE_NPS
 /** Software In The Loop simulation uses IVY bus directly as the transport layer */
 #include "ivy_transport.h"
 
@@ -82,15 +82,6 @@
 #ifndef DefaultDevice
 #define DefaultDevice DOWNLINK_DEVICE
 #endif
-
-/** Downlink structure */
-struct downlink {
-  uint8_t nb_ovrn;    ///< Counter of messages not sent because of unavailability of the output buffer
-  uint16_t nb_bytes;  ///< Number of bytes send over telemetry
-  uint16_t nb_msgs;   ///< Number of messages send over telemetry
-};
-
-extern struct downlink downlink;
 
 // Init function
 extern void downlink_init(void);

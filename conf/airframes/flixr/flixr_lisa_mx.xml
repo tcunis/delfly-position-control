@@ -39,9 +39,9 @@
     <subsystem name="gps"           type="ublox"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="float_mlkf"/>
-    <!--subsystem name="ahrs"          type="int_cmpl_quat">
+    <subsystem name="ahrs"          type="int_cmpl_quat">
       <configure name="SECONDARY_AHRS" value="int_cmpl_quat"/>
-    </subsystem-->
+    </subsystem>
 
     <subsystem name="ins" type="hff"/>
 
@@ -82,6 +82,8 @@
     <target name="test_ahrs" board="lisa_mx_2.0">
       <subsystem name="imu" type="aspirin_v2.2"/>
       <subsystem name="ahrs" type="int_cmpl_quat"/>
+    </target>
+    <target name="test_module" board="lisa_mx_2.0">
     </target>
   </firmware>
 
@@ -161,7 +163,6 @@
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
     <define name="DEADBAND_R" value="200"/>
-    <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
@@ -171,11 +172,6 @@
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
     <define name="IGAIN_R" value="50"/>
-
-    <!-- feedforward -->
-    <define name="DDGAIN_P" value="300"/>
-    <define name="DDGAIN_Q" value="300"/>
-    <define name="DDGAIN_R" value="300"/>
   </section>
 
 
