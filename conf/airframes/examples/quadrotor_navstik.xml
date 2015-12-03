@@ -47,8 +47,7 @@
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
     <!--load name="airspeed_ms45xx_i2c.xml">
-      <define name="MS45XX_I2C_DEV" value="i2c3"/>
-      <define name="USE_I2C3"/>
+      <configure name="MS45XX_I2C_DEV" value="i2c3"/>
     </load>
     <load name="direct_memory_logger.xml"/-->
   </modules>
@@ -120,7 +119,6 @@
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
     <define name="DEADBAND_R" value="200"/>
-    <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
@@ -130,11 +128,6 @@
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
     <define name="IGAIN_R" value="50"/>
-
-    <!-- feedforward -->
-    <define name="DDGAIN_P" value="300"/>
-    <define name="DDGAIN_Q" value="300"/>
-    <define name="DDGAIN_R" value="300"/>
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">

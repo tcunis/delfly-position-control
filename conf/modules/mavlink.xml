@@ -12,10 +12,14 @@
 
   <init fun="mavlink_init()"/>
   <periodic fun="mavlink_periodic()" freq="10" autorun="TRUE"/>
+  <periodic fun="mavlink_periodic_telemetry()" freq="$TELEMETRY_FREQUENCY" autorun="TRUE"/>
   <event fun="mavlink_event()"/>
 
   <makefile>
     <file name="mavlink.c"/>
+    <file name="mission_manager.c" dir="modules/datalink/missionlib"/>
+    <file name="waypoints.c" dir="modules/datalink/missionlib"/>
+    <file name="blocks.c" dir="modules/datalink/missionlib"/>
     <raw>
       MAVLINK_PORT ?= UART1
       MAVLINK_PORT_UPPER=$(shell echo $(MAVLINK_PORT) | tr a-z A-Z)

@@ -341,6 +341,7 @@ and wid = ref None
 and srtm = ref false
 and hide_fp = ref false
 and timestamp = ref false
+and confirm_kill = ref true
 
 let options =
   [
@@ -376,6 +377,7 @@ let options =
     "-auto_hide_fp", Arg.Unit (fun () -> Live.auto_hide_fp true; hide_fp := true), "Automatically hide flight plans of unselected aircraft";
     "-timestamp", Arg.Set timestamp, "Bind on timestampped telemetry messages";
     "-ac_ids", Arg.String (fun s -> Live.filter_ac_ids s), "comma separated list of AC IDs to show in GCS";
+    "-no_confirm_kill", Arg.Unit (fun () -> confirm_kill := false), "Disable kill confirmation from strip button"; 
   ]
 
 
@@ -452,6 +454,7 @@ let create_geomap = fun switch_fullscreen editor_frame ->
   ignore (map_menu_fact#add_item "Map of Region" ~key:GdkKeysyms._R ~callback:(map_from_region geomap));
   ignore (map_menu_fact#add_item "Dump map of Tiles" ~key:GdkKeysyms._T ~callback:(GM.map_from_tiles geomap));
   ignore (map_menu_fact#add_item "Load sector" ~callback:(Sectors.load geomap));
+  ignore (map_menu_fact#add_item "Load KML" ~callback:(Sectors.load_kml geomap));
 
   (** Connect Maps display to view change *)
   geomap#connect_view (fun () -> GM.update geomap);
@@ -606,7 +609,7 @@ let save_layout = fun filename contents ->
 let listen_dropped_papgets = fun (geomap:G.widget) ->
   let dnd_targets = [ { Gtk.target = "STRING"; flags = []; info = 0 } ] in
   geomap#canvas#drag#dest_set dnd_targets ~actions:[`COPY];
-  ignore (geomap#canvas#drag#connect#data_received ~callback:(Papgets.dnd_data_received geomap#still))
+  ignore (geomap#canvas#drag#connect#data_received ~callback:(Papgets.dnd_data_received geomap#still geomap#zoom_adj))
 
 
 
@@ -713,7 +716,7 @@ let () =
 
   (** packing papgets *)
   let papgets = try find_widget_children "map2d" the_layout with Not_found -> [] in
-  List.iter (Papgets.create geomap#still) papgets;
+  List.iter (Papgets.create geomap#still geomap#zoom_adj) papgets;
   listen_dropped_papgets geomap;
 
   let save_layout = fun () ->
@@ -787,7 +790,7 @@ let () =
     begin
       my_alert#add "Waiting for telemetry...";
       Speech.say "Waiting for telemetry...";
-      Live.listen_acs_and_msgs geomap ac_notebook strips_table my_alert !auto_center_new_ac alt_graph !timestamp
+      Live.listen_acs_and_msgs geomap ac_notebook strips_table !confirm_kill my_alert !auto_center_new_ac alt_graph !timestamp
     end;
 
   (** Display the window *)

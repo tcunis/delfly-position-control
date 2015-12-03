@@ -4,15 +4,16 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="ardrone2">
-      <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
-      <define name="USE_SONAR" value="0"/>
       <configure name="USE_BARO_BOARD" value="FALSE"/>
-      <configure name="USE_MAGNETOMETER" value="0"/>
     </target>
 
     <target name="nps" board="pc">
       <subsystem name="fdm" type="jsbsim"/>
     </target>
+
+    <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
+    <define name="USE_SONAR" value="0"/>
+    <configure name="USE_MAGNETOMETER" value="0"/>
 
 	<!-- Subsystem section -->
     <subsystem name="telemetry" type="transparent_udp"/>
@@ -28,6 +29,7 @@
 
   <modules main_freq="512">
     <load name="bat_voltage_ardrone2.xml"/>
+    <load name="stereocam_droplet.xml" />
   </modules>
 
   <commands>
@@ -112,7 +114,6 @@
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
     <define name="DEADBAND_R" value="200"/>
-    <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
@@ -122,11 +123,6 @@
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
     <define name="IGAIN_R" value="50"/>
-
-    <!-- feedforward -->
-    <define name="DDGAIN_P" value="300"/>
-    <define name="DDGAIN_Q" value="300"/>
-    <define name="DDGAIN_R" value="300"/>
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">

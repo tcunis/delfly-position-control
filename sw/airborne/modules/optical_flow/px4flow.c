@@ -28,7 +28,7 @@
 
 #include "modules/optical_flow/px4flow.h"
 #include "modules/datalink/mavlink_decoder.h"
-#include <string.h>
+#include "subsystems/abi.h"
 
 struct mavlink_optical_flow optical_flow;
 bool_t optical_flow_available;
@@ -38,13 +38,25 @@ bool_t optical_flow_available;
 // size of the structure
 #define MAVLINK_OPTICAL_FLOW_LEN 26
 
+#ifndef PX4FLOW_NOISE
+#define PX4FLOW_NOISE 0.5
+#endif
+
 // request struct for mavlink decoder
 struct mavlink_msg_req req;
+
 
 // callback function on message reception
 static void decode_optical_flow_msg(struct mavlink_message *msg __attribute__((unused)))
 {
   optical_flow_available = TRUE;
+
+  // Y negated to get to the body of the drone
+  AbiSendMsgVELOCITY_ESTIMATE(PX4FLOW_VELOCITY_ID, 0,
+                              (optical_flow.flow_x / optical_flow.ground_distance),
+                              -1.0 * (optical_flow.flow_y / optical_flow.ground_distance),
+                              0.0f,
+                              PX4FLOW_NOISE);
 }
 
 /** Initialization function
