@@ -75,7 +75,7 @@
   <servos driver="Pwm">
     <servo name="MOTOR" no="4" min="1080" neutral="1100" max="1900"/>
     <servo name="ELEVATOR" no="5" min="1100" neutral="1500" max="1900"/>
-    <servo name="RUDDER" no="0" min="1900" neutral="1500" max="1100"/>
+    <servo name="RUDDER" no="0" min="1100" neutral="1500" max="1900"/>
     <servo name="LEDS" no="2" min="0" neutral="0" max="2500"/>
   </servos>
 
@@ -87,8 +87,7 @@
   </commands>
 
   <command_laws>
-    <!--let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/-->
-    <let var="ledscontrol" value="(2*@FLAP-1)*MAX_PPRZ"/>
+    <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
     <set servo="ELEVATOR" value="(1-SRVO_kill)*@PITCH"/>
     <set servo="RUDDER" value="(1-SRVO_kill)*@YAW"/>
