@@ -102,6 +102,10 @@ struct SpeedControl {
 	struct SpeedControlSetPoint sp;
 	struct SpeedControlFeedBackGains fb_gains;
 	struct SpeedControlFeedForwardGains ff_gains;
+
+	/* constant pitch offset
+	 * in rad, with #INT32_ANGLE_FRAC */
+	int32_t pitch_offset;
 };
 
 
@@ -114,5 +118,8 @@ extern void speed_control_stop_running(void);
 extern void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading );
 extern void speed_control_set_cmd_v( int32_t cmd_v_acceleration );
 
+/* sets the pitch offset
+ * parameter in deg, without FRAC! */
+extern void speed_control_set_pitch_offset( int32_t pitch_offset_deg );
 
 #endif /* SPEED_CONTROL_H_ */

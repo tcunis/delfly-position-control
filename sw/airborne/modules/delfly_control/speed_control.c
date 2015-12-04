@@ -77,6 +77,8 @@ void speed_control_init (void) {
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
 
+  speed_control_set_pitch_offset(SPEED_CONTROL_PITCH_OFFSET);
+
   VECT2_ZERO(speed_control_var.ref.velocity.xy);
 
   VECT2_ZERO(speed_control_var.now.acceleration.xy);
@@ -108,6 +110,10 @@ void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading ) 
 void speed_control_set_cmd_v( int32_t cmd_v_acceleration ) {
 
   speed_control.sp.acceleration.fv.ver = cmd_v_acceleration;
+}
+
+void speed_control_set_pitch_offset( int32_t pitch_offset_deg ) {
+  speed_control.pitch_offset = INT32_RAD_OF_DEG(ANGLE_BFP_OF_REAL(pitch_offset_deg));
 }
 
 
@@ -196,7 +202,7 @@ void speed_control_run (bool_t in_flight) {
 
   static struct Int32Eulers orientation_cmd;
   orientation_cmd.phi   = 0;
-  orientation_cmd.theta = speed_control_var.cmd.pitch;
+  orientation_cmd.theta = speed_control_var.cmd.pitch - speed_control.pitch_offset;
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
@@ -204,6 +210,7 @@ void speed_control_run (bool_t in_flight) {
 
   stabilization_attitude_run(in_flight);
 }
+
 
 
 void speed_control_calculate_cmd( struct SpeedControlCmd* cmd, struct SpeedControlEquilibrium* eq, struct SpeedControlGainScheduling* mat ) {

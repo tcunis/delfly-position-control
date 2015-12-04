@@ -863,24 +863,24 @@
   <message name="DELFLY_STATE" id="107">
    <description>States of Delfly MAV, estimated and/or filtered if necessary;
     raw sensor data is given by message DELFLY_STATERAW. 68 bytes</description>
-   <field name="pos_x" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in x-axis (geographic frame)</field>
-   <field name="pos_y" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in y-axis (geographic frame)</field>
-   <field name="pos_z" type="int32" alt_unit="m" alt_unit_coef="0.00390625">Position in z-axis (geographic frame)</field>
-   <field name="vel_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Path velocity in x-axis (geographic frame)</field>
-   <field name="vel_y" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Path velocity in y-axis (geographic frame)</field>
-   <field name="vel_z" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Path velocity in z-axis (geographic frame)</field>
-   <field name="air_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air velocity in x-axis (geographic frame)</field>
-   <field name="air_y" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air velocity in y-axis (geographic frame)</field>
-   <field name="air_z" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air velocity in z-axis (geographic frame)</field>
-   <field name="acc_x" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Acceleration in x-axis (geographic frame)</field>
-   <field name="acc_y" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Acceleration in y-axis (geographic frame)</field>
-   <field name="acc_z" type="int32" alt_unit="m/s2" alt_unit_coef="0.00097656">Acceleration in z-axis (geographic frame)</field>
-   <field name="air_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Air speed in xy-plane (geographic frame)</field>
-   <field name="ground_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Ground speed in xy-plane (geographic frame)</field>
-   <field name="heading" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Heading</field>
-   <field name="head_rate" type="int32" alt_unit="deg/s" alt_unit_coef="0.01398823">Heading rate</field>
-   <field name="azimuth" type="int32" alt_unit="deg" alt_unit_coef="0.01398823">Azimuth</field>
-   <field name="flap_freq" type="float" unit="Hz">Flapping frequency</field>
+   <field name="pos_x" type="int32" alt_unit=" m" alt_unit_coef="0.00390625">Position in x-axis (geographic frame)</field>
+   <field name="pos_y" type="int32" alt_unit=" m" alt_unit_coef="0.00390625">Position in y-axis (geographic frame)</field>
+   <field name="pos_z" type="int32" alt_unit=" m" alt_unit_coef="0.00390625">Position in z-axis (geographic frame)</field>
+   <field name="vel_x" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Path velocity in x-axis (geographic frame)</field>
+   <field name="vel_y" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Path velocity in y-axis (geographic frame)</field>
+   <field name="vel_z" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Path velocity in z-axis (geographic frame)</field>
+   <field name="air_x" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air velocity in x-axis (geographic frame)</field>
+   <field name="air_y" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air velocity in y-axis (geographic frame)</field>
+   <field name="air_z" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air velocity in z-axis (geographic frame)</field>
+   <field name="acc_x" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Acceleration in x-axis (geographic frame)</field>
+   <field name="acc_y" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Acceleration in y-axis (geographic frame)</field>
+   <field name="acc_z" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Acceleration in z-axis (geographic frame)</field>
+   <field name="air_speed"    type="int32" alt_unit=" m/s"   alt_unit_coef="0.00000191">Air speed in xy-plane (geographic frame)</field>
+   <field name="ground_speed" type="int32" alt_unit=" m/s"   alt_unit_coef="0.00000191">Ground speed in xy-plane (geographic frame)</field>
+   <field name="heading"      type="int32" alt_unit=" deg"   alt_unit_coef="0.01398823">Heading</field>
+   <field name="head_rate"    type="int32" alt_unit=" deg/s" alt_unit_coef="0.01398823">Heading rate</field>
+   <field name="azimuth"      type="int32" alt_unit=" deg"   alt_unit_coef="0.01398823">Azimuth</field>
+   <field name="flap_freq"    type="float" unit=" Hz">Flapping frequency</field>
    <!-- TODO: add attitude, and rates -->
   </message>
   

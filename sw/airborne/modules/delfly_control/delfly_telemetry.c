@@ -41,14 +41,14 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct lin
 
 
 static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_GUIDANCE( DefaultChannel, DefaultDevice,
+//	DOWNLINK_SEND_DELFLY_GUIDANCE(DefaultChannel, DefaultDevice,
 //		&guidance_h.mode,
 //		&guidance_v_mode
 //	);
 }
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
-	DOWNLINK_SEND_DELFLY_STATE(DefaultChannel, DefaultDevice,
+  DOWNLINK_SEND_DELFLY_STATE(DefaultChannel, DefaultDevice,
 	    &delfly_state.h.pos.x,
 	    &delfly_state.h.pos.y,
 	    &delfly_state.v.pos,
@@ -66,7 +66,7 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 	    &delfly_state.h.heading,
 	    &delfly_state.h.head_rate,
 	    &delfly_state.h.azimuth,
-		&delfly_state.flap_freq
+	    &delfly_state.flap_freq
 	);
 }
 
@@ -108,9 +108,9 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, stru
 
 void delfly_telemetry_init_all (void) {
 
-	register_periodic_telemetry(DefaultPeriodic, "DELFLY_GUIDANCE", &delfly_telemetry_send_guidance);
-	register_periodic_telemetry(DefaultPeriodic, "DELFLY_STATE", &delfly_telemetry_send_state);
-	register_periodic_telemetry(DefaultPeriodic, "DELFLY_STATERAW", &delfly_telemetry_send_stateraw);
-	register_periodic_telemetry(DefaultPeriodic, "DELFLY_STATEESTIMATION", &delfly_telemetry_send_stateestimation);
-	register_periodic_telemetry(DefaultPeriodic, "DELFLY_SPEEDCONTROL", &delfly_telemetry_send_speedcontrol);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_GUIDANCE,        &delfly_telemetry_send_guidance);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATE,           &delfly_telemetry_send_state);
+	//register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATERAW,        &delfly_telemetry_send_stateraw);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATEESTIMATION, &delfly_telemetry_send_stateestimation);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_SPEEDCONTROL,    &delfly_telemetry_send_speedcontrol);
 }

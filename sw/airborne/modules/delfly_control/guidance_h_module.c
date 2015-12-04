@@ -101,6 +101,7 @@ void guidance_h_module_run_traj( bool_t in_flight, int32_t* cmd_accelerate, int3
 
 
 	*cmd_accelerate = 0;
+	*cmd_heading = delfly_state.h.heading;
 
-	guidance_lat_adjust_heading( in_flight, cmd_heading, guidance_h_module_pos_err );
+	//guidance_lat_adjust_heading( in_flight, cmd_heading, guidance_h_module_pos_err );
 }

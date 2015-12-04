@@ -87,7 +87,8 @@
   </commands>
 
   <command_laws>
-    <let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/>
+    <!--let var="ledscontrol" value="(2*LEDS_switch-1)*MAX_PPRZ"/-->
+    <let var="ledscontrol" value="(2*@FLAP-1)*MAX_PPRZ"/>
     <set servo="MOTOR" value="(1-SRVO_kill)*@THRUST"/>
     <set servo="ELEVATOR" value="(1-SRVO_kill)*@PITCH"/>
     <set servo="RUDDER" value="(1-SRVO_kill)*@YAW"/>
@@ -121,7 +122,7 @@
     <!-- RC_LOST_MODE means that if your RC Transmitter signal is not received anymore in the autopilot, e.g. you switch it off
     or  fly a long range mission you define the wanted mode behaviour here.
     If you do not define it, it defaults to flying to the flightplan HOME -->
-    <define name="RC_LOST_MODE" value="MODE_AUTO2"/>
+    <!--define name="RC_LOST_MODE" value="MODE_AUTO2"/-->
   </section><!--AUTOPILOT-->
 
   <section name="BAT">
@@ -133,10 +134,11 @@
   </section><!--BAT-->
 
   <section name="DELFLY_CONTROL" prefix="SPEED_CONTROL_">
-    <define name="FB_PGAIN" value="100"/>
+    <define name="FB_PGAIN" value="0"/>
     <define name="FB_IGAIN" value="100"/>
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
+    <define name="PITCH_OFFSET" value="70"/>
   </section><!--DELFLY_CONTROL-->
  
   <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">

@@ -73,6 +73,8 @@ void state_estimation_enter (void) {
   delfly_state.flap_freq = rpm_sensor.motor_frequency;
 
   //TODO: get heading, azimuth
+  delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
+  delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
 }
 
