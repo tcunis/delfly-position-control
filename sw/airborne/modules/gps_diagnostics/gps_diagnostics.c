@@ -100,7 +100,7 @@ void gps_diagnostics_init(void) {
     
     count_iteration = 0;
 
-    register_periodic_telemetry(DefaultPeriodic, "GPS_DIAGNOSTICS", &gps_diagnostics_send_diagnostics);
+    register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_DIAGNOSTICS, &gps_diagnostics_send_diagnostics);
 }
 
 void gps_diagnostics_periodic(void) {

@@ -51,6 +51,10 @@
 #error "ALL control gains have to be positive!!!"
 #endif
 
+#if (!GUIDANCE_DELFLY)
+#warning "Won't use delfly guidance system."
+#endif
+
 
 #ifndef GUIDANCE_LAT_MAX_HEAD_CORR
 #define GUIDANCE_LAT_MAX_HEAD_CORR RadOfDeg(45)

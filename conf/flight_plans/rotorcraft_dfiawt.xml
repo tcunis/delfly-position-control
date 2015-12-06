@@ -68,10 +68,10 @@
     </block>
     <block name="trajectory" strip_button="Closed trajectory" strip_icon="flat_theme/oval.png">
       <while cond="TRUE">
-        <go wp="p1" approaching_time="3"/>
-        <go wp="p2" approaching_time="3"/>
-        <go wp="p3" approaching_time="3"/>
-        <go wp="p4" approaching_time="3"/>
+        <go wp="p1" approaching_time="0.5"/>
+        <go wp="p2" approaching_time="0.5"/>
+        <go wp="p3" approaching_time="0.5"/>
+        <go wp="p4" approaching_time="0.5"/>
       </while>
     </block>
     <block name="land here"><!-- strip_button="Land Here" strip_icon="land-right.png"-->

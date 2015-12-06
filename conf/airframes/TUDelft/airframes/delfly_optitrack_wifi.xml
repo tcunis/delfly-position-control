@@ -28,6 +28,7 @@
       
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500" />
       <configure name="USE_BARO_BOARD" value="FALSE" />
+      <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
     </target><!--ap-->
     
     <target name="nps" board="pc">
@@ -50,9 +51,9 @@
     <subsystem name="ins" />
     <subsystem name="motor_mixing" />
     
-    <subsystem name="rpm_sensor" type="eagletree">
-      <define name="PULSES_PER_ROTATION" value="5"/>
-    </subsystem><!--rpm_sensor-->
+	  <subsystem name="rpm_sensor" type="eagletree">
+	  	<define name="PULSES_PER_ROTATION" value="5"/>
+	  </subsystem><!--rpm_sensor-->
     
     <subsystem name="stabilization" type="int_quat" />
     
@@ -113,7 +114,6 @@
     <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
     <define name="MODE_AUTO2" value="AP_MODE_HOVER_DIRECT"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
-    <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="AUTOPILOT_DISABLE_AHRS_KILL" value="TRUE"/>
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
     If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
