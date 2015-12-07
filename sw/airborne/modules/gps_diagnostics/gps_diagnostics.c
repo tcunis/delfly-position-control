@@ -34,6 +34,7 @@
 #define SEC_OF_USEC(_USEC_)         ( (_USEC_)*1.0/USEC_OF_SEC(1) )
 #define USEC_OF_GPS_MSG(_GPS_)      ( USEC_OF_SEC(_GPS_.last_msg_time) + usec_of_cpu_ticks(_GPS_.last_msg_ticks) )
 
+uint8_t msg_fmt_small;
 
 uint16_t msg_count;         // total number of gps messages received since start-up
 uint16_t dlpkg_count;      // total number of datalink "gps" packages received
@@ -57,8 +58,6 @@ uint8_t  count;
 struct GpsState prev_gps_state; // last gps state received
 uint32_t prev_msg_time;     // previous time of reception of last gps message, in μs
 
-
-
 uint8_t  count_iteration;   // number of iterations since previous gps message
 
 
@@ -66,6 +65,7 @@ uint8_t  count_iteration;   // number of iterations since previous gps message
 static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* device ) {
 
     DOWNLINK_SEND_GPS_DIAGNOSTICS( DefaultChannel, DefaultDevice,
+        &msg_fmt_small,
 //        &msg_count,
         &dlpkg_count,
 //        &gps_freq,
@@ -81,6 +81,7 @@ static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct
 
 void gps_diagnostics_init(void) {
 
+    msg_fmt_small = 0;
     msg_count = 0;
     dlpkg_count = 0;;
     gps_freq = 0.0;
@@ -147,6 +148,8 @@ void gps_diagnostics_periodic(void) {
 
 void gps_diagnostics_datalink_event(void) {
 
+    msg_fmt_small = 0;
+
     dlpkg_count++;
     uint32_t dlpkg_time = get_sys_time_usec();
     
@@ -164,6 +167,8 @@ void gps_diagnostics_datalink_event(void) {
 }
 
 void gps_diagnostics_datalink_small_event(void) {
+
+    msg_fmt_small = 1;
 
     dlpkg_count++;
     uint32_t dlpkg_time = get_sys_time_usec();

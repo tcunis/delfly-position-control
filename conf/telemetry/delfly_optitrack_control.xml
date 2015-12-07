@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE telemetry SYSTEM "telemetry.dtd">
 <telemetry>
-
-
   <process name="Main">
-
     <mode name="default" key_press="d">
       <message name="ALIVE"                  period="1.5"   phase="0."/>  <!-- n bytes -->
       <message name="AUTOPILOT_VERSION"      period="6."    phase="3."/>  <!-- 1 + n bytes -->
@@ -23,8 +20,25 @@
       <message name="STAB_ATTITUDE_INT"      period="0.25"  />
       <message name="UART_ERRORS"            period="3."    phase="0."/>  <!-- 7 bytes -->
       <message name="WP_MOVED"               period="1.5"/>
-    </mode>
-
+    </mode><!--Main-->
+    
+    <mode name="diagnostics" key_press="d">
+      <message name="ALIVE"                  period="1.5"   phase="0."/>  <!-- n bytes -->
+      <message name="AUTOPILOT_VERSION"      period="6."    phase="3."/>  <!-- 1 + n bytes -->
+      <message name="DATALINK_REPORT"        period="6."    phase="0."/>  <!-- 9 bytes -->
+      <message name="DELFLY_STATE"           period="0.25"  /><!-- 68 bytes -->
+      <message name="DL_VALUE"               period="1.5"   phase="0.75"/><!-- 2n bytes -->
+      <message name="ENERGY"                 period="3."    phase="1.5"/> <!-- 14 bytes -->
+      <message name="GPS_DIAGNOSTICS"        period="0.25"  phase="0."/><!-- 14 bytes -->
+      <message name="GPS_INT"                period="0.5"   />
+      <message name="ROTORCRAFT_CAM"         period="1."    />
+      <message name="ROTORCRAFT_FP"          period="0.5"   phase="0.25"/><!-- 58 bytes -->
+      <message name="ROTORCRAFT_NAV_STATUS"  period="1.5"   />            <!-- 15 bytes -->
+      <message name="ROTORCRAFT_STATUS"      period="1.5"   phase="0.75"/><!-- 17 bytes -->
+      <message name="UART_ERRORS"            period="3."    phase="0."/>  <!-- 7 bytes -->
+      <message name="WP_MOVED"               period="1.5"/>
+    </mode><!--diagnostics-->
+    
     <mode name="ppm">
       <message name="DL_VALUE"                 period="0.5"/>
       <message name="ALIVE"                    period="2.1"/>
@@ -35,7 +49,7 @@
       <message name="ROTORCRAFT_STATUS"        period="1"/>
       <message name="BEBOP_ACTUATORS"          period="0.2"/>
     </mode>
-
+    
     <mode name="raw_sensors">
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
@@ -46,7 +60,7 @@
       <message name="BARO_RAW"          period=".1"/>
       <message name="ARDRONE_NAVDATA" period=".05"/>
     </mode>
-
+    
     <mode name="scaled_sensors">
       <message name="ROTORCRAFT_STATUS"      period="1.2"/>
       <message name="DL_VALUE"               period="0.5"/>
@@ -55,7 +69,7 @@
       <message name="IMU_ACCEL_SCALED"       period=".075"/>
       <message name="IMU_MAG_SCALED"         period=".1"/>
     </mode>
-
+    
     <mode name="ahrs">
       <message name="ROTORCRAFT_STATUS"  period="1.2"/>
       <message name="DL_VALUE"           period="0.5"/>
@@ -68,14 +82,14 @@
       <message name="AHRS_EULER_INT"     period=".1"/>
 <!--      <message name="AHRS_RMAT_INT"   period=".5"/> -->
     </mode>
-
+    
     <mode name="rate_loop">
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
       <message name="ALIVE"             period="2.1"/>
       <message name="RATE_LOOP"         period=".02"/>
     </mode>
-
+    
     <mode name="attitude_setpoint_viz" key_press="v">
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
@@ -83,7 +97,7 @@
       <message name="ROTORCRAFT_RADIO_CONTROL" period="0.1"/>
       <message name="AHRS_REF_QUAT" period="0.05"/>
     </mode>
-
+    
     <mode name="attitude_loop" key_press="a">
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
@@ -92,7 +106,7 @@
       <message name="STAB_ATTITUDE_REF_INT" period=".03"/>
       <message name="STAB_ATTITUDE_INDI"     period=".25"/>
     </mode>
-
+    
     <mode name="vert_loop" key_press="v">
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
@@ -104,7 +118,7 @@
       <message name="INS"               period=".11"/>
       <message name="INS_REF"           period="5.1"/>
     </mode>
-
+    
     <mode name="h_loop" key_press="h">
       <message name="ALIVE"                 period="0.9"/>
       <message name="HOVER_LOOP"            period="0.062"/>
@@ -117,67 +131,49 @@
       <message name="INS_REF"               period="5.1"/>
       <!-- HFF messages are only sent if USE_HFF -->
       <message name="HFF"                   period=".05"/>
-	  <message name="HFF_GPS"               period=".03"/>
+	    <message name="HFF_GPS"               period=".03"/>
       <message name="HFF_DBG"               period=".2"/>
     </mode>
-
+    
     <mode name="aligner">
       <message name="ALIVE"             period="0.9"/>
       <message name="FILTER_ALIGNER"    period="0.02"/>
     </mode>
-
+    
     <mode name="tune_hover">
       <message name="DL_VALUE"          period="1.1"/>
       <message name="ROTORCRAFT_STATUS" period="1.2"/>
       <message name="ALIVE"             period="2.1"/>
       <message name="GUIDANCE_H_INT"    period="0.05"/>
-	  <message name="HOVER_LOOP"		period=".1"/>
+	    <message name="HOVER_LOOP"		period=".1"/>
       <message name="ROTORCRAFT_TUNE_HOVER"    period=".1"/>
       <!-- <message name="GPS_INT"               period=".20"/> -->
       <!--<message name="INS2"              period=".05"/>
       <message name="INS3"              period=".20"/>-->
       <message name="INS_REF"           period="5.1"/>
     </mode>
-
-	<mode name="tune_delfly">
-	  <message name="ROTORCRAFT_STATUS" period="1.2"/>
-	  <message name="SYS_MON"			period="1."/>
-    <message name="STAB_ATTITUDE_INT"     period=".125"/>
-    <!--message name="STAB_ATTITUDE_REF_INT" period=".125"/-->
-    <message name="STAB_ATTITUDE_INDI"     period=".125"/>
-    <!--message name="GUIDANCE_H_INT"    period="0.1"/-->
-    <message name="ROTORCRAFT_TUNE_HOVER"    period=".25"/>
-    <message name="VERT_LOOP"         period=".25"/>
-    <message name="HOVER_LOOP"            period="0.25"/>
-    <!--message name="INS_Z"             period=".1"/>
-    <message name="INS"               period=".11"/>
-    <message name="INS_REF"           period="5.1"/-->
-	</mode>
-
-	<mode name="mute">
-    <message name="ALIVE"                  period="2."/>
-	  <message name="ROTORCRAFT_STATUS" period="1.2"/>
-	  <message name="SYS_MON"			period="1." module="sys_mon"/>
-	  <message name="GPS_DIAGNOSTICS"        period=".25" module="gps_diagnostics"/>
-  </mode>
-  
-  <mode name="downlink_5hz">
-    <message name="ALIVE" period=".2"/>
-  </mode>
-
-  <mode name="downlink_15hz">
-    <message name="ALIVE" period=".067"/>
-  </mode>
-
-  <mode name="downlink_30hz">
-    <message name="ALIVE" period=".033"/>
-  </mode>
-  
-    <mode name="downlink_60hz">
-    <message name="ALIVE" period=".017"/>
-  </mode>
-
+    
+	  <mode name="tune_delfly">
+	    <message name="ROTORCRAFT_STATUS" period="1.2"/>
+  	  <message name="SYS_MON"			period="1."/>
+      <message name="STAB_ATTITUDE_INT"     period=".125"/>
+      <!--message name="STAB_ATTITUDE_REF_INT" period=".125"/-->
+      <message name="STAB_ATTITUDE_INDI"     period=".125"/>
+      <!--message name="GUIDANCE_H_INT"    period="0.1"/-->
+      <message name="ROTORCRAFT_TUNE_HOVER"    period=".25"/>
+      <message name="VERT_LOOP"         period=".25"/>
+      <message name="HOVER_LOOP"            period="0.25"/>
+      <!--message name="INS_Z"             period=".1"/>
+      <message name="INS"               period=".11"/>
+      <message name="INS_REF"           period="5.1"/-->
+	  </mode>
+    
+    <mode name="mute">
+      <message name="ALIVE"                  period="2."/>
+      <message name="ROTORCRAFT_STATUS" period="1.2"/>
+      <message name="SYS_MON"			period="1." module="sys_mon"/>
+      <message name="GPS_DIAGNOSTICS"        period=".25" module="gps_diagnostics"/>
+    </mode>
   </process>
-
 </telemetry>
 
