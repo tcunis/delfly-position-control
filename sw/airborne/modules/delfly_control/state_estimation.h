@@ -29,6 +29,20 @@
 #define STATE_ESTIMATION_H_
 
 
+#include "delfly_model.h"
+
+
+struct StateEstimation {
+
+  struct DelflyModelStates states;
+  struct DelflyModelStates out;
+
+  struct Int32Vect3 error;
+};
+
+
+extern struct StateEstimation state_estimation;
+
 
 extern void state_estimation_init(void);
 

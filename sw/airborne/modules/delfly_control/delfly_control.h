@@ -49,6 +49,12 @@
 #define SPEED_CONTROL_RUN_FREQ    DELFLY_CONTROL_RUN_FREQ
 #endif
 
+#ifndef STATE_ESTIMATION_RUN_PERIOD
+#define STATE_ESTIMATION_RUN_PERIOD  DELFLY_CONTROL_RUN_PERIOD
+#define STATE_ESTIMATION_RUN_FREQ    DELFLY_CONTROL_RUN_FREQ
+#endif
+
+
 
 /*    general module functions      */
 extern void delfly_control_init(void);

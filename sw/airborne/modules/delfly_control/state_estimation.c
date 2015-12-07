@@ -28,6 +28,8 @@
 #include "delfly_state.h"
 #include "state_estimation.h"
 
+#include "delfly_control.h"
+
 #include "state.h"
 #include "subsystems/sensors/rpm_sensor.h"
 
@@ -35,8 +37,19 @@
 
 struct DelflyState delfly_state;
 
+struct StateEstimation state_estimation;
+
+
+static void state_estimation_getoutput (void);
+static void state_estimation_aftermath (void);
+
 
 void state_estimation_init (void) {
+
+  delfly_model_init_states( &state_estimation.states );
+  delfly_model_init_states( &state_estimation.out );
+
+  VECT3_ZERO( state_estimation.error );
 
   VECT2_ZERO( delfly_state.h.pos );
   VECT2_ZERO( delfly_state.h.vel );
@@ -61,12 +74,51 @@ void state_estimation_init (void) {
 }
 
 
+void state_estimation_getoutput (void) {
+
+  delfly_model_assign_states( &state_estimation.out,
+		  	  	  	  	  	  	  *stateGetPositionNed_i(),
+								  *stateGetSpeedNed_i(),
+								  *stateGetAccelNed_i()
+  );
+}
+
+
 void state_estimation_enter (void) {
-  set_position_ned_i( stateGetPositionNed_i() );
-  set_velocity_ned_i( stateGetSpeedNed_i() );
+
+  state_estimation_getoutput();
+
+  delfly_model_assign_states( &state_estimation.states,
+		  	  	  	  	  	  	  state_estimation.out.pos,
+								  state_estimation.out.vel,
+								  state_estimation.out.acc
+  );
+}
+
+
+void state_estimation_run (void) {
+
+  state_estimation_getoutput();
+
+  delfly_model_update_states( &state_estimation.states, STATE_ESTIMATION_RUN_PERIOD );
+
+  //TODO prediction
+
+  VECT3_DIFF( state_estimation.error, state_estimation.out.pos, state_estimation.states.pos );
+
+  //TODO update
+
+  state_estimation_aftermath();
+}
+
+
+void state_estimation_aftermath (void) {
+
+  set_position_ned_i( state_estimation.states.pos );
+  set_velocity_ned_i( state_estimation.states.vel );
   //TODO: get airspeed
-  set_airspeed_ned_i( stateGetSpeedNed_i() );
-  set_acceleration_ned_i( stateGetAccelNed_i() );
+  set_airspeed_ned_i( state_estimation.states.vel );
+  set_acceleration_ned_i( state_estimation.states.acc );
 
   delfly_state.flap_freq = rpm_sensor.motor_frequency;
 
@@ -74,11 +126,6 @@ void state_estimation_enter (void) {
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
   delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
-}
-
-void state_estimation_run (void) {
-
-  state_estimation_enter();
 
   set_speed_vel( int32_vect2_norm(&delfly_state.h.vel) );
   set_speed_air( int32_vect2_norm(&delfly_state.h.air) );
