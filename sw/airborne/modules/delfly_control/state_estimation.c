@@ -32,8 +32,6 @@
 #include "subsystems/sensors/rpm_sensor.h"
 
 
-#define INT32_ZERO(_i)    { _i = 0; }
-
 
 struct DelflyState delfly_state;
 

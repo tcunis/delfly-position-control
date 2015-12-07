@@ -112,7 +112,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
     <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
-    <define name="MODE_AUTO2" value="AP_MODE_HOVER_DIRECT"/>
+    <define name="MODE_AUTO2" value="AP_MODE_MODULE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
     <define name="AUTOPILOT_DISABLE_AHRS_KILL" value="TRUE"/>
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
@@ -134,7 +134,7 @@
 
   <section name="DELFLY_CONTROL" prefix="SPEED_CONTROL_">
     <define name="FB_PGAIN" value="0"/>
-    <define name="FB_IGAIN" value="100"/>
+    <define name="FB_IGAIN" value="0"/>
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
     <define name="PITCH_OFFSET" value="70"/>
@@ -146,10 +146,10 @@
   </section><!--DELFLY_UTILS-->
 
   <section name="GPS" prefix="GPS_">
-    <!--define name="USE_DATALINK_SMALL" value="0"/>
+    <define name="USE_DATALINK_SMALL" value="1"/>
     <define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/>
     <define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/>
-    <define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/-->
+    <define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/>
   </section><!--GPS-->
  
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">

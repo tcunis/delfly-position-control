@@ -36,7 +36,7 @@
 #define DELFLY_STATE_H_
 
 
-#include "math/pprz_algebra_int.h"
+#include "delfly_algebra_int.h"
 #include "math/pprz_geodetic_int.h"
 
 
@@ -86,14 +86,6 @@ struct DelflyVerticalState {
   int32_t acc;
 };
 
-
-union Int32VectLong {
-  struct Int32Vect2 xy;
-  struct {
-    int32_t fwd;
-    int32_t ver;
-  } fv;
-};
 
 /**
  * Delfly state in longitudinal, xz-plane.

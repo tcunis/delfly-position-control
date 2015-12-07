@@ -24,13 +24,15 @@
  * @author Torbjoern Cunis
  */
 
-#include "math/pprz_algebra_int.h"
+#include "delfly_algebra_int.h"
 
 
 extern const uint8_t INT32_MATLAB_FRAC;
 
 
-/* optimal guidance forward and lateral */
+/* optimal guidance forward and lateral
+ * in m/s2, with #INT32_MATLAB_FRAC
+ */
 extern struct Int32Vect2 matlab_guidance_gain;
 extern struct Int32Vect2 matlab_guidance_gain_fwd;
 extern struct Int32Vect2 matlab_guidance_gain_lat;

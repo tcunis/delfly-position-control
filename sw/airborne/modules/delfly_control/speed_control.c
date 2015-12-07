@@ -57,6 +57,8 @@
 struct SpeedControl speed_control;
 struct SpeedControlVariables speed_control_var;
 
+struct SpeedControlEquilibrium speed_control_eq_zero = {.pitch = 0, .throttle = 0};
+
 
 
 static void speed_control_estimate_error (void);
@@ -182,23 +184,23 @@ void speed_control_run (bool_t in_flight) {
   speed_control_estimate_error();
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
   VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
-		  	  	   speed_control_var.err.acceleration.xy,
-				   speed_control.fb_gains.p*1.0/100);
+                   speed_control_var.err.acceleration.xy,
+                   speed_control.fb_gains.p*1.0/100);
   VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
-		  	  	   speed_control_var.err.velocity.xy,
-				   speed_control.fb_gains.i*1.0/100);
+		  	  	       speed_control_var.err.velocity.xy,
+		  	  	       speed_control.fb_gains.i*1.0/100);
 
   /* pitch and throttle command */
   //cmd = ff_cmd + fb_cmd
   VECT2_SUM(speed_control_var.cmd.acceleration.xy,
-		    speed_control_var.ff_cmd.acceleration.xy,
-			speed_control_var.fb_cmd.acceleration.xy);
+		        speed_control_var.ff_cmd.acceleration.xy,
+		        speed_control_var.fb_cmd.acceleration.xy);
 
   speed_control_calculate_cmd(&speed_control_var.cmd, &speed_control_var.eq, &speed_control_var.mat);
 
   //for telemetry:
-  speed_control_calculate_cmd(&speed_control_var.ff_cmd, &speed_control_var.eq, &speed_control_var.mat);
-  speed_control_calculate_cmd(&speed_control_var.fb_cmd, &speed_control_var.eq, &speed_control_var.mat);
+  speed_control_calculate_cmd(&speed_control_var.ff_cmd, &speed_control_eq_zero, &speed_control_var.mat);
+  speed_control_calculate_cmd(&speed_control_var.fb_cmd, &speed_control_eq_zero, &speed_control_var.mat);
 
   static struct Int32Eulers orientation_cmd;
   orientation_cmd.phi   = 0;
@@ -216,10 +218,10 @@ void speed_control_run (bool_t in_flight) {
 void speed_control_calculate_cmd( struct SpeedControlCmd* cmd, struct SpeedControlEquilibrium* eq, struct SpeedControlGainScheduling* mat ) {
 	//commanded pitch in rad, with #INT32_ANGLE_FRAC
 	cmd->pitch 	  = (eq->pitch * (1 << INT32_ACCEL_FRAC)
-			         + VECT2_DOT_PRODUCT(mat->pitch, cmd->acceleration.xy))
-			      / (1 << (INT32_ACCEL_FRAC + INT32_MATLAB_FRAC - INT32_ANGLE_FRAC));
+			             + VECT2_DOT_PRODUCT(mat->pitch, cmd->acceleration.xy))
+			          / (1 << (INT32_ACCEL_FRAC + INT32_MATLAB_FRAC - INT32_ANGLE_FRAC));
 	//commanded throttle in 0:MAX_PPRZ
-	cmd->throttle = (eq->throttle * (1 << INT32_ACCEL_FRAC)
-					 + VECT2_DOT_PRODUCT(mat->throttle, cmd->acceleration.xy))
-				  * MAX_PPRZ / (100 * (1 << (INT32_MATLAB_FRAC + INT32_ACCEL_FRAC)));
+	cmd->throttle = (eq->throttle //* (1 << INT32_ACCEL_FRAC)
+					         + VECT2_DOT_PRODUCT(mat->throttle, cmd->acceleration.xy)/(1 << INT32_ACCEL_FRAC))
+				        * (MAX_PPRZ*speed_control.ff_gains.throttle/100) / (100 << INT32_MATLAB_FRAC/2);
 }

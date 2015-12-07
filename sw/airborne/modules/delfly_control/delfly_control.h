@@ -39,6 +39,11 @@
 #include "std.h"
 
 
+
+#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_MODULE
+#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
+
+
 #ifndef SPEED_CONTROL_RUN_PERIOD
 #define SPEED_CONTROL_RUN_PERIOD  DELFLY_CONTROL_RUN_PERIOD
 #define SPEED_CONTROL_RUN_FREQ    DELFLY_CONTROL_RUN_FREQ
@@ -67,9 +72,10 @@ extern void speed_control_run(bool_t in_flight);
 
 extern void guidance_h_module_init(void);
 extern void guidance_h_module_enter(void);
-extern void guidance_h_module_read_rc(bool_t);
+extern void guidance_h_module_read_rc(void);
 extern void guidance_h_module_run(bool_t);
 
+extern void guidance_v_module_init(void);
 extern void guidance_v_module_enter(void);
 extern void guidance_v_module_run(bool_t);
 

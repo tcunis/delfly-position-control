@@ -52,7 +52,15 @@ int32_t guidance_v_module_vel_err;
 static void guidance_v_module_run_traj( bool_t, int32_t* cmd_accelerate );
 
 
-void guidance_v_module_enter() {
+void guidance_v_module_init(void) {
+
+  guidance_cmd_v_accelerate = 0;
+  guidance_v_module_pos_err = 0;
+  guidance_v_module_vel_err = 0;
+}
+
+
+void guidance_v_module_enter(void) {
 
 	guidance_cmd_v_accelerate = 0;
 }
