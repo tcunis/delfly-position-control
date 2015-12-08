@@ -32,12 +32,31 @@
 #include "delfly_model.h"
 
 
+struct StateEstimationCovariances {
+  struct DelflyModelCovariance estimate;
+  struct Int32Mat33 residual;
+};
+
+struct StateEstimationGain {
+  struct Int32Mat33 pos_err;
+  struct Int32Mat33 vel_err;
+  struct Int32Mat33 acc_err;
+};
+
+
 struct StateEstimation {
 
   struct DelflyModelStates states;
   struct DelflyModelStates out;
 
-  struct Int32Vect3 error;
+  struct StateEstimationCovariances covariance;
+  struct StateEstimationGain gain;
+
+  /* measurement position residual
+   * in m, with #INT32_POS_FRAC 	*/
+  struct Int32Vect3 err;
+
+  int32_t period;
 };
 
 

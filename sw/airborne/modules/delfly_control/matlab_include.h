@@ -24,10 +24,21 @@
  * @author Torbjoern Cunis
  */
 
+#ifndef MATLAB_INCLUDE_H
+#define MATLAB_INCLUDE_H
+
+
 #include "delfly_algebra_int.h"
 
 
 extern const uint8_t INT32_MATLAB_FRAC;
+
+
+/* static co-variances R & Q
+ * with #INT32_MATLAB_FRAC
+ */
+extern struct Int32Vect3 matlab_noise_distribution;
+extern struct Int32Vect3 matlab_disturbance_distribution;
 
 
 /* optimal guidance forward and lateral
@@ -67,3 +78,4 @@ extern struct Int32Vect2 matlab_throttle_matrix_v12;
 extern struct Int32Vect2 matlab_throttle_matrix_v25;
 extern struct Int32Vect2 matlab_throttle_matrix_v50;
 
+#endif // MATLAB_INCLUDE_H

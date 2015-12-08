@@ -20,6 +20,7 @@
     <file name="matlab_include.c"/>
     <file name="matlab_include_speed_controller.c"/>
     <file name="matlab_include_guidance_optimal.c"/>
+    <file name="matlab_include_state_estimation.c"/>
   </makefile>
 </module>
 
