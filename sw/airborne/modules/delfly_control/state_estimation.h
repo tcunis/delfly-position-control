@@ -32,13 +32,28 @@
 #include "delfly_model.h"
 
 
-#define STATE_ESTIMATION_MODE_OFF		0
-#define STATE_ESTIMATION_MODE_ESTIMATE	1
+#define STATE_ESTIMATION_MODE_OFF		    0
+#define STATE_ESTIMATION_MODE_ENTER     1
+#define STATE_ESTIMATION_MODE_ESTIMATE	2
+
+#ifndef STATE_ESTIMATION_MODE
+#define STATE_ESTIMATION_MODE           STATE_ESTIMATION_MODE_OFF
+#endif
 
 
 struct StateEstimationCovariances {
+  /* state estimation co-variance matrix
+   * with #INT32_MATLAB_FRAC              */
   struct DelflyModelCovariance estimate;
+
+  /* residual co-variance matrix
+   * with #INT32_MATLAB_FRAC              */
   struct Int32Mat33 residual;
+
+  /* inverted co-variance matrix
+   * with #INT32_MATLAB_FRAC
+   * <for debug>                          */
+  struct Int32Mat33 residual_inv;
 };
 
 struct StateEstimationGain {
@@ -52,16 +67,32 @@ struct StateEstimation {
 
   uint8_t mode;
 
+  /* predicted states
+   * in m,    with #INT32_POS_FRAC
+   * in m/s,  with #INT32_SPEED_FRAC
+   * in m/s2, with #INT32_ACCEL_FRAC
+   */
   struct DelflyModelStates states;
+
+  /* measured states
+   * in m,    with #INT32_POS_FRAC
+   * in m/s,  with #INT32_SPEED_FRAC
+   * in m/s2, with #INT32_ACCEL_FRAC
+   */
   struct DelflyModelStates out;
 
   struct StateEstimationCovariances covariance;
+
+  /* Kalman filter gain matrix
+   * with #INT32_MATLAB_FRAC      */
   struct StateEstimationGain gain;
 
-  /* measurement position residual
+  /* position measurement residual
    * in m, with #INT32_POS_FRAC 	*/
-  struct Int32Vect3 err;
+  struct Int32Vect3 res;
 
+  /* filter period
+   * in s, with #INT32_TIME_FRAC  */
   int32_t period;
 };
 

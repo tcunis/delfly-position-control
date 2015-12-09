@@ -51,7 +51,7 @@ static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct l
 }
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
-  DOWNLINK_SEND_DELFLY_STATE(DefaultChannel, DefaultDevice,
+  pprz_msg_send_DELFLY_STATE(trans, dev, AC_ID,
 	    &delfly_state.h.pos.x,
 	    &delfly_state.h.pos.y,
 	    &delfly_state.v.pos,
@@ -80,20 +80,24 @@ static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct l
 
 static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
 
-	int32_t res_cov;
+	int32_t est_cov11, res_cov, res_cov_inv;
 	int32_t gain_pos, gain_vel, gain_acc;
 
-	INT32_MAT33_DET(res_cov,  state_estimation.covariance.residual, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(est_cov11,   state_estimation.covariance.estimate.pos_pos, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(res_cov,     state_estimation.covariance.residual, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(res_cov_inv, state_estimation.covariance.residual_inv, INT32_MATLAB_FRAC);
 	INT32_MAT33_DET(gain_pos, state_estimation.gain.pos_err, INT32_MATLAB_FRAC);
 	INT32_MAT33_DET(gain_vel, state_estimation.gain.vel_err, INT32_MATLAB_FRAC);
 	INT32_MAT33_DET(gain_acc, state_estimation.gain.acc_err, INT32_MATLAB_FRAC);
 
-	DOWNLINK_SEND_DELFLY_STATEESTIMATION(DefaultChannel, DefaultDevice,
+	pprz_msg_send_DELFLY_STATEESTIMATION(trans, dev, AC_ID,
 		&state_estimation.mode,
-		&state_estimation.err.x,
-		&state_estimation.err.y,
-		&state_estimation.err.z,
+		&state_estimation.res.x,
+		&state_estimation.res.y,
+		&state_estimation.res.z,
+		&est_cov11,
 		&res_cov,
+		&res_cov_inv,
 		&gain_pos,
 		&gain_vel,
 		&gain_acc,
@@ -113,7 +117,7 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 }
 
 static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {
-	DOWNLINK_SEND_DELFLY_SPEEDCONTROL(DefaultChannel, DefaultDevice,
+  pprz_msg_send_DELFLY_SPEEDCONTROL(trans, dev, AC_ID,
 		&speed_control.mode,
 		&speed_control.sp.acceleration.fv.fwd,
 		&speed_control.sp.acceleration.fv.ver,

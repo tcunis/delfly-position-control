@@ -76,12 +76,43 @@ struct Int64Mat33 {
     MAT33_ELMT((_mat1),2,2) += (MAT33_ELMT((_mat2),2,2) * (_num)) / (_den);  \
   }
 
+/* determinant of matrix with fraction
+ * |_m| with same fraction */
 #define INT32_MAT33_DET(_det, _m, _frac) {		\
-	const float m00 = MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,1);    \
-	const float m10 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,1);    \
-	const float m20 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,1);    \
+	const int32_t m00 = MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,1);    \
+	const int32_t m10 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,1);    \
+	const int32_t m20 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,1);    \
 	_det = (MAT33_ELMT((_m),0,0)*m00 - MAT33_ELMT((_m),1,0)*m10 + MAT33_ELMT((_m),2,0)*m20)/(1<<(2*_frac)); \
 }
+
+/* invariant of matrix with fraction
+ * invS = 1/det(S) com(S)'
+ * invS with same fraction */
+#define INT32_MAT33_INV(_minv, _m, _frac) {            \
+    /*pair-wise element products, with double fraction */  \
+    const int32_t m00 = MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,1);    \
+    const int32_t m10 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,1);    \
+    const int32_t m20 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,1);    \
+    const int32_t m01 = MAT33_ELMT((_m),1,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,0);    \
+    const int32_t m11 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,0);    \
+    const int32_t m21 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,0);    \
+    const int32_t m02 = MAT33_ELMT((_m),1,0)*MAT33_ELMT((_m),2,1) - MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,0);    \
+    const int32_t m12 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,0);    \
+    const int32_t m22 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,0);    \
+    /* determinant with same fraction */    \
+    const int32_t det = (MAT33_ELMT((_m),0,0)*m00 - MAT33_ELMT((_m),1,0)*m10 + MAT33_ELMT((_m),2,0)*m20)/(1<<(2*_frac)); \
+    if (det != 0) {          \
+      MAT33_ELMT((_minv),0,0) =  m00 / det;           \
+      MAT33_ELMT((_minv),1,0) = -m01 / det;           \
+      MAT33_ELMT((_minv),2,0) =  m02 / det;           \
+      MAT33_ELMT((_minv),0,1) = -m10 / det;           \
+      MAT33_ELMT((_minv),1,1) =  m11 / det;           \
+      MAT33_ELMT((_minv),2,1) = -m12 / det;           \
+      MAT33_ELMT((_minv),0,2) =  m20 / det;           \
+      MAT33_ELMT((_minv),1,2) = -m21 / det;           \
+      MAT33_ELMT((_minv),2,2) =  m22 / det;           \
+    }                 \
+  }
 
 //const float m01 = MAT33_ELMT((_m),1,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,0);
 //const float m11 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,0);
@@ -91,18 +122,31 @@ struct Int64Mat33 {
 //const float m22 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,0);
 
 
-#define MAT33_MULT2(_mat0, _mat1, _mat2, _s) {         \
-	MAT33_ELMT((_mat0),0,0) = (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,0)) * (_s);  \
-	MAT33_ELMT((_mat0),0,1) = (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,1)) * (_s);  \
-	MAT33_ELMT((_mat0),0,2) = (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,2)) * (_s);  \
-	MAT33_ELMT((_mat0),1,0) = (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,0)) * (_s);  \
-	MAT33_ELMT((_mat0),1,1) = (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,1)) * (_s);  \
-	MAT33_ELMT((_mat0),1,2) = (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,2)) * (_s);  \
-	MAT33_ELMT((_mat0),2,0) = (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,0)) * (_s);  \
-	MAT33_ELMT((_mat0),2,1) = (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,1)) * (_s);  \
-	MAT33_ELMT((_mat0),2,2) = (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,2)) * (_s);  \
+#define MAT33_MULT2(_mat0, _mat1, _mat2, _num, _den) {         \
+	MAT33_ELMT((_mat0),0,0) = ( (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,0)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),0,1) = ( (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,1)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),0,2) = ( (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,2)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),1,0) = ( (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,0)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),1,1) = ( (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,1)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),1,2) = ( (MAT33_ELMT((_mat1),1,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),1,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),1,2)*MAT33_ELMT((_mat2),2,2)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),2,0) = ( (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,0)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),2,1) = ( (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,1)) * (_num) ) / (_den);  \
+	MAT33_ELMT((_mat0),2,2) = ( (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,2)) * (_num) ) / (_den);  \
   }
 
-#define MAT33_MULT(_mat0, _mat1, _mat2)    MAT33_MULT2(_mat0, _mat1, _mat2, 1)
+#define MAT33_MULT(_mat0, _mat1, _mat2)    MAT33_MULT2(_mat0, _mat1, _mat2, 1, 1)
+
+
+#define MAT33_VECT3_MULT2(_vout, _mat, _vin, _num, _den) {    \
+    (_vout).x = ( (MAT33_ELMT((_mat), 0, 0) * (_vin).x + \
+                  MAT33_ELMT((_mat), 0, 1) * (_vin).y + \
+                  MAT33_ELMT((_mat), 0, 2) * (_vin).z)*(_num)) / (_den);  \
+    (_vout).y = ( (MAT33_ELMT((_mat), 1, 0) * (_vin).x +   \
+                  MAT33_ELMT((_mat), 1, 1) * (_vin).y +   \
+                  MAT33_ELMT((_mat), 1, 2) * (_vin).z)*(_num)) / (_den);  \
+    (_vout).z = ( (MAT33_ELMT((_mat), 2, 0) * (_vin).x + \
+                  MAT33_ELMT((_mat), 2, 1) * (_vin).y + \
+                  MAT33_ELMT((_mat), 2, 2) * (_vin).z)*(_num)) / (_den);  \
+  }
 
 #endif /* DELFLY_ALGEBRA_INT_H_2 */

@@ -44,6 +44,9 @@ struct StateEstimation state_estimation;
 
 
 struct DelflyModelCovariance delfly_model_process_covariance;
+
+/* measurement noise co-variance matrix
+ * with #INT32_MATLAB_FRAC                */
 struct Int32Mat33 state_estimation_noise_covariance;
 
 
@@ -53,19 +56,19 @@ static void state_estimation_aftermath (void);
 
 void state_estimation_init (void) {
 
-  state_estimation.mode = STATE_ESTIMATION_MODE_OFF;
+  state_estimation.mode = STATE_ESTIMATION_MODE;
 
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
 
-  VECT3_ZERO( state_estimation.err );
+  VECT3_ZERO( state_estimation.res );
 
   state_estimation.period = BFP_OF_REAL(STATE_ESTIMATION_RUN_PERIOD, INT32_TIME_FRAC);
 
   INT32_MAT33_DIAG(state_estimation_noise_covariance,
-		  	  	  	  SQUARE(matlab_noise_distribution.x)/(1<<INT32_MATLAB_FRAC),
-					  SQUARE(matlab_noise_distribution.y)/(1<<INT32_MATLAB_FRAC),
-					  SQUARE(matlab_noise_distribution.z)/(1<<INT32_MATLAB_FRAC)
+		  	  	  	    SQUARE(matlab_noise_distribution.x)/(1<<INT32_MATLAB_FRAC),
+		  	  	  	      SQUARE(matlab_noise_distribution.y)/(1<<INT32_MATLAB_FRAC),
+		  	  	  	        SQUARE(matlab_noise_distribution.z)/(1<<INT32_MATLAB_FRAC)
   );
   delfly_model_assign_covariance( &delfly_model_process_covariance, state_estimation.period, matlab_disturbance_distribution );
 
@@ -103,7 +106,7 @@ void state_estimation_getoutput (void) {
 
   delfly_model_assign_eulers( &state_estimation.out,
 		  	  	  	  	  	  	  *stateGetNedToBodyEulers_i(),
-								  *stateGetBodyRates_i()
+		  	  	  	  	  	  	  *stateGetBodyRates_i()
   );
 }
 
@@ -112,31 +115,56 @@ void state_estimation_enter (void) {
 
   state_estimation_getoutput();
 
-  delfly_model_assign_states( &state_estimation.states,
-		  	  	  	  	  	  	  state_estimation.out.pos,
-								  state_estimation.out.vel,
-								  state_estimation.out.acc
-  );
+  struct Int32Vect3 pos, vel, acc;
+
+
+  VECT3_COPY(pos, state_estimation.out.pos);
+
+  switch (state_estimation.mode) {
+    case STATE_ESTIMATION_MODE_ENTER:
+    case STATE_ESTIMATION_MODE_ESTIMATE: {
+      VECT3_ZERO(vel);
+      VECT3_ZERO(acc);
+    } break;
+    case STATE_ESTIMATION_MODE_OFF:
+    default: {
+      VECT3_COPY(vel, state_estimation.out.vel);
+      VECT3_COPY(acc, state_estimation.out.acc);
+    } break;
+  }
+
+
+  delfly_model_assign_states( &state_estimation.states, pos, vel, acc );
   delfly_model_assign_eulers( &state_estimation.states,
 		  	  	  	  	  	  	  state_estimation.out.att,
-								  state_estimation.out.rot
+		  	  	  	  	  	  	  state_estimation.out.rot
   );
 }
 
-
+/* updates state estimation co-variance matrix using Kalman gain matrix
+ * P_(k|k) = (I - K_k H_k) P_(k|k-1)
+ * cov  -- co-variance matrix P_(k|k-1), with #INT32_MATLAB_FRAC
+ * gain -- Kalman gain matrix K_k,       with #INT32_MATLAB_FRAC
+ * returns P_(k|k), with #INT32_MATLAB_FRAC
+ */
 static inline void state_estimation_update_covariance ( struct DelflyModelCovariance* cov, struct StateEstimationGain gain ) {
 
+  /* co-variance matrix P_(k|k) after update, with #INT32_MATLAB_FRAC */
   struct DelflyModelCovariance covK;
-  MAT33_MULT2(covK.pos_pos, gain.pos_err, cov->pos_pos, -1);
-  MAT33_MULT2(covK.pos_vel, gain.pos_err, cov->pos_vel, -1);
-  MAT33_MULT2(covK.pos_acc, gain.pos_err, cov->pos_acc, -1);
-  MAT33_MULT2(covK.vel_pos, gain.vel_err, cov->pos_pos, -1);
-  MAT33_MULT2(covK.vel_vel, gain.vel_err, cov->pos_vel, -1);
-  MAT33_MULT2(covK.vel_acc, gain.vel_err, cov->pos_acc, -1);
-  MAT33_MULT2(covK.acc_pos, gain.acc_err, cov->pos_pos, -1);
-  MAT33_MULT2(covK.acc_vel, gain.acc_err, cov->pos_vel, -1);
-  MAT33_MULT2(covK.acc_acc, gain.acc_err, cov->pos_acc, -1);
 
+  // P'_(k|k) = -K_k H_k P_(k|k-1), with #INT32_MATLAB_FRAC
+  MAT33_MULT2(covK.pos_pos, gain.pos_err, cov->pos_pos, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.pos_vel, gain.pos_err, cov->pos_vel, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.pos_acc, gain.pos_err, cov->pos_acc, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.vel_pos, gain.vel_err, cov->pos_pos, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.vel_vel, gain.vel_err, cov->pos_vel, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.vel_acc, gain.vel_err, cov->pos_acc, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.acc_pos, gain.acc_err, cov->pos_pos, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.acc_vel, gain.acc_err, cov->pos_vel, -1, (1<<INT32_MATLAB_FRAC));
+  MAT33_MULT2(covK.acc_acc, gain.acc_err, cov->pos_acc, -1, (1<<INT32_MATLAB_FRAC));
+
+  // P_(k|k) = P'_(k|k) + P_(k|k-1), with #INT32_MATLAB_FRAC
+  //         = P_(k|k-1) - K_k H_k P_(k|k-1)
   MAT33_ADD(covK.pos_pos, cov->pos_pos);
   MAT33_ADD(covK.pos_pos, cov->vel_pos);
   MAT33_ADD(covK.pos_pos, cov->acc_pos);
@@ -181,40 +209,66 @@ static inline void state_estimation_update_covariance ( struct DelflyModelCovari
 
 void state_estimation_run (void) {
 
-  state_estimation.mode = STATE_ESTIMATION_MODE_ESTIMATE;
-
-  struct Int32Mat33 residual_inv;
-  struct Int32Vect3 offset_pos, offset_vel, offset_acc;
-
-  MAT33_ZERO( residual_inv );
-
   state_estimation_getoutput();
 
+  switch (state_estimation.mode) {
+    case STATE_ESTIMATION_MODE_ENTER: {
+      state_estimation_enter();
+      state_estimation.mode = STATE_ESTIMATION_MODE_ESTIMATE;
+    }
+    /*no break*/
+    case STATE_ESTIMATION_MODE_ESTIMATE:
+      break;
+    case STATE_ESTIMATION_MODE_OFF:
+    default: {
+      state_estimation_enter();
+      state_estimation_aftermath();
+    } return;
+  }
+
+  /* residual co-variance matrix inverse
+   * with #INT32_MATLAB_FRAC              */
+  // <for debug>: use state_estimation.covariance.residual_inv
+  //struct Int32Mat33 residual_inv;
+
+  /* position estimation offset
+   * with #INT32_POS_FRAC                 */
+  struct Int32Vect3 offset_pos;
+  /* velocity estimation offset
+     * with #INT32_SPEED_FRAC                 */
+  struct Int32Vect3 offset_vel;
+  /* acceleration estimation offset
+     * with #INT32_ACCEL_FRAC                 */
+  struct Int32Vect3 offset_acc;
+
+  MAT33_ZERO( state_estimation.covariance.residual_inv );
+
   /* Kalman filter -- predict */
-  // a-priori state estimate 			x_(k|k-1) = A x_(k-1|k-1)
-  delfly_model_update_states( &state_estimation.states, state_estimation.period );
-  // a-priori estimate co-variance		P_(k|k-1) = A P_(k-1|k-1) A' + Q
-  delfly_model_update_covariance( &state_estimation.covariance.estimate, state_estimation.period );
+  // a-priori state estimate 			  x_(k|k-1) = A x_(k-1|k-1)           -- with states fracs
+  delfly_model_predict_states( &state_estimation.states, state_estimation.period );
+  // a-priori estimate co-variance	P_(k|k-1) = A P_(k-1|k-1) A' + Q    -- with #INT32_MATLAB_FRAC
+  delfly_model_predict_covariance( &state_estimation.covariance.estimate, state_estimation.period );
 
   /* Kalman filter -- calculate gain */
-  // measurement residual				y_k = z_k - H x_(k|k-1)
-  VECT3_DIFF( state_estimation.err, state_estimation.out.pos, state_estimation.states.pos );
-  // residual co-variance				S_k = H P_(k|k-1) H' + R
+  // measurement residual				    y_k = z_k - H x_(k|k-1)             -- with #INT32_POS_FRAC
+  VECT3_DIFF( state_estimation.res, state_estimation.out.pos, state_estimation.states.pos );
+  // residual co-variance				    S_k = H P_(k|k-1) H' + R
+  //                                    =  P11_(k|k-1)   + R            -- with #INT32_MATLAB_FRAC
   MAT33_COPY( state_estimation.covariance.residual, state_estimation.covariance.estimate.pos_pos );
-  MAT33_ADD( state_estimation.covariance.residual, state_estimation_noise_covariance );
-  // optimal Kalman gain				K_k = P_(k|k-1) H' inv(S_k)
-  MAT33_INV( residual_inv, state_estimation.covariance.residual );
-  MAT33_MULT( state_estimation.gain.pos_err, state_estimation.covariance.estimate.pos_pos, residual_inv );
-  MAT33_MULT( state_estimation.gain.vel_err, state_estimation.covariance.estimate.vel_pos, residual_inv );
-  MAT33_MULT( state_estimation.gain.acc_err, state_estimation.covariance.estimate.acc_pos, residual_inv );
+  MAT33_ADD(  state_estimation.covariance.residual, state_estimation_noise_covariance );
+  // optimal Kalman gain				    K_k = P_(k|k-1) H' inv(S_k)         -- with #INT32_MATLAB_FRAC
+  INT32_MAT33_INV( state_estimation.covariance.residual_inv, state_estimation.covariance.residual, INT32_MATLAB_FRAC );
+  MAT33_MULT2( state_estimation.gain.pos_err, state_estimation.covariance.estimate.pos_pos, state_estimation.covariance.residual_inv, 1, (1<<INT32_MATLAB_FRAC) );
+  MAT33_MULT2( state_estimation.gain.vel_err, state_estimation.covariance.estimate.vel_pos, state_estimation.covariance.residual_inv, 1, (1<<INT32_MATLAB_FRAC) );
+  MAT33_MULT2( state_estimation.gain.acc_err, state_estimation.covariance.estimate.acc_pos, state_estimation.covariance.residual_inv, 1, (1<<INT32_MATLAB_FRAC) );
 
   /* Kalman filter -- update */
-  // update states
-  MAT33_VECT3_MUL( offset_pos, state_estimation.gain.pos_err, state_estimation.err );
-  MAT33_VECT3_MUL( offset_vel, state_estimation.gain.vel_err, state_estimation.err );
-  MAT33_VECT3_MUL( offset_acc, state_estimation.gain.acc_err, state_estimation.err );
-  delfly_model_add_states( &state_estimation.states, offset_pos, offset_vel, offset_acc );
-  // update estimate co-variance
+  // update states                  x_(k|k) = x_(k|k-1) + K_k y_k       -- with states fracs
+  MAT33_VECT3_MULT2( offset_pos, state_estimation.gain.pos_err, state_estimation.res, 1, (1<<(INT32_MATLAB_FRAC)) );
+  MAT33_VECT3_MULT2( offset_vel, state_estimation.gain.vel_err, state_estimation.res, 1, (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_SPEED_FRAC)) );
+  MAT33_VECT3_MULT2( offset_acc, state_estimation.gain.acc_err, state_estimation.res, 1, (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC)) );
+//  delfly_model_add_states( &state_estimation.states, offset_pos, offset_vel, offset_acc );
+  // update estimate co-variance    P_(k|k) = (I - K_k H_k) P_(k|k-1)   -- with #INT32_MATLAB_FRAC
   state_estimation_update_covariance( &state_estimation.covariance.estimate, state_estimation.gain );
 
   /* aftermath */

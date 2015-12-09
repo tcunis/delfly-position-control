@@ -6,17 +6,23 @@
   	<!-- This settings file for the delfy guidance module contains ONLY the additional settings 
   	 	 w.r.t. rotorcraft_guidance.xml. In order to use all settings, load the latter as well! -->
   	
-    <dl_settings NAME="Lateral loop">
+    <dl_settings NAME="Delfly">
       <dl_setting var="guidance_lat.gains.p" min="1" step="1" max="1000" module="guidance/guidance_lat" shortname="kp" param="GUIDANCE_LAT_PGAIN" type="int32" persistent="true"/>
-    </dl_settings>
+    <!--/dl_settings>
     
-    <dl_settings NAME="Speed/thrust loop">
+    <dl_settings NAME="Speed/thrust loop"-->
       <dl_setting var="ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(speed_control.pitch_offset))" min="-90" step="1" max="90" module="delfly_control/speed_control" shortname="Th_off" param="SPEED_CONTROL_PITCH_OFFSET" type="int32" persistent="true" handler="set_pitch_offset"/>
       <dl_setting var="speed_control.fb_gains.p" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_kp" param="SPEED_CONTROL_FB_PGAIN" type="int32" persistent="true"/>
-	    <dl_setting var="speed_control.fb_gains.i" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>
-	    <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
-	    <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
+      <dl_setting var="speed_control.fb_gains.i" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>
+	  <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
+	  <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
+    <!--/dl_settings>
+    
+    <dl_settings name="State estimation"-->
+      <dl_setting var="state_estimation.mode" min="0" step="1" max="1" module="delfly_control/state_estimation" shortname="est_mode" param="STATE_ESTIMATION_MODE" type="uint8"/>
     </dl_settings>
+    
+    
 
   </dl_settings>
 </settings>

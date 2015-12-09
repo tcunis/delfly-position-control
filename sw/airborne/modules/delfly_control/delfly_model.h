@@ -55,6 +55,8 @@ struct DelflyModelCovariance {
 };
 
 
+/* state disturbance co-variance matrix
+ * with #INT32_MATLAB_FRAC                */
 extern struct DelflyModelCovariance delfly_model_process_covariance;
 
 
@@ -86,11 +88,11 @@ static inline void delfly_model_assign_covariance ( struct DelflyModelCovariance
 
   struct Int32Mat33 dist_mat;
   float acc_dist_x = FLOAT_OF_BFP(acc_dist.x, INT32_MATLAB_FRAC),
-		acc_dist_y = FLOAT_OF_BFP(acc_dist.y, INT32_MATLAB_FRAC),
-		acc_dist_z = FLOAT_OF_BFP(acc_dist.z, INT32_MATLAB_FRAC);
+        acc_dist_y = FLOAT_OF_BFP(acc_dist.y, INT32_MATLAB_FRAC),
+        acc_dist_z = FLOAT_OF_BFP(acc_dist.z, INT32_MATLAB_FRAC);
   INT32_MAT33_DIAG( dist_mat, BFP_OF_REAL(SQUARE(acc_dist_x), INT32_MATLAB_FRAC),
-		  	  	  	  	  	  	  BFP_OF_REAL(SQUARE(acc_dist_y), INT32_MATLAB_FRAC),
-								  	  BFP_OF_REAL(SQUARE(acc_dist_z), INT32_MATLAB_FRAC) );
+		  	  	  	  	  	  	    BFP_OF_REAL(SQUARE(acc_dist_y), INT32_MATLAB_FRAC),
+		  	  	  	  	  	  	      BFP_OF_REAL(SQUARE(acc_dist_z), INT32_MATLAB_FRAC) );
 
   struct Int64Mat33 temp;
   float period_f = FLOAT_OF_BFP(period, INT32_TIME_FRAC);
@@ -144,7 +146,7 @@ static inline void delfly_model_add_states ( struct DelflyModelStates* states, s
   VECT3_ADD(states->acc, acc);
 }
 
-static inline void delfly_model_update_states ( struct DelflyModelStates* states, int32_t period ) {
+static inline void delfly_model_predict_states ( struct DelflyModelStates* states, int32_t period ) {
 
   struct Int64Vect3 temp;
   VECT3_COPY(temp, states->pos);
@@ -159,7 +161,7 @@ static inline void delfly_model_update_states ( struct DelflyModelStates* states
   //TODO: update rotation
 }
 
-static inline void delfly_model_update_covariance ( struct DelflyModelCovariance* cov, int32_t period ) {
+static inline void delfly_model_predict_covariance ( struct DelflyModelCovariance* cov, int32_t period ) {
 
   //struct DelflyModelCovariance covK = *cov;
   struct Int64Mat33 temp;
