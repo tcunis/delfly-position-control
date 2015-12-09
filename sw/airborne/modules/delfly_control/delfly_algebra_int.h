@@ -46,12 +46,32 @@ struct Int64Mat33 {
   int64_t m[3 * 3];
 };
 
+/* a += b * num / den */
+#define VECT2_ADD_SCALED2(_a, _b, _num, _den) {   \
+    (_a).x += ((_b).x * (_num)) / (_den);           \
+    (_a).y += ((_b).y * (_num)) / (_den);           \
+  }
+
+/* a += b * s */
+#define VECT2_ADD_SCALED(_a, _b, _s)		VECT2_ADD_SCALED2(_a, _b, _s, 1)
+
+/* c = (a - b) * num / den */
+#define VECT2_DIFF_SCALED2(_c, _a, _b, _num, _den) { 	\
+	(_c).x = (((_a).x - (_b).x) * (_num)) / (_den);			\
+	(_c).y = (((_a).y - (_b).y) * (_num)) / (_den);			\
+  }
+
+/* c = (a - b) * s */
+#define VECT2_DIFF_SCALED(_c, _a, _b, _s)   VECT2_DIFF_SCALED2(_a, _b, _s, 1)
+
+/* a += b * num / den */
 #define VECT3_ADD_SCALED2(_a, _b, _num, _den) {   \
     (_a).x += ((_b).x * (_num)) / (_den);        \
     (_a).y += ((_b).y * (_num)) / (_den);        \
     (_a).z += ((_b).z * (_num)) / (_den);        \
   }
 
+/* m1 += m2 */
 #define MAT33_ADD(_mat1,_mat2) {     \
     MAT33_ELMT((_mat1),0,0) += MAT33_ELMT((_mat2),0,0);  \
     MAT33_ELMT((_mat1),0,1) += MAT33_ELMT((_mat2),0,1);  \
@@ -64,6 +84,7 @@ struct Int64Mat33 {
     MAT33_ELMT((_mat1),2,2) += MAT33_ELMT((_mat2),2,2);  \
   }
 
+/* m1 += m2 * num / den */
 #define MAT33_ADD_SCALED2(_mat1,_mat2, _num, _den) {     \
     MAT33_ELMT((_mat1),0,0) += (MAT33_ELMT((_mat2),0,0) * (_num)) / (_den);  \
     MAT33_ELMT((_mat1),0,1) += (MAT33_ELMT((_mat2),0,1) * (_num)) / (_den);  \
@@ -121,7 +142,7 @@ struct Int64Mat33 {
 //const float m12 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,0);
 //const float m22 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,0);
 
-
+/* m0 = m1 * m2 * num / den */
 #define MAT33_MULT2(_mat0, _mat1, _mat2, _num, _den) {         \
 	MAT33_ELMT((_mat0),0,0) = ( (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,0)) * (_num) ) / (_den);  \
 	MAT33_ELMT((_mat0),0,1) = ( (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,1)) * (_num) ) / (_den);  \
@@ -134,9 +155,10 @@ struct Int64Mat33 {
 	MAT33_ELMT((_mat0),2,2) = ( (MAT33_ELMT((_mat1),2,0)*MAT33_ELMT((_mat2),0,2) + MAT33_ELMT((_mat1),2,1)*MAT33_ELMT((_mat2),1,2) + MAT33_ELMT((_mat1),2,2)*MAT33_ELMT((_mat2),2,2)) * (_num) ) / (_den);  \
   }
 
+/* m0 = m1 * m2 */
 #define MAT33_MULT(_mat0, _mat1, _mat2)    MAT33_MULT2(_mat0, _mat1, _mat2, 1, 1)
 
-
+/* v0 = m * v1 * num / den */
 #define MAT33_VECT3_MULT2(_vout, _mat, _vin, _num, _den) {    \
     (_vout).x = ( (MAT33_ELMT((_mat), 0, 0) * (_vin).x + \
                   MAT33_ELMT((_mat), 0, 1) * (_vin).y + \

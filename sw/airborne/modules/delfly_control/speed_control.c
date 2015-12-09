@@ -38,20 +38,9 @@
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 
-#include "math/pprz_algebra.h"
+#include "delfly_algebra_int.h"
 #include "speed_control_var.h"
 
-
-/* a += b*s */
-#define VECT2_ADD_SCALED(_a, _b, _s) {   \
-    (_a).x += ((_b).x * (_s));           \
-    (_a).y += ((_b).y * (_s));           \
-  }
-
-#define VECT2_DIFF_SCALED(_c, _a, _b, _s) { 	\
-	(_c).x = ((_a).x - (_b).x)*(_s);			\
-	(_c).y = ((_a).y - (_b).y)*(_s);			\
-  }
 
 
 struct SpeedControl speed_control;
@@ -143,8 +132,8 @@ void speed_control_estimate_error (void) {
 
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
   VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
-		  	  	   speed_control.sp.acceleration.xy,
-				   SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+		  	  	    speed_control.sp.acceleration.xy,
+				    SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;
@@ -153,10 +142,10 @@ void speed_control_estimate_error (void) {
 			 speed_control_var.now.velocity.xy);
 
   //estimated acceleration error: a_err(k-1) = (v_err(k) - v_err(k-1))/T
-  VECT2_DIFF_SCALED(speed_control_var.err.acceleration.xy,
+  VECT2_DIFF_SCALED2(speed_control_var.err.acceleration.xy,
 		  	  	    velocity_error_new.xy,
 					speed_control_var.err.velocity.xy,
-					SPEED_CONTROL_RUN_FREQ/(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+					SPEED_CONTROL_RUN_FREQ,(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
   VECT2_COPY(speed_control_var.err.velocity.xy, velocity_error_new.xy);
 
   //for telemetry: a_now = a_ref - a_err
@@ -183,12 +172,15 @@ void speed_control_run (bool_t in_flight) {
   /* feed-back */
   speed_control_estimate_error();
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
-  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
-                   speed_control_var.err.acceleration.xy,
-                   speed_control.fb_gains.p*1.0/100);
-  VECT2_ADD_SCALED(speed_control_var.fb_cmd.acceleration.xy,
-		  	  	       speed_control_var.err.velocity.xy,
-		  	  	       speed_control.fb_gains.i*1.0/100);
+  //if p = 100 %, 1 m/s2 acceleration error equals to +1 m/s2 acceleration command
+  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+                     speed_control_var.err.acceleration.xy,
+                     speed_control.fb_gains.p, 100 );
+  //if i = 100 %, 1 m/s velocity error equals to +1 m/s2 acceleration command
+  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+		  	  	     speed_control_var.err.velocity.xy,
+		  	  	     speed_control.fb_gains.i,
+					 (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
 
   /* pitch and throttle command */
   //cmd = ff_cmd + fb_cmd

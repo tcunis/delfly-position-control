@@ -55,12 +55,27 @@ struct DelflyModelCovariance {
 };
 
 
+struct DelflyModel {
+
+	struct DelflyModelStates states;
+};
+
+
+extern struct DelflyModel delfly_model;
+
+
 /* state disturbance co-variance matrix
  * with #INT32_MATLAB_FRAC                */
 extern struct DelflyModelCovariance delfly_model_process_covariance;
 
 
 extern void delfly_model_init (void);
+
+extern void delfly_model_enter (void);
+
+extern void delfly_model_set_cmd (int32_t cmd_h_acc, int32_t cmd_v_acc);
+
+extern void delfly_model_run (void);
 
 
 static inline void delfly_model_init_states ( struct DelflyModelStates* states ) {
