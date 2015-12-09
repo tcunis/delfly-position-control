@@ -139,10 +139,12 @@ void guidance_h_module_run_traj( bool_t in_flight, int32_t* cmd_accelerate, int3
 	guidance_h_module_fwd_err.states.pos = 0;
 	guidance_h_module_fwd_err.states.vel = guidance_h_module_vel_rc_sp.fv.fwd;
 
-	*cmd_accelerate = guidance_h_module_fwd_gain.states.pos * guidance_h_module_fwd_err.states.pos
-	                  / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-	                + guidance_h_module_fwd_gain.states.vel * guidance_h_module_fwd_err.states.vel
-	                  / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+//	*cmd_accelerate = guidance_h_module_fwd_gain.states.pos * guidance_h_module_fwd_err.states.pos
+//	                  / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+//	                + guidance_h_module_fwd_gain.states.vel * guidance_h_module_fwd_err.states.vel
+//	                  / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+
+	*cmd_accelerate = guidance_h_module_vel_rc_sp.fv.fwd/(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
 	*cmd_heading = guidance_h.rc_sp.psi; //delfly_state.h.heading
 
 	//guidance_lat_adjust_heading( in_flight, cmd_heading, guidance_h_module_pos_err );
