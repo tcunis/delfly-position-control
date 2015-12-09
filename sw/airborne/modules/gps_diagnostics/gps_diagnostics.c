@@ -62,9 +62,9 @@ uint8_t  count_iteration;   // number of iterations since previous gps message
 
 
 
-static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* device ) {
+static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* dev ) {
 
-    DOWNLINK_SEND_GPS_DIAGNOSTICS( DefaultChannel, DefaultDevice,
+  pprz_msg_send_GPS_DIAGNOSTICS( trans, dev, AC_ID,
         &msg_fmt_small,
 //        &msg_count,
         &dlpkg_count,

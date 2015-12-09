@@ -141,8 +141,8 @@
   </section><!--DELFLY_CONTROL-->
  
   <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
-    <define name="LEDS_SWITCH" value="0"/>
-    <define name="SRVO_KILL" value="1"/>
+    <define name="LEDS_SWITCH" value="1"/>
+    <define name="SRVO_KILL" value="0"/>
   </section><!--DELFLY_UTILS-->
 
   <section name="GPS" prefix="GPS_">

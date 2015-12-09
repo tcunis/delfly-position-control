@@ -30,6 +30,10 @@
 #include "delfly_state.h"
 #include "state_estimation.h"
 #include "speed_control_var.h"
+#include "delfly_guidance.h"
+
+#include "guidance/guidance_h.h"
+#include "guidance/guidance_v.h"
 
 #include "delfly_algebra_int.h"
 
@@ -44,10 +48,28 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct lin
 
 
 static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_GUIDANCE(DefaultChannel, DefaultDevice,
-//		&guidance_h.mode,
-//		&guidance_v_mode
-//	);
+  pprz_msg_send_DELFLY_GUIDANCE(trans, dev, AC_ID,
+		&guidance_h.mode,
+		&guidance_v_mode,
+		&guidance_h.sp.pos.x,
+		&guidance_h.sp.pos.y,
+		&guidance_v_z_sp,
+		&delfly_guidance.sp.vel_rc.fv.fwd,
+		&guidance_h.rc_sp.psi,
+		&delfly_guidance.err.pos.x,
+		&delfly_guidance.err.pos.y,
+		&delfly_guidance.err.pos.z,
+		&delfly_guidance.err.vel.x,
+		&delfly_guidance.err.vel.y,
+		&delfly_guidance.err.vel.z,
+		&delfly_guidance.err.fwd.states.pos,
+		&delfly_guidance.err.lat.states.pos,
+		&delfly_guidance.err.fwd.states.vel,
+		&delfly_guidance.err.lat.states.vel,
+		&delfly_guidance.cmd.h_acc,
+		&delfly_guidance.cmd.v_acc,
+		&delfly_guidance.cmd.heading
+	);
 }
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
