@@ -12,6 +12,7 @@
   <periodic fun="delfly_control_module_run()" freq="256" start="delfly_control_start()" stop="delfly_control_stop()" autorun="FALSE"/>
   <makefile>
     <file name="delfly_control.c"/>
+    <file name="delfly_guidance.c"/>    
     <file name="delfly_telemetry.c"/>
     <file name="guidance_h_module.c"/>
     <file name="guidance_v_module.c"/>
