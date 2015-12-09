@@ -53,6 +53,8 @@ static void state_estimation_aftermath (void);
 
 void state_estimation_init (void) {
 
+  state_estimation.mode = STATE_ESTIMATION_MODE_OFF;
+
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
 
@@ -178,6 +180,8 @@ static inline void state_estimation_update_covariance ( struct DelflyModelCovari
 
 
 void state_estimation_run (void) {
+
+  state_estimation.mode = STATE_ESTIMATION_MODE_ESTIMATE;
 
   struct Int32Mat33 residual_inv;
   struct Int32Vect3 offset_pos, offset_vel, offset_acc;

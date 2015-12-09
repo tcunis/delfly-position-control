@@ -32,13 +32,13 @@
 
 struct DelflyModelStates {
   /* position in m, with #INT32_POS_FRAC */
-  struct Int64Vect3 pos;
+  struct Int32Vect3 pos;
 
   /* velocity in m/s, with #INT32_SPEED_FRAC */
-  struct Int64Vect3 vel;
+  struct Int32Vect3 vel;
 
   /* acceleration in m/s2, with #INT32_ACCEL_FRAC */
-  struct Int64Vect3 acc;
+  struct Int32Vect3 acc;
 
   /* attitude in rad, with #INT32_EULER_FRAC */
   struct Int32Eulers att;
@@ -85,42 +85,48 @@ static inline void delfly_model_init_covariance ( struct DelflyModelCovariance* 
 static inline void delfly_model_assign_covariance ( struct DelflyModelCovariance* cov, int32_t period, struct Int32Vect3 acc_dist ) {
 
   struct Int32Mat33 dist_mat;
-  INT32_MAT33_DIAG( dist_mat, SQUARE(acc_dist.x), SQUARE(acc_dist.y), SQUARE(acc_dist.z));
+  float acc_dist_x = FLOAT_OF_BFP(acc_dist.x, INT32_MATLAB_FRAC),
+		acc_dist_y = FLOAT_OF_BFP(acc_dist.y, INT32_MATLAB_FRAC),
+		acc_dist_z = FLOAT_OF_BFP(acc_dist.z, INT32_MATLAB_FRAC);
+  INT32_MAT33_DIAG( dist_mat, BFP_OF_REAL(SQUARE(acc_dist_x), INT32_MATLAB_FRAC),
+		  	  	  	  	  	  	  BFP_OF_REAL(SQUARE(acc_dist_y), INT32_MATLAB_FRAC),
+								  	  BFP_OF_REAL(SQUARE(acc_dist_z), INT32_MATLAB_FRAC) );
 
   struct Int64Mat33 temp;
+  float period_f = FLOAT_OF_BFP(period, INT32_TIME_FRAC);
 
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, HYCUBE(period), (4<<(4*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, HYCUBE(period_f), 4 );
   MAT33_COPY(cov->pos_pos, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, CUBE(period),   (2<<(3*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, CUBE(period_f),   2 );
   MAT33_COPY(cov->pos_vel, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (2<<(2*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (2<<(2*INT32_TIME_FRAC)) );
   MAT33_COPY(cov->pos_acc, temp);
 
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, CUBE(period),   (2<<(3*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, CUBE(period_f),   2 );
   MAT33_COPY(cov->vel_pos, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (1<<(2*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (1<<(2*INT32_TIME_FRAC)) );
   MAT33_COPY(cov->vel_vel, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, period,         (1<<(INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, period,         (1<<(INT32_TIME_FRAC)) );
   MAT33_COPY(cov->acc_acc, temp);
 
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (2<<(2*INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, SQUARE(period), (2<<(2*INT32_TIME_FRAC)) );
   MAT33_COPY(cov->acc_pos, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, period,         (1<<(INT32_TIME_FRAC+INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, period,         (1<<(INT32_TIME_FRAC)) );
   MAT33_COPY(cov->acc_vel, temp);
   MAT33_ZERO(temp);
-  MAT33_ADD_SCALED2( temp, dist_mat, 1,              (1<<(INT32_MATLAB_FRAC)) );
+  MAT33_ADD_SCALED2( temp, dist_mat, 1,              1 );
   MAT33_COPY(cov->acc_acc, temp);
 }
 
-static inline void delfly_model_assign_states ( struct DelflyModelStates* states, struct Int64Vect3 pos, struct Int64Vect3 vel, struct Int64Vect3 acc ) {
+static inline void delfly_model_assign_states ( struct DelflyModelStates* states, struct Int32Vect3 pos, struct Int32Vect3 vel, struct Int32Vect3 acc ) {
 
   VECT3_COPY(states->pos, pos);
   VECT3_COPY(states->vel, vel);
@@ -160,59 +166,48 @@ static inline void delfly_model_update_covariance ( struct DelflyModelCovariance
 
   static const int64_t TIME_SQUARE = 1<<(2*INT32_TIME_FRAC);
   static const int64_t TIME_CUBE   = 1<<(3*INT32_TIME_FRAC);
-  static const int64_t TIME_HYCUBE = 1<<(4*INT32_TIME_FRAC);
 
-  MAT33_COPY(temp, cov->pos_pos);
-  MAT33_ADD_SCALED2( temp, cov->vel_pos, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->pos_vel, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_pos, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->vel_vel, SQUARE(period), (1*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->pos_acc, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, CUBE(period),   (2*TIME_CUBE) );
-  MAT33_ADD_SCALED2( temp, cov->vel_acc, CUBE(period),   (2*TIME_CUBE) );
-  MAT33_ADD_SCALED2( temp, cov->acc_acc, HYCUBE(period), (4*TIME_HYCUBE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.pos_pos );
-  MAT33_COPY(cov->pos_pos, temp);
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->vel_pos, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->pos_vel, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->acc_pos, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->vel_vel, SQUARE(period), (1*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->pos_acc, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->acc_vel, CUBE(period),   (2*TIME_CUBE) );
+  MAT33_ADD_SCALED2( cov->pos_pos, cov->vel_acc, CUBE(period),   (2*TIME_CUBE) );
+  MAT33_ZERO(temp);
+  MAT33_ADD_SCALED2( temp, cov->acc_acc, HYCUBE(period)/(1<<INT32_TIME_FRAC), (1<<(3*INT32_TIME_FRAC)) );
+  MAT33_ADD_SCALED2( cov->pos_pos, temp, 1, 4);
+  MAT33_ADD( cov->pos_pos, delfly_model_process_covariance.pos_pos );
 
-  MAT33_COPY(temp, cov->pos_vel);
-  MAT33_ADD_SCALED2( temp, cov->vel_vel, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->pos_acc, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->vel_acc, SQUARE(period), (1*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->acc_acc, CUBE(period),   (2*TIME_CUBE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.pos_vel );
-  MAT33_COPY(cov->pos_vel, temp);
+  MAT33_ADD_SCALED2( cov->pos_vel, cov->vel_vel, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->pos_vel, cov->pos_acc, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->pos_vel, cov->acc_vel, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->pos_vel, cov->vel_acc, SQUARE(period), (1*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->pos_vel, cov->acc_acc, CUBE(period),   (2*TIME_CUBE) );
+  MAT33_ADD( cov->pos_vel, delfly_model_process_covariance.pos_vel );
 
-  MAT33_COPY(temp, cov->pos_acc);
-  MAT33_ADD_SCALED2( temp, cov->vel_acc, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.pos_acc );
-  MAT33_COPY(cov->pos_acc, temp);
+  MAT33_ADD_SCALED2( cov->pos_acc, cov->vel_acc, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->pos_acc, cov->acc_vel, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD( cov->pos_acc, delfly_model_process_covariance.pos_acc );
 
-  MAT33_COPY(temp, cov->vel_pos);
-  MAT33_ADD_SCALED2( temp, cov->acc_pos, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->vel_vel, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, SQUARE(period), (1*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->vel_acc, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD_SCALED2( temp, cov->acc_acc, CUBE(period),   (2*TIME_CUBE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.vel_pos );
-  MAT33_COPY(cov->vel_pos, temp);
+  MAT33_ADD_SCALED2( cov->vel_pos, cov->acc_pos, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->vel_pos, cov->vel_vel, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->vel_pos, cov->acc_vel, SQUARE(period), (1*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->vel_pos, cov->vel_acc, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD_SCALED2( cov->vel_pos, cov->acc_acc, CUBE(period),   (2*TIME_CUBE) );
+  MAT33_ADD( cov->vel_pos, delfly_model_process_covariance.vel_pos );
 
-  MAT33_COPY(temp, cov->vel_vel);
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->vel_acc, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_acc, SQUARE(period), (1*TIME_SQUARE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.vel_vel );
-  MAT33_COPY(cov->vel_vel, temp);
+  MAT33_ADD_SCALED2( cov->vel_vel, cov->acc_vel, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->vel_vel, cov->vel_acc, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->vel_vel, cov->acc_acc, SQUARE(period), (1*TIME_SQUARE) );
+  MAT33_ADD( cov->vel_vel, delfly_model_process_covariance.vel_vel );
 
   MAT33_ADD_SCALED2( cov->vel_acc, cov->acc_acc, period, (1<<INT32_TIME_FRAC) );
   MAT33_ADD( cov->vel_acc, delfly_model_process_covariance.vel_acc );
 
-  MAT33_COPY(temp, cov->acc_pos);
-  MAT33_ADD_SCALED2( temp, cov->acc_vel, period,         (1<<INT32_TIME_FRAC) );
-  MAT33_ADD_SCALED2( temp, cov->acc_acc, SQUARE(period), (2*TIME_SQUARE) );
-  MAT33_ADD( temp, delfly_model_process_covariance.acc_pos );
-  MAT33_COPY(cov->acc_pos, temp);
+  MAT33_ADD_SCALED2( cov->acc_pos, cov->acc_vel, period,         (1<<INT32_TIME_FRAC) );
+  MAT33_ADD_SCALED2( cov->acc_pos, cov->acc_acc, SQUARE(period), (2*TIME_SQUARE) );
+  MAT33_ADD( cov->acc_pos, delfly_model_process_covariance.acc_pos );
 
   MAT33_ADD_SCALED2( cov->acc_vel, cov->acc_acc, period, (1<<INT32_TIME_FRAC) );
   MAT33_ADD( cov->acc_vel, delfly_model_process_covariance.acc_vel );

@@ -28,7 +28,10 @@
 #include "delfly_telemetry.h"
 
 #include "delfly_state.h"
+#include "state_estimation.h"
 #include "speed_control_var.h"
+
+#include "delfly_algebra_int.h"
 
 
 static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
@@ -76,8 +79,37 @@ static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct l
 }
 
 static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_STATEESTIMATION(struct transport_tx*, struct link_device*
-//	);
+
+	int32_t res_cov;
+	int32_t gain_pos, gain_vel, gain_acc;
+
+	INT32_MAT33_DET(res_cov,  state_estimation.covariance.residual, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(gain_pos, state_estimation.gain.pos_err, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(gain_vel, state_estimation.gain.vel_err, INT32_MATLAB_FRAC);
+	INT32_MAT33_DET(gain_acc, state_estimation.gain.acc_err, INT32_MATLAB_FRAC);
+
+	DOWNLINK_SEND_DELFLY_STATEESTIMATION(DefaultChannel, DefaultDevice,
+		&state_estimation.mode,
+		&state_estimation.err.x,
+		&state_estimation.err.y,
+		&state_estimation.err.z,
+		&res_cov,
+		&gain_pos,
+		&gain_vel,
+		&gain_acc,
+		&state_estimation.states.pos.x,
+		&state_estimation.states.pos.y,
+		&state_estimation.states.pos.z,
+		&state_estimation.states.vel.x,
+		&state_estimation.states.vel.y,
+		&state_estimation.states.vel.z,
+		&state_estimation.out.pos.x,
+		&state_estimation.out.pos.y,
+		&state_estimation.out.pos.z,
+		&state_estimation.out.vel.x,
+		&state_estimation.out.vel.y,
+		&state_estimation.out.vel.z
+	);
 }
 
 static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {

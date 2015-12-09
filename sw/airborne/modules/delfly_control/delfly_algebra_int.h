@@ -76,6 +76,21 @@ struct Int64Mat33 {
     MAT33_ELMT((_mat1),2,2) += (MAT33_ELMT((_mat2),2,2) * (_num)) / (_den);  \
   }
 
+#define INT32_MAT33_DET(_det, _m, _frac) {		\
+	const float m00 = MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,1);    \
+	const float m10 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,1);    \
+	const float m20 = MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,1);    \
+	_det = (MAT33_ELMT((_m),0,0)*m00 - MAT33_ELMT((_m),1,0)*m10 + MAT33_ELMT((_m),2,0)*m20)/(1<<(2*_frac)); \
+}
+
+//const float m01 = MAT33_ELMT((_m),1,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),1,2)*MAT33_ELMT((_m),2,0);
+//const float m11 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),2,0);
+//const float m21 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,2) - MAT33_ELMT((_m),0,2)*MAT33_ELMT((_m),1,0);
+//const float m02 = MAT33_ELMT((_m),1,0)*MAT33_ELMT((_m),2,1) - MAT33_ELMT((_m),1,1)*MAT33_ELMT((_m),2,0);
+//const float m12 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),2,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),2,0);
+//const float m22 = MAT33_ELMT((_m),0,0)*MAT33_ELMT((_m),1,1) - MAT33_ELMT((_m),0,1)*MAT33_ELMT((_m),1,0);
+
+
 #define MAT33_MULT2(_mat0, _mat1, _mat2, _s) {         \
 	MAT33_ELMT((_mat0),0,0) = (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,0) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,0) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,0)) * (_s);  \
 	MAT33_ELMT((_mat0),0,1) = (MAT33_ELMT((_mat1),0,0)*MAT33_ELMT((_mat2),0,1) + MAT33_ELMT((_mat1),0,1)*MAT33_ELMT((_mat2),1,1) + MAT33_ELMT((_mat1),0,2)*MAT33_ELMT((_mat2),2,1)) * (_s);  \

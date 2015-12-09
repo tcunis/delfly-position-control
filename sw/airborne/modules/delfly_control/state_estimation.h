@@ -32,6 +32,10 @@
 #include "delfly_model.h"
 
 
+#define STATE_ESTIMATION_MODE_OFF		0
+#define STATE_ESTIMATION_MODE_ESTIMATE	1
+
+
 struct StateEstimationCovariances {
   struct DelflyModelCovariance estimate;
   struct Int32Mat33 residual;
@@ -45,6 +49,8 @@ struct StateEstimationGain {
 
 
 struct StateEstimation {
+
+  uint8_t mode;
 
   struct DelflyModelStates states;
   struct DelflyModelStates out;
