@@ -100,6 +100,8 @@ void guidance_h_module_enter() {
   INT32_ZERO(delfly_guidance.cmd.h_acc);
   INT32_ZERO(delfly_guidance.cmd.heading);
   VECT2_ZERO(delfly_guidance.sp.vel_rc.xy);
+
+  guidance_h.rc_sp.psi = delfly_state.h.heading;
 }
 
 
