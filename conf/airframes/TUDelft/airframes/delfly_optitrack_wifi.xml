@@ -29,6 +29,7 @@
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500" />
       <configure name="USE_BARO_BOARD" value="FALSE" />
       <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
+      <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
     </target><!--ap-->
     
     <target name="nps" board="pc">

@@ -239,7 +239,7 @@
         
         <define name="RADIO_MODE" value="RADIO_FLAP"></define>
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"></define>
-		<define name="USE_PERSISTENT_SETTINGS" value="TRUE"></define>
+		    <define name="USE_PERSISTENT_SETTINGS" value="TRUE"></define>
       </subsystem>
 
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"></configure>
