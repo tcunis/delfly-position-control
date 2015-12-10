@@ -34,6 +34,7 @@
 #include "delfly_control.h"
 
 #include "state_estimation.h"
+#include "delfly_model.h"
 
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
@@ -87,6 +88,9 @@ void delfly_control_stop(void){
 void delfly_control_run(void) {
 
   state_estimation_run();
+  delfly_model_run();
+
+  delfly_control_module_run();
 }
 
 /* control module periodic function */

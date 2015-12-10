@@ -916,8 +916,8 @@
   <message name="DELFLY_SPEEDCONTROL"  id="109">
    <description>Input, states, and output of the Delfly control speed control sub-module. 77 bytes</description>
    <field name="mode"              type="uint8" values="OFF|ENTER|CONTROL">Speed control mode</field>
-   <field name="sp_h"              type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
-   <field name="sp_v"              type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
+   <field name="sp_acc_h"          type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
+   <field name="sp_acc_v"          type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
    <field name="air_speed"         type="int32" alt_unit=" m/s"        alt_unit_coef="0.00000191">Air speed</field>
    <field name="eq_pitch"          type="int32" alt_unit=" deg"        alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
    <field name="eq_throttle"       type="int32" alt_unit=" %"          alt_unit_coef="0.00610352">Equilibrii throttle frequency</field>
@@ -925,6 +925,8 @@
    <field name="inv_lift_throttle" type="int32" alt_unit=" m/(% s2)"   alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. throttle frequency</field>
    <field name="inv_drag_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. pitch</field>
    <field name="inv_drag_throttle" type="int32" alt_unit=" m/(% s2)"   alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. throttle frequency</field>
+   <field name="ref_vel_h"         type="int32" alt_unit=" m/s"        alt_unit_coef="0.00000191">Reference horizontal velocity</field>
+   <field name="ref_vel_v"         type="int32" alt_unit=" m/s"        alt_unit_coef="0.00000191">Reference vertical velocity</field>
    <field name="err_h"             type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Horizontal acceleration error</field>
    <field name="err_v"             type="int32" alt_unit=" m/s2"       alt_unit_coef="0.00097656">Vertical acceleration error</field>
    <field name="err_h_int"         type="int32" alt_unit=" m/s"        alt_unit_coef="0.00000191">Integrated horizontal error</field>
@@ -933,8 +935,8 @@
    <field name="cmd_ff_throttle"   type="int32" alt_unit=" %"          alt_unit_coef="0.01041667">Feed-forward throttle frequency command</field>
    <field name="cmd_fb_pitch"      type="int32" alt_unit=" deg"        alt_unit_coef="0.01398823">Feed-back pitch command</field>
    <field name="cmd_fb_throttle"   type="int32" alt_unit=" %"          alt_unit_coef="0.01041667">Feed-back throttle frequency command</field>
-   <field name="cmd_pitch"         type="int32" alt_unit=" deg"        alt_unit_coef="0.01398823">Pitch command</field>
-   <field name="cmd_throttle"      type="int32" alt_unit=" %"          alt_unit_coef="0.01041667">Throttle frequency command</field>
+   <field name="cmd_pitch"         type="int32" alt_unit=" deg"        alt_unit_coef="0.01398823">Pitch command (cmd = eq + ff + fb)</field>
+   <field name="cmd_throttle"      type="int32" alt_unit=" %"          alt_unit_coef="0.01041667">Throttle frequency command (cmd = eq + ff + fb)</field>
   </message>
   
   <message name="DELFLY_GUIDANCE" id="110">

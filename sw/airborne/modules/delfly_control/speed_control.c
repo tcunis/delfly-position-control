@@ -32,7 +32,9 @@
 #include "speed_control_var.h"
 #include "delfly_control.h"
 
+#include "delfly_model.h"
 #include "delfly_state.h"
+
 #include "matlab_include.h"
 
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
@@ -117,6 +119,9 @@ void speed_control_enter (void) {
   //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
 
+  delfly_model_enter();
+  delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
+
   /* TODO: gain scheduling w.r.t. air speed */
   VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
   VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
@@ -131,6 +136,7 @@ void speed_control_estimate_error (void) {
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
 
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
+  //TODO: use reference model!
   VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
 		  	  	    speed_control.sp.acceleration.xy,
 				    SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
@@ -206,6 +212,8 @@ speed_control_var.fb_cmd.throttle = TRIM_UPPRZ(speed_control_var.fb_cmd.throttle
   stabilization_cmd[COMMAND_THRUST] = speed_control_var.cmd.throttle;
 
   stabilization_attitude_run(in_flight);
+
+  delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
 }
 
 

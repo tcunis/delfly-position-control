@@ -30,6 +30,12 @@
 #include "matlab_include.h"
 
 
+#define DELFLY_MODEL_MODE_OFF        0
+#define DELFLY_MODEL_MODE_ENTER      1
+#define DELFLY_MODEL_MODE_EVOLUTE    2
+
+
+
 struct DelflyModelStates {
   /* position in m, with #INT32_POS_FRAC */
   struct Int32Vect3 pos;
@@ -56,6 +62,8 @@ struct DelflyModelCovariance {
 
 
 struct DelflyModel {
+
+	uint8_t mode;
 
 	struct DelflyModelStates states;
 };

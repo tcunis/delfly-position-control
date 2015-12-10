@@ -24,6 +24,8 @@
 
 #include "delfly_model.h"
 
+#include "delfly_control.h"
+
 #include "state_estimation.h"
 
 #include "delfly_algebra_int.h"
@@ -34,24 +36,30 @@ struct DelflyModel delfly_model;
 
 void delfly_model_init (void) {
 
+  delfly_model.mode = DELFLY_MODEL_MODE_OFF;
+
   delfly_model_init_states( &delfly_model.states );
 }
 
 
 void delfly_model_enter (void) {
 
+  delfly_model.mode = DELFLY_MODEL_MODE_ENTER;
+
   delfly_model_assign_states( &delfly_model.states, state_estimation.states.pos, state_estimation.states.vel, state_estimation.states.acc );
   delfly_model_assign_eulers( &delfly_model.states, state_estimation.states.att, state_estimation.states.rot );
 }
 
-extern void delfly_model_set_cmd (int32_t cmd_h_acc, int32_t cmd_v_acc) {
+void delfly_model_set_cmd (int32_t cmd_h_acc, int32_t cmd_v_acc) {
 
   delfly_model.states.acc.x = ( cmd_h_acc * pprz_itrig_cos(delfly_model.states.att.psi) )/(1<<INT32_TRIG_FRAC);
   delfly_model.states.acc.y = ( cmd_h_acc * pprz_itrig_sin(delfly_model.states.att.psi) )/(1<<INT32_TRIG_FRAC);
   delfly_model.states.acc.z =   cmd_v_acc;
 }
 
-extern void delfly_model_run (void) {
+void delfly_model_run (void) {
+
+  delfly_model.mode = DELFLY_MODEL_MODE_EVOLUTE;
 
   delfly_model_predict_states( &delfly_model.states, DELFLY_MODEL_RUN_PERIOD*(1<<INT32_TIME_FRAC) );
 
