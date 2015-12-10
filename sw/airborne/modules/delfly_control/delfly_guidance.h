@@ -77,6 +77,7 @@ struct DelflyGuidanceGains {
 };
 
 struct DelflyGuidanceSetPoint {
+
   /* radio-control velocity set-point
    * in m/s, with #INT32_SPEED_FRAC  */
   union Int32VectLong vel_rc;

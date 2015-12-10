@@ -33,6 +33,8 @@
 #include "delfly_state.h"
 #include "speed_control.h"
 
+#include "matlab_include.h"
+
 #include "guidance/guidance_v.h"
 
 
@@ -57,35 +59,45 @@ void guidance_v_module_init(void) {
 
   delfly_guidance.cmd.v_acc = 0;
   VECT2_ZERO(delfly_guidance.err.ver.xy);
+
+  VECT2_COPY(delfly_guidance.gains.ver.xy, matlab_guidance_gain);
 }
 
 
 void guidance_v_module_enter(void) {
 
-	delfly_guidance.cmd.v_acc = 0;
+  guidance_v_z_sp = delfly_state.v.pos;
+  guidance_v_zd_sp = 0;
+
+  delfly_guidance.cmd.v_acc = 0;
 }
 
 
 void guidance_v_module_run(bool_t in_flight) {
 
-	guidance_v_module_run_traj(in_flight);
+  guidance_v_module_run_traj(in_flight);
 
-	speed_control_set_cmd_v(delfly_guidance.cmd.v_acc);
+  speed_control_set_cmd_v(delfly_guidance.cmd.v_acc);
 }
 
 
 void guidance_v_module_run_traj( bool_t in_flight ) {
 
-	/* compute position error    */
-	delfly_guidance.err.pos.z = guidance_v_z_sp - delfly_state.v.pos;
-	/* saturate it               */
-	//VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
+  /* compute position error    */
+  delfly_guidance.err.pos.z = guidance_v_z_sp - delfly_state.v.pos;
+  /* saturate it               */
+  //VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
 
-	/* compute speed error    */
-	delfly_guidance.err.vel.z = guidance_v_z_sp - delfly_state.v.vel;
-	/* saturate it               */
-	//VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+  /* compute speed error    */
+  delfly_guidance.err.vel.z = guidance_v_z_sp - delfly_state.v.vel;
+  /* saturate it               */
+  //VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
+  delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
+  delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
 
-	delfly_guidance.cmd.v_acc = 0;
+  delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+		                    + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+
+  //delfly_guidance.cmd.v_acc = 0;
 }
