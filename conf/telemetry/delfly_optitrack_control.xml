@@ -176,6 +176,14 @@
       <message name="SYS_MON"			period="1." module="sys_mon"/>
       <message name="GPS_DIAGNOSTICS"        period=".25" module="gps_diagnostics"/>
     </mode>
+    
+    <mode name="empty"/>
+  </process>
+  
+  <process name="Logger">
+    <mode name="default">
+      <message name="ALIVE" period="0.1" phase="0."/>
+    </mode>  
   </process>
 </telemetry>
 
