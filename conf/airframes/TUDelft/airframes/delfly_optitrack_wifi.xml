@@ -70,7 +70,7 @@
     <load name="delfly_utils.xml"/>
     <load name="gps_diagnostics.xml"/>
     <load name="logger_sd_spi_direct.xml">
-     <configure name="SDLOGGER_CONTROL_SWITCH" value="RADIO_FLAP"/>
+     <configure name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="RADIO_ELEV"/>
      <configure name="LOGGER_LED" value="3"/>
     </load><!--logger_sd_spi_direct.xml-->
     <!--load name="sys_mon.xml"/-->
