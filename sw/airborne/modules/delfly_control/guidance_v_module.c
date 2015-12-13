@@ -66,14 +66,17 @@ void guidance_v_module_init(void) {
 
 void guidance_v_module_enter(void) {
 
-  guidance_v_z_sp = delfly_state.v.pos;
-  guidance_v_zd_sp = 0;
+  // called by guidance_h_module_enter prior:
+  //defly_guidance_enter()
 
-  delfly_guidance.cmd.v_acc = 0;
+  INT32_ZERO(delfly_guidance.cmd.v_acc);
 }
 
 
 void guidance_v_module_run(bool_t in_flight) {
+
+  // called by guidance_h_module_run prior:
+  //defly_guidance_run()
 
   guidance_v_module_run_traj(in_flight);
 
@@ -83,21 +86,27 @@ void guidance_v_module_run(bool_t in_flight) {
 
 void guidance_v_module_run_traj( bool_t in_flight ) {
 
-  /* compute position error    */
-  delfly_guidance.err.pos.z = guidance_v_z_sp - delfly_state.v.pos;
-  /* saturate it               */
-  //VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
+  switch (delfly_guidance.mode) {
 
-  /* compute speed error    */
-  delfly_guidance.err.vel.z = guidance_v_z_sp - delfly_state.v.vel;
-  /* saturate it               */
-  //VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+  case DELFLY_GUIDANCE_MODE_MODULE:
+  case DELFLY_GUIDANCE_MODE_NAV:
+  default:
+  {
+	/* compute position error    */
+	delfly_guidance.err.pos.z = delfly_guidance.sp.pos.z - delfly_state.v.pos;
+	/* saturate it               */
+	//VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
 
-  delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
-  delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
+	/* compute speed error    */
+	delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - delfly_state.v.vel;
+	/* saturate it               */
+	//VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
-  delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-		                    + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+	delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
+	delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
 
-  //delfly_guidance.cmd.v_acc = 0;
+	delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+							+ delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+  }
+  }
 }

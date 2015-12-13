@@ -29,6 +29,13 @@
 #include "delfly_algebra_int.h"
 
 
+#define DELFLY_GUIDANCE_MODE_OFF			0
+#define DELFLY_GUIDANCE_MODE_MODULE			1
+#define DELFLY_GUIDANCE_MODE_NAV			2
+//#define DELFLY_GUIDANCE_MODE_NAV_WAYPOINT		6
+//#define DELFLY_GUIDANCE_MODE_NAV_SPEED		7
+
+
 struct DelflyGuidanceCommand {
   /* horizontal acceleration command
    * in m/s2, with #INT32_ACCEL_FRAC */
@@ -81,10 +88,28 @@ struct DelflyGuidanceSetPoint {
   /* radio-control velocity set-point
    * in m/s, with #INT32_SPEED_FRAC  */
   union Int32VectLong vel_rc;
+
+  /* radio-control attitude set-point
+   * in rad, with #INT32_ANGLE_FRAC */
+  struct Int32Eulers att_rc;
+
+  /* position set-point
+   * in m, with #INT32_POS_FRAC */
+  struct Int32Vect3 pos;
+
+  /* velocity set-point
+   * in m/s, with #INT32_SPEED_FRAC */
+  struct Int32Vect3 vel;
+
+  /* heading set-point
+   * in rad, with #INT32_ANGLE_FRAC */
+  int32_t heading;
 };
 
 
 struct DelflyGuidance {
+
+  uint8_t mode;
 
   struct DelflyGuidanceSetPoint sp;
 
@@ -95,6 +120,11 @@ struct DelflyGuidance {
 
 
 extern struct DelflyGuidance delfly_guidance;
+
+extern void delfly_guidance_int (void);
+
+extern void delfly_guidance_enter (void);
+extern void delfly_guidance_run (void);
 
 
 #endif /* DELFLY_GUIDANCE_H_ */

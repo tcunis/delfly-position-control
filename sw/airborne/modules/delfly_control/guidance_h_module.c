@@ -82,12 +82,8 @@ static void guidance_h_module_run_traj( bool_t );
 
 
 void guidance_h_module_init() {
-  //nothing to do yet
-  INT32_ZERO(delfly_guidance.cmd.h_acc);
-  INT32_ZERO(delfly_guidance.cmd.heading);
-  VECT2_ZERO(delfly_guidance.err.fwd.xy);
-  VECT2_ZERO(delfly_guidance.err.lat.xy);
-  VECT2_ZERO(delfly_guidance.sp.vel_rc.xy);
+
+  delfly_guidance_init();
 
   VECT2_COPY(delfly_guidance.gains.fwd.xy, matlab_guidance_gain_fwd);
 //  guidance_h_module_fwd_gain.states.pos /= (1 << INT32_POS_FRAC);
@@ -97,36 +93,59 @@ void guidance_h_module_init() {
 
 void guidance_h_module_enter() {
 
+  delfly_guidance_enter();
+
   INT32_ZERO(delfly_guidance.cmd.h_acc);
   INT32_ZERO(delfly_guidance.cmd.heading);
   VECT2_ZERO(delfly_guidance.sp.vel_rc.xy);
 
-  guidance_h.rc_sp.psi = delfly_state.h.heading;
+  switch (delfly_guidance.mode) {
+
+  case DELFLY_GUIDANCE_MODE_MODULE:
+    delfly_guidance.sp.att_rc.psi = delfly_state.h.heading;
+    break;
+
+  case DELFLY_GUIDANCE_MODE_NAV:
+  default:
+	//nothing to do
+  }
 }
 
 
-#define GUIDANCE_H_MODULE_REF_MAX_SPEED   0.3
+#define DELFLY_GUIDANCE_REF_MAX_SPEED   0.3
 
 
 void guidance_h_module_read_rc(void) {
 
-  stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, TRUE, FALSE, FALSE);
-//#if GUIDANCE_H_USE_SPEED_REF
-  // negative pitch is forward
-  int64_t rc_x = -radio_control.values[RADIO_PITCH];
-  int64_t rc_y = radio_control.values[RADIO_ROLL];
-  DeadBand(rc_x, MAX_PPRZ / 20);
-  DeadBand(rc_y, MAX_PPRZ / 20);
+  switch (delfly_guidance.mode) {
 
-  // convert input from MAX_PPRZ range to SPEED_BFP
-  int32_t max_speed = SPEED_BFP_OF_REAL(GUIDANCE_H_MODULE_REF_MAX_SPEED);
-  delfly_guidance.sp.vel_rc.fv.fwd = rc_x * max_speed / MAX_PPRZ;
-  delfly_guidance.sp.vel_rc.fv.ver = 0; //rc_y * max_speed / MAX_PPRZ;
+  case DELFLY_GUIDANCE_MODE_MODULE:
+  {
+	stabilization_attitude_read_rc_setpoint_eulers(&delfly_guidance.sp.att_rc, TRUE, FALSE, FALSE);
+//#if GUIDANCE_H_USE_SPEED_REF
+	// negative pitch is forward
+	int64_t rc_x = -radio_control.values[RADIO_PITCH];
+	int64_t rc_y = radio_control.values[RADIO_ROLL];
+	DeadBand(rc_x, MAX_PPRZ / 20);
+	DeadBand(rc_y, MAX_PPRZ / 20);
+
+	// convert input from MAX_PPRZ range to SPEED_BFP
+	int32_t max_speed = SPEED_BFP_OF_REAL(DELFLY_GUIDANCE_REF_MAX_SPEED);
+	delfly_guidance.sp.vel_rc.fv.fwd = rc_x * max_speed / MAX_PPRZ;
+	delfly_guidance.sp.vel_rc.fv.ver = 0; //rc_y * max_speed / MAX_PPRZ;
 //#endif
+  } break;
+
+  case DELFLY_GUIDANCE_MODE_NAV:
+  default:
+	//nothing to do
+  }
 }
 
 
 void guidance_h_module_run(bool_t in_flight) {
+
+  delfly_guidance_run();
 
   guidance_h_module_run_traj(in_flight);
 
@@ -136,18 +155,47 @@ void guidance_h_module_run(bool_t in_flight) {
 
 void guidance_h_module_run_traj( bool_t in_flight ) {
 
-	VECT2_DIFF(delfly_guidance.err.pos, guidance_h.sp.pos, delfly_state.h.pos);
-	VECT2_DIFF(delfly_guidance.err.vel, guidance_h.sp.speed, delfly_state.h.vel);
+  delfly_guidance_run();
 
+  switch (delfly_guidance.mode) {
+
+  case DELFLY_GUIDANCE_MODE_MODULE:
+  {
 	delfly_guidance.err.fwd.states.pos = 0;
-	delfly_guidance.err.lat.states.vel = delfly_guidance.sp.vel_rc.fv.fwd;
+	delfly_guidance.err.fwd.states.vel = delfly_guidance.sp.vel_rc.fv.fwd;
 
 //	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
 //	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
 //	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
 //	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+
 	delfly_guidance.cmd.h_acc = delfly_guidance.sp.vel_rc.fv.fwd/(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-	delfly_guidance.cmd.heading = guidance_h.rc_sp.psi; //delfly_state.h.heading
+	delfly_guidance.cmd.heading = delfly_guidance.sp.heading; //delfly_state.h.heading
+  } break;
+
+  case DELFLY_GUIDANCE_MODE_NAV:
+  {
+	VECT2_DIFF(delfly_guidance.err.pos, guidance_h.sp.pos, delfly_state.h.pos);
+	VECT2_DIFF(delfly_guidance.err.vel, guidance_h.sp.speed, delfly_state.h.vel);
+
+	delfly_guidance.err.fwd.states.pos = VECT2_GET_FWD(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+	delfly_guidance.err.fwd.states.vel = VECT2_GET_FWD(delfly_guidance.err.vel, delfly_guidance.sp.heading);
+
+	delfly_guidance.err.lat.states.pos = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+	delfly_guidance.err.lat.states.vel = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+
+//	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+//	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+//	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+//	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+	delfly_guidance.cmd.h_acc = 0;
+	delfly_guidance.cmd.heading = delfly_guidance.sp.heading;
 
 	//guidance_lat_adjust_heading( in_flight, cmd_heading, guidance_h_module_pos_err );
+  } break;
+
+  default:
+	//nothing to do
+  }
+
 }

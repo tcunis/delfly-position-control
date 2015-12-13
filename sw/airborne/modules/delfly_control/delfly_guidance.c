@@ -25,5 +25,65 @@
 
 #include "delfly_guidance.h"
 
+#include "firmwares/rotorcraft/autopilot.h"
+#include "firmwares/rotorcraft/navigation.h"
+
+
 
 struct DelflyGuidance delfly_guidance;
+
+
+void delfly_guidance_init (void) {
+
+  delfly_guidance.mode = DELFLY_GUIDANCE_MODE_OFF;
+
+  INT32_ZERO(delfly_guidance.cmd.h_acc);
+  INT32_ZERO(delfly_guidance.cmd.heading);
+  VECT2_ZERO(delfly_guidance.err.fwd.xy);
+  VECT2_ZERO(delfly_guidance.err.lat.xy);
+  VECT2_ZERO(delfly_guidance.sp.vel_rc.xy);
+
+}
+
+
+void delfly_guidance_enter (void) {
+
+  switch (autopilot_mode) {
+
+  case AP_MODE_MODULE:
+	delfly_guidance.mode = DELFLY_GUIDANCE_MODE_MODULE;
+	{
+	  delfly_guidance.sp.pos.z = delfly_state.v.pos;
+	  delfly_guidance.sp.vel.z = delfly_state.v.vel;
+	}
+	break;
+  case AP_MODE_NAV:
+	delfly_guidance.mode = DELFLY_GUIDANCE_MODE_NAV;
+	break;
+  default:
+	delfly_guidance.mode = DELFLY_GUIDANCE_MODE_OFF;
+  }
+}
+
+
+void delfly_guidance_run (void) {
+
+  switch (delfly_guidance.mode) {
+
+  case DELFLY_GUIDANCE_MODE_MODULE:
+  {
+    delfly_guidance.sp.heading = delfly_guidance.sp.att_rc.psi;
+    //TODO: set velocity set-point
+  } break;
+
+  case DELFLY_GUIDANCE_MODE_NAV:
+  {
+	delfly_guidance.sp.heading = nav_heading;
+	//TODO: set position and velocity set-point
+	ENU_OF_TO_NED(delfly_guidance.sp.pos, navigation_carrot);
+  } break;
+
+  default:
+	//nothing to do
+  }
+}

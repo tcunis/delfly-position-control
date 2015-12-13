@@ -119,6 +119,9 @@
     <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
     <define name="MODE_AUTO2" value="AP_MODE_MODULE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
+    <define name="GUIDANCE_H_MODE_IN_NAV" value="GUIDANCE_H_MODE_MODULE"/>
+    <define name="GUIDANCE_V_MODE_IN_NAV" value="GUIDANCE_V_MODE_MODULE"/>
+    
     <define name="AUTOPILOT_DISABLE_AHRS_KILL" value="TRUE"/>
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
     If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
