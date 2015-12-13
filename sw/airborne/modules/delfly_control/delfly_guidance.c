@@ -25,6 +25,8 @@
 
 #include "delfly_guidance.h"
 
+#include "delfly_state.h"
+
 #include "firmwares/rotorcraft/autopilot.h"
 #include "firmwares/rotorcraft/navigation.h"
 
@@ -84,6 +86,6 @@ void delfly_guidance_run (void) {
   } break;
 
   default:
-	//nothing to do
+  {} //nothing to do
   }
 }

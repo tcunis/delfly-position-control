@@ -107,7 +107,7 @@ void guidance_h_module_enter() {
 
   case DELFLY_GUIDANCE_MODE_NAV:
   default:
-	//nothing to do
+  {} //nothing to do
   }
 }
 
@@ -138,7 +138,7 @@ void guidance_h_module_read_rc(void) {
 
   case DELFLY_GUIDANCE_MODE_NAV:
   default:
-	//nothing to do
+  {} //nothing to do
   }
 }
 
@@ -195,7 +195,7 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
   } break;
 
   default:
-	//nothing to do
+  {} //nothing to do
   }
 
 }
