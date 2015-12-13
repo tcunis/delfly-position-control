@@ -881,6 +881,7 @@
    <field name="head_rate"    type="int32" alt_unit=" deg/s" alt_unit_coef="0.01398823">Heading rate</field>
    <field name="azimuth"      type="int32" alt_unit=" deg"   alt_unit_coef="0.01398823">Azimuth</field>
    <field name="flap_freq"    type="float" unit=" Hz">Flapping frequency</field>
+   <field name="log_status"   type="uint8" values="UnIntit|Error|Initializing|RetrIndex|Ready|Logging|LoggingFinalBlock|StoppedLogging|GetIndexForUpdate|UpdateIndexGetIndexForDownload|Downloading">SPI Logger status for debug</field>
    <!-- TODO: add attitude, and rates -->
   </message>
   

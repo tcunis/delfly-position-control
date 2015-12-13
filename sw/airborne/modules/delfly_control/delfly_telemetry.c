@@ -35,6 +35,8 @@
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
 
+#include "generated/modules.h"
+
 #include "delfly_algebra_int.h"
 
 
@@ -91,7 +93,8 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 	    &delfly_state.h.heading,
 	    &delfly_state.h.head_rate,
 	    &delfly_state.h.azimuth,
-	    &delfly_state.flap_freq
+	    &delfly_state.flap_freq,
+		&sdlogger_spi.status
 	);
 }
 
