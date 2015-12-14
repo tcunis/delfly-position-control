@@ -49,7 +49,7 @@
     <subsystem name="gps" type="datalink_acm"/>
     <subsystem name="guidance" type="delfly" />
     <subsystem name="imu" type="lisa_s_v1.0" />
-    <subsystem name="ins" type="extended" />
+    <subsystem name="ins" />
     <subsystem name="motor_mixing" />
     
 	  <subsystem name="rpm_sensor" type="eagletree">

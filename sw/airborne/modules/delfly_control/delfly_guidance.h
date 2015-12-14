@@ -121,7 +121,7 @@ struct DelflyGuidance {
 
 extern struct DelflyGuidance delfly_guidance;
 
-extern void delfly_guidance_int (void);
+extern void delfly_guidance_init (void);
 
 extern void delfly_guidance_enter (void);
 extern void delfly_guidance_run (void);
