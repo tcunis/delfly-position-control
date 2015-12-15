@@ -201,7 +201,7 @@ void speed_control_run (bool_t in_flight) {
   //for telemetry:
   speed_control_calculate_cmd(&speed_control_var.ff_cmd, &speed_control_eq_zero, &speed_control_var.mat);
   speed_control_calculate_cmd(&speed_control_var.fb_cmd, &speed_control_eq_zero, &speed_control_var.mat);
-speed_control_var.fb_cmd.throttle = TRIM_UPPRZ(speed_control_var.fb_cmd.throttle);
+  speed_control_var.fb_cmd.throttle = TRIM_UPPRZ(speed_control_var.fb_cmd.throttle);
 
   static struct Int32Eulers orientation_cmd;
   orientation_cmd.phi   = 0;
