@@ -74,6 +74,13 @@ struct Int64Mat33 {
     (_a).z += ((_b).z * (_num)) / (_den);        \
   }
 
+/* a == b */
+#define VECT3_EQUALS(_a, _b)	(	\
+	(_a).x == (_b).x &&				\
+	(_a).y == (_b).y &&				\
+	(_a).z == (_b).z				\
+  )
+
 /* m1 += m2 */
 #define MAT33_ADD(_mat1,_mat2) {     \
     MAT33_ELMT((_mat1),0,0) += MAT33_ELMT((_mat2),0,0);  \
