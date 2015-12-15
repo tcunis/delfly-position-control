@@ -74,6 +74,13 @@ struct Int64Mat33 {
     (_a).z += ((_b).z * (_num)) / (_den);        \
   }
 
+/* a = b * num / den */
+#define VECT3_ASSIGN_SCALED2(_a, _b, _num, _den) {   \
+    (_a).x = ((_b).x * (_num)) / (_den);        \
+    (_a).y = ((_b).y * (_num)) / (_den);        \
+    (_a).z = ((_b).z * (_num)) / (_den);        \
+  }
+
 /* a == b */
 #define VECT3_EQUALS(_a, _b)	(	\
 	(_a).x == (_b).x &&				\

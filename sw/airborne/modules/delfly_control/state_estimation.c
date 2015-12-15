@@ -57,6 +57,8 @@ static void state_estimation_aftermath (void);
 void state_estimation_init (void) {
 
   state_estimation.mode = STATE_ESTIMATION_MODE;
+  state_estimation.type = STATE_ESTIMATION_TYPE;
+  state_estimation.gps_freq = STATE_ESTIMATION_GPS_FREQ;
 
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
@@ -111,7 +113,7 @@ void state_estimation_getoutput (void) {
 }
 
 
-void state_estimation_enter (void) {
+void state_estimation_enter (uint8_t mode) {
 
   state_estimation_getoutput();
 
@@ -120,12 +122,24 @@ void state_estimation_enter (void) {
 
   VECT3_COPY(pos, state_estimation.out.pos);
 
-  switch (state_estimation.mode) {
-    case STATE_ESTIMATION_MODE_ENTER:
-    case STATE_ESTIMATION_MODE_ESTIMATE: {
+  switch (mode) {
+    /* PREDICATE/COMPLEMENTARY:
+     * nothing to do yet				*/
+    case STATE_ESTIMATION_TYPE_PRED:
+    case STATE_ESTIMATION_TYPE_COMP: {
+      VECT3_ZERO(vel);
+    } break;
+
+    /* GPS/KALMAN: assume zero velocity
+     * & acceleration during enter.		*/
+    case STATE_ESTIMATION_TYPE_GPS:
+    case STATE_ESTIMATION_TYPE_KALMAN: {
       VECT3_ZERO(vel);
       VECT3_ZERO(acc);
     } break;
+
+    case STATE_ESTIMATION_MODE_ENTER:
+    case STATE_ESTIMATION_MODE_ESTIMATE:
     case STATE_ESTIMATION_MODE_OFF:
     default: {
       VECT3_COPY(vel, state_estimation.out.vel);
@@ -139,7 +153,92 @@ void state_estimation_enter (void) {
 		  	  	  	  	  	  	  state_estimation.out.att,
 		  	  	  	  	  	  	  state_estimation.out.rot
   );
+
+  state_estimation.mode = mode;
 }
+
+
+
+void state_estimation_run (void) {
+
+  state_estimation_getoutput();
+
+  switch (state_estimation.mode) {
+    case STATE_ESTIMATION_MODE_ENTER: {
+      state_estimation_enter();
+    }
+    /*no break*/
+    case STATE_ESTIMATION_MODE_ESTIMATE:
+      state_estimation.mode = state_estimation.type;
+      break;
+
+    case STATE_ESTIMATION_TYPE_KALMAN:
+      state_estimation_run_kalman();
+      break;
+
+    case STATE_ESTIMATION_TYPE_GPS: {
+      static uint32_t last_time = 0, last_ticks = 0;
+      static struct Int32Vect3 pos_diff, vel_diff;
+      static struct Int32Vect3 last_pos, last_vel;
+      if ( gps.last_msg_time == last_time && gps.last_msg_ticks == last_ticks )
+      {}
+      else // new gps message
+      {
+    	VECT3_COPY(last_pos, state_estimation.states.pos);
+      	VECT3_COPY(last_vel, state_estimation.states.vel);
+
+      	// get position from gps
+      	VECT3_COPY(state_estimation.states.pos, state_estimation.out.pos);
+
+      	// get velocity as 1st discrete time derivative
+      	VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
+    	VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, state_estimation.gps_freq*(1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), 1);
+
+    	// get acceleration as 2nd discrete time derivative
+    	VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
+    	VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, state_estimation.gps_freq, (1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+
+    	last_time = gps.last_msg_time;
+    	last_ticks = gps.last_msg_ticks;
+      }
+      break;
+    }
+
+    case STATE_ESTIMATION_MODE_OFF:
+    default: {
+      state_estimation_enter();
+    } break;
+  }
+
+  state_estimation_aftermath();
+}
+
+
+void state_estimation_aftermath (void) {
+
+  struct Int32Vect3 pos, vel, acc;
+  VECT3_COPY(pos, state_estimation.states.pos);
+  VECT3_COPY(vel, state_estimation.states.vel);
+  VECT3_COPY(acc, state_estimation.states.acc);
+
+  set_position( &pos );
+  set_velocity( &vel );
+  //TODO: get airspeed
+  set_airspeed( &vel );
+  set_acceleration( &acc );
+
+  delfly_state.flap_freq = rpm_sensor.motor_frequency;
+
+  //TODO: get heading, azimuth
+  delfly_state.h.heading = state_estimation.states.att.psi;
+  delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
+  //TODO: get heading rate
+
+  set_speed_vel( int32_vect2_norm(&delfly_state.h.vel) );
+  set_speed_air( int32_vect2_norm(&delfly_state.h.air) );
+  set_speed_acc( int32_vect2_norm(&delfly_state.h.acc) );
+}
+
 
 /* updates state estimation co-variance matrix using Kalman gain matrix
  * P_(k|k) = (I - K_k H_k) P_(k|k-1)
@@ -206,26 +305,7 @@ static inline void state_estimation_update_covariance ( struct DelflyModelCovari
   MAT33_COPY(cov->acc_acc, covK.acc_acc);
 }
 
-
-void state_estimation_run (void) {
-
-  state_estimation_getoutput();
-
-  switch (state_estimation.mode) {
-    case STATE_ESTIMATION_MODE_ENTER: {
-      state_estimation_enter();
-      state_estimation.mode = STATE_ESTIMATION_MODE_ESTIMATE;
-    }
-    /*no break*/
-    case STATE_ESTIMATION_MODE_ESTIMATE:
-      break;
-    case STATE_ESTIMATION_MODE_OFF:
-    default: {
-      state_estimation_enter();
-      state_estimation_aftermath();
-    } return;
-  }
-
+static inline void state_estimation_run_kalman (void) {
   /* residual co-variance matrix inverse
    * with #INT32_MATLAB_FRAC              */
   // <for debug>: use state_estimation.covariance.residual_inv
@@ -235,10 +315,10 @@ void state_estimation_run (void) {
    * with #INT32_POS_FRAC                 */
   struct Int32Vect3 offset_pos;
   /* velocity estimation offset
-     * with #INT32_SPEED_FRAC                 */
+   * with #INT32_SPEED_FRAC                 */
   struct Int32Vect3 offset_vel;
   /* acceleration estimation offset
-     * with #INT32_ACCEL_FRAC                 */
+	 * with #INT32_ACCEL_FRAC                 */
   struct Int32Vect3 offset_acc;
 
   MAT33_ZERO( state_estimation.covariance.residual_inv );
@@ -273,32 +353,4 @@ void state_estimation_run (void) {
 
   /* aftermath */
   delfly_model_assign_eulers( &state_estimation.states, state_estimation.out.att, state_estimation.out.rot );
-
-  state_estimation_aftermath();
-}
-
-
-void state_estimation_aftermath (void) {
-
-  struct Int32Vect3 pos, vel, acc;
-  VECT3_COPY(pos, state_estimation.states.pos);
-  VECT3_COPY(vel, state_estimation.states.vel);
-  VECT3_COPY(acc, state_estimation.states.acc);
-
-  set_position( &pos );
-  set_velocity( &vel );
-  //TODO: get airspeed
-  set_airspeed( &vel );
-  set_acceleration( &acc );
-
-  delfly_state.flap_freq = rpm_sensor.motor_frequency;
-
-  //TODO: get heading, azimuth
-  delfly_state.h.heading = state_estimation.states.att.psi;
-  delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
-  //TODO: get heading rate
-
-  set_speed_vel( int32_vect2_norm(&delfly_state.h.vel) );
-  set_speed_air( int32_vect2_norm(&delfly_state.h.air) );
-  set_speed_acc( int32_vect2_norm(&delfly_state.h.acc) );
 }

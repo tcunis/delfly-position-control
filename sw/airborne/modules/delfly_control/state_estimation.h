@@ -32,13 +32,19 @@
 #include "delfly_model.h"
 
 
-#define STATE_ESTIMATION_MODE_OFF		    0
+#define STATE_ESTIMATION_MODE_OFF		0
 #define STATE_ESTIMATION_MODE_ENTER     1
 #define STATE_ESTIMATION_MODE_ESTIMATE	2
+
+#define STATE_ESTIMATION_TYPE_GPS		3
+#define STATE_ESTIMATION_TYPE_PRED		4
+#define STATE_ESTIMATION_TYPE_COMP		5
+#define STATE_ESTIMATION_TYPE_KALMAN	6
 
 #ifndef STATE_ESTIMATION_MODE
 #define STATE_ESTIMATION_MODE           STATE_ESTIMATION_MODE_OFF
 #endif
+
 
 
 struct StateEstimationCovariances {
@@ -66,6 +72,9 @@ struct StateEstimationGain {
 struct StateEstimation {
 
   uint8_t mode;
+  uint8_t type;
+
+  int32_t gps_freq;
 
   /* predicted states
    * in m,    with #INT32_POS_FRAC

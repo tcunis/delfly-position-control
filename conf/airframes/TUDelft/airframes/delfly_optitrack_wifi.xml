@@ -147,6 +147,11 @@
     <define name="FF_THROTTLE_GAIN" value="100"/>
     <define name="PITCH_OFFSET" value="70"/>
   </section><!--DELFLY_CONTROL-->
+  
+  <section name="DELFLY_STATE" prefix="STATE_ESTIMATION_">
+    <define name="TYPE"     value="STATE_ESTIMATION_TYPE_GPS"/>
+    <define name="GPS_FREQ" value="30"/>
+  </section><!--DELFLY_STATE-->
  
   <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
     <define name="LEDS_SWITCH" value="1"/>
