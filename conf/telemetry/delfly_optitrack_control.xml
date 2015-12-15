@@ -187,6 +187,7 @@
       <message name="DELFLY_GUIDANCE"        period="0.02"/>
       <message name="DELFLY_SPEEDCONTROL"    period="0.02"/>
       <message name="DELFLY_STATEESTIMATION" period="0.02"/>
+      <message name="GPS_INT"                period="0.02"/>
       <message name="STAB_ATTITUDE_INT"      period="0.1" />
       <message name="ROTORCRAFT_FP"          period="0.1" />
     </mode>  

@@ -30,10 +30,13 @@
 
 #include "delfly_control.h"
 
+#include "generated/airframe.h"
+
 #include "matlab_include.h"
 #include "delfly_algebra_int.h"
 
 #include "state.h"
+#include "subsystems/gps.h"
 #include "subsystems/sensors/rpm_sensor.h"
 
 
@@ -50,8 +53,11 @@ struct DelflyModelCovariance delfly_model_process_covariance;
 struct Int32Mat33 state_estimation_noise_covariance;
 
 
+static void state_estimation_enter_mode (uint8_t mode);
 static void state_estimation_getoutput (void);
 static void state_estimation_aftermath (void);
+
+static void state_estimation_run_kalman (void);
 
 
 void state_estimation_init (void) {
@@ -113,7 +119,12 @@ void state_estimation_getoutput (void) {
 }
 
 
-void state_estimation_enter (uint8_t mode) {
+void state_estimation_enter (void) {
+
+  state_estimation_enter_mode( state_estimation.mode );
+}
+
+void state_estimation_enter_mode (uint8_t mode) {
 
   state_estimation_getoutput();
 
@@ -128,6 +139,7 @@ void state_estimation_enter (uint8_t mode) {
     case STATE_ESTIMATION_TYPE_PRED:
     case STATE_ESTIMATION_TYPE_COMP: {
       VECT3_ZERO(vel);
+      VECT3_COPY(acc, state_estimation.out.acc);
     } break;
 
     /* GPS/KALMAN: assume zero velocity
@@ -165,12 +177,12 @@ void state_estimation_run (void) {
 
   switch (state_estimation.mode) {
     case STATE_ESTIMATION_MODE_ENTER: {
-      state_estimation_enter();
+      state_estimation_enter_mode(state_estimation.type);
     }
-    /*no break*/
+    break;
+
     case STATE_ESTIMATION_MODE_ESTIMATE:
-      state_estimation.mode = state_estimation.type;
-      break;
+      return;
 
     case STATE_ESTIMATION_TYPE_KALMAN:
       state_estimation_run_kalman();
@@ -305,7 +317,7 @@ static inline void state_estimation_update_covariance ( struct DelflyModelCovari
   MAT33_COPY(cov->acc_acc, covK.acc_acc);
 }
 
-static inline void state_estimation_run_kalman (void) {
+static void state_estimation_run_kalman (void) {
   /* residual co-variance matrix inverse
    * with #INT32_MATLAB_FRAC              */
   // <for debug>: use state_estimation.covariance.residual_inv

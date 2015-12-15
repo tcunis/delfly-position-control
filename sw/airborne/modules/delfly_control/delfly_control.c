@@ -42,6 +42,7 @@
 #include "delfly_telemetry.h"
 
 #include "state.h"
+#include "subsystems/radio_control.h"
 
 
 uint8_t h_mode_alt;
@@ -86,6 +87,10 @@ void delfly_control_stop(void){
 
 /* all-time periodic function */
 void delfly_control_run(void) {
+
+#ifdef STATE_ESTIMATION_MODE_SWITCH
+  state_estimation.mode = (radio_control.values[STATE_ESTIMATION_MODE_SWITCH] > 0);
+#endif
 
   state_estimation_run();
   delfly_model_run();

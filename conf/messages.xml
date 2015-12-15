@@ -887,7 +887,7 @@
   
   <message name="DELFLY_STATEESTIMATION" id="108">
    <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module. 13 bytes</description>
-   <field name="mode"        type="uint8" values="OFF|ENTER|ESTIMATE">State estimator mode</field>
+   <field name="mode"        type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
    <field name="res_x"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="res_y"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="res_z"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
@@ -909,6 +909,10 @@
    <field name="out_vel_x"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191"/>
    <field name="out_vel_y"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191"/>
    <field name="out_vel_z"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191"/>
+   <field name="out_acc_x"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
+   <field name="out_acc_y"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
+   <field name="out_acc_z"   type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
+  
    <!--field name="wind_x"   type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in x-axis (geographic frame)</field>
    <field name="wind_y" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in y-axis (geographic frame)</field>
    <field name="wind_speed" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind speed in xy-plane (geographic frame)</field-->

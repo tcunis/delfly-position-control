@@ -33,6 +33,7 @@ extern uint8_t SRVO_kill;
 
 
 extern void util_init(void);
+extern void util_run_periodic(void);
 
 
 #endif

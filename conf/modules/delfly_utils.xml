@@ -8,6 +8,7 @@
     <file name="delfly_utils.h"/>
   </header>
   <init fun="util_init()"/>
+  <periodic fun="util_run_periodic()" freq="64" autorun="LOCK"/>
   <makefile>
     <file name="delfly_utils.c"/>
   </makefile>

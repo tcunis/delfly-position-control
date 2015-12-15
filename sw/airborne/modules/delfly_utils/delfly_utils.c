@@ -23,9 +23,10 @@
  * 
  */
 
-#include "modules/delfly_utils/delfly_utils.h"
+#include "delfly_utils.h"
 
 #include "generated/airframe.h"
+#include "subsystems/radio_control.h"
 
 
 uint8_t LEDS_switch = DELFLY_UTILS_LEDS_SWITCH;
@@ -34,4 +35,7 @@ uint8_t SRVO_kill = DELFLY_UTILS_SRVO_KILL;
 extern void util_init(void) {
 }
 
-
+extern void util_run_periodic(void) {
+  // refer values greater than -1000 to be non-negative
+  LEDS_switch = ( radio_control.values[RADIO_MIX] > -1000 );
+}

@@ -137,7 +137,10 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 		&state_estimation.out.pos.z,
 		&state_estimation.out.vel.x,
 		&state_estimation.out.vel.y,
-		&state_estimation.out.vel.z
+		&state_estimation.out.vel.z,
+		&state_estimation.out.acc.x,
+		&state_estimation.out.acc.y,
+		&state_estimation.out.acc.z
 	);
 }
 

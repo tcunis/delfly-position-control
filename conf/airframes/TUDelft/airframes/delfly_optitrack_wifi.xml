@@ -24,6 +24,7 @@
         <!--define name="RADIO_YAW" value="RADIO_ROLL"/-->
         <!--define name="RADIO_MODE" value="RADIO_FLAP"></define-->
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"></define>
+        <define name="RADIO_ROLL" value="RADIO_YAW"/>
       </subsystem><!--radio_control-->
       
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500" />
@@ -49,7 +50,7 @@
     <subsystem name="gps" type="datalink_acm"/>
     <subsystem name="guidance" type="delfly" />
     <subsystem name="imu" type="lisa_s_v1.0" />
-    <subsystem name="ins" />
+    <subsystem name="ins"/>
     <subsystem name="motor_mixing" />
     
 	  <subsystem name="rpm_sensor" type="eagletree">
@@ -70,7 +71,7 @@
     <load name="delfly_utils.xml"/>
     <load name="gps_diagnostics.xml"/>
     <load name="logger_sd_spi_direct.xml">
-     <configure name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="RADIO_ELEV"/>
+     <configure name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="RADIO_MIX"/>
      <configure name="LOGGER_LED" value="3"/>
     </load><!--logger_sd_spi_direct.xml-->
     <!--load name="sys_mon.xml"/-->
@@ -151,6 +152,7 @@
   <section name="DELFLY_STATE" prefix="STATE_ESTIMATION_">
     <define name="TYPE"     value="STATE_ESTIMATION_TYPE_GPS"/>
     <define name="GPS_FREQ" value="30"/>
+    <define name="MODE_SWITCH" value="RADIO_ELEV"/>   
   </section><!--DELFLY_STATE-->
  
   <section name="DELFLY_UTILS" prefix="DELFLY_UTILS_">
