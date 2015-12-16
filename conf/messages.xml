@@ -2014,6 +2014,9 @@
     <field name="avrg_msgtimediff" type="double" unit="usec"/-->
     <field name="dl_pkgtimediff" type="uint32" unit="usec"/>
     <!--field name="count" type="uint8"/-->
+    <field name="gps_ned_x" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
+    <field name="gps_ned_y" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
+    <field name="gps_ned_z" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
   </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
