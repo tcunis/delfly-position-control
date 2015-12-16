@@ -150,8 +150,11 @@ static void acc_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __a
 
 static void gps_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __attribute__((unused)), struct GpsState *gps_s) {
 
+  static struct LtpDef_i ltp_def;
+  ltp_def_from_ecef_i(&ltp_def, &gps.ecef_pos);
+
   struct NedCoor_i gps_pos_cm_ned;
-  ned_of_ecef_point_i(&gps_pos_cm_ned, &ins_int.ltp_def, &gps_s->ecef_pos);
+  ned_of_ecef_point_i(&gps_pos_cm_ned, &ltp_def, &gps_s->ecef_pos);
 
   //todo: log gps ned position
   gps_diagnostics_log_pos( &gps_pos_cm_ned );
@@ -215,13 +218,13 @@ void state_estimation_run (void) {
   state_estimation_getoutput();
 
   switch (state_estimation.mode) {
+
     case STATE_ESTIMATION_MODE_ENTER: {
       state_estimation_enter_mode(state_estimation.type);
-    }
-    break;
+    } break;
 
     case STATE_ESTIMATION_MODE_ESTIMATE:
-      return;
+      break;
 
     case STATE_ESTIMATION_TYPE_KALMAN:
       state_estimation_run_kalman();
@@ -229,13 +232,13 @@ void state_estimation_run (void) {
 
     case STATE_ESTIMATION_TYPE_GPS: {
       static uint32_t last_time = 0, last_ticks = 0;
-      static struct Int32Vect3 pos_diff, vel_diff;
-      static struct Int32Vect3 last_pos, last_vel;
+      struct Int32Vect3 pos_diff, vel_diff;
+      struct Int32Vect3 last_pos, last_vel;
       if ( gps.last_msg_time == last_time && gps.last_msg_ticks == last_ticks )
-      {}
+      {  }
       else // new gps message
       {
-    	VECT3_COPY(last_pos, state_estimation.states.pos);
+    	  VECT3_COPY(last_pos, state_estimation.states.pos);
       	VECT3_COPY(last_vel, state_estimation.states.vel);
 
       	// get position from gps
@@ -243,23 +246,23 @@ void state_estimation_run (void) {
 
       	// get velocity as 1st discrete time derivative
       	VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
-    	VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, state_estimation.gps_freq*(1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), 1);
+    	  VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, state_estimation.gps_freq*(1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), 1);
 
-    	// get acceleration as 2nd discrete time derivative
-    	VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
-    	VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, state_estimation.gps_freq, (1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+    	  // get acceleration as 2nd discrete time derivative
+    	  VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
+    	  VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, state_estimation.gps_freq, (1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
 
-    	last_time = gps.last_msg_time;
-    	last_ticks = gps.last_msg_ticks;
+    	  last_time = gps.last_msg_time;
+    	  last_ticks = gps.last_msg_ticks;
       }
-      break;
-    }
+    } break;
 
     case STATE_ESTIMATION_MODE_OFF:
     default: {
       state_estimation_enter();
     } break;
   }
+
 
   state_estimation_aftermath();
 }
