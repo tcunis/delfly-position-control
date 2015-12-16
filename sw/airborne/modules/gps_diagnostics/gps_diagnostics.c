@@ -27,6 +27,8 @@
 
 #include "subsystems/gps.h"
 #include "subsystems/datalink/telemetry.h"
+#include "subsystems/datalink/pprzlog_transport.h"
+#include "generated/modules.h"
 
 //#include "generated/airframe.h"
 
@@ -60,6 +62,7 @@ uint32_t prev_msg_time;     // previous time of reception of last gps message, i
 
 uint8_t  count_iteration;   // number of iterations since previous gps message
 
+struct NedCoor_i gps_pos_cm_ned;
 
 
 static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct link_device* dev ) {
@@ -74,8 +77,11 @@ static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct
         &dl_period,
 //        &prev_msgtimediff,
 //        &avrg_msgtimediff,
-        &dl_pkgtimediff
-//        &count
+        &dl_pkgtimediff,
+//        &count,
+		&gps_pos_cm_ned.x,
+		&gps_pos_cm_ned.y,
+		&gps_pos_cm_ned.z
     );
 }
 
@@ -94,6 +100,8 @@ void gps_diagnostics_init(void) {
     dl_pkgtimediff = 0;
     count = -1;
 
+    INT_VECT3_ZERO(gps_pos_cm_ned);
+
     prev_gps_state = gps;
     prev_msg_time = USEC_OF_GPS_MSG(gps);
     
@@ -102,6 +110,15 @@ void gps_diagnostics_init(void) {
     count_iteration = 0;
 
     register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_DIAGNOSTICS, &gps_diagnostics_send_diagnostics);
+}
+
+void gps_diagnostics_log_pos( struct NedCoor_i* pos_ned ) {
+
+	gps_pos_cm_ned.x = pos_ned->x;
+	gps_pos_cm_ned.x = pos_ned->y;
+	gps_pos_cm_ned.x = pos_ned->z;
+
+	gps_diagnostics_send_diagnostics( &pprzlog_tp.trans_tx, &sdlogger_spi.device );
 }
 
 void gps_diagnostics_periodic(void) {

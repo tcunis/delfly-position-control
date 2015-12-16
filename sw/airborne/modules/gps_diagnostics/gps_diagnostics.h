@@ -27,7 +27,11 @@
 #define GPS_DIAGNOSTICS_H
 
 
+#include "math/pprz_geodetic_int.h"
+
+
 extern void gps_diagnostics_init(void);
+extern void gps_diagnostics_log_pos( struct NedCoor_i* pos_ned );
 extern void gps_diagnostics_periodic(void);
 extern void gps_diagnostics_datalink_event(void);
 extern void gps_diagnostics_datalink_small_event(void);
