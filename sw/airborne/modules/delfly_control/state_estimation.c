@@ -31,14 +31,21 @@
 #include "delfly_control.h"
 
 #include "generated/airframe.h"
+#include "generated/modules.h"
 
 #include "matlab_include.h"
 #include "delfly_algebra_int.h"
 
 #include "state.h"
+#include "subsystems/imu.h"
 #include "subsystems/gps.h"
+#include "subsystems/abi.h"
+#include "subsystems/ins/ins_int.h"
 #include "subsystems/sensors/rpm_sensor.h"
 
+#ifndef INS_INT_IMU_ID
+#define INS_INT_IMU_ID ABI_BROADCAST
+#endif
 
 
 struct DelflyState delfly_state;
@@ -52,10 +59,16 @@ struct DelflyModelCovariance delfly_model_process_covariance;
  * with #INT32_MATLAB_FRAC                */
 struct Int32Mat33 state_estimation_noise_covariance;
 
+static abi_event accel_ev;
+static abi_event gps_ev;
+
 
 static void state_estimation_enter_mode (uint8_t mode);
 static void state_estimation_getoutput (void);
 static void state_estimation_aftermath (void);
+
+static void acc_cb (uint8_t sender_id __attribute__((unused)), uint32_t stamp __attribute__((unused)), struct Int32Vect3 *accel);
+static void gps_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __attribute__((unused)), struct GpsState *gps_s);
 
 static void state_estimation_run_kalman (void);
 
@@ -103,6 +116,9 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.acc.xy );
 
   INT32_ZERO( delfly_state.flap_freq );
+
+  AbiBindMsgIMU_ACCEL_INT32(INS_INT_IMU_ID, &accel_ev, acc_cb);
+  AbiBindMsgGPS(ABI_BROADCAST, &gps_ev, gps_cb);
 }
 
 
@@ -110,12 +126,35 @@ void state_estimation_getoutput (void) {
 
   VECT3_COPY(state_estimation.out.pos, *stateGetPositionNed_i());
   VECT3_COPY(state_estimation.out.vel, *stateGetSpeedNed_i());
-  VECT3_COPY(state_estimation.out.acc, *stateGetAccelNed_i());
+  //VECT3_COPY(state_estimation.out.acc, *stateGetAccelNed_i());
 
   delfly_model_assign_eulers( &state_estimation.out,
 		  	  	  	  	  	  	  *stateGetNedToBodyEulers_i(),
 		  	  	  	  	  	  	  *stateGetBodyRates_i()
   );
+}
+
+
+static void acc_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __attribute__((unused)), struct Int32Vect3 *accel) {
+
+  /* untilt accels */
+  struct Int32Vect3 accel_meas_body;
+  struct Int32RMat *body_to_imu_rmat = orientationGetRMat_i(&imu.body_to_imu);
+  int32_rmat_transp_vmult(&accel_meas_body, body_to_imu_rmat, accel);
+  struct Int32Vect3 accel_meas_ltp;
+  int32_rmat_transp_vmult(&accel_meas_ltp, stateGetNedToBodyRMat_i(), &accel_meas_body);
+
+  VECT3_COPY(state_estimation.out.acc, accel_meas_ltp);
+  state_estimation.out.acc.z += ACCEL_BFP_OF_REAL(9.81);
+}
+
+static void gps_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __attribute__((unused)), struct GpsState *gps_s) {
+
+  struct NedCoor_i gps_pos_cm_ned;
+  ned_of_ecef_point_i(&gps_pos_cm_ned, &ins_int.ltp_def, &gps_s->ecef_pos);
+
+  //todo: log gps ned position
+  gps_diagnostics_log_pos( &gps_pos_cm_ned );
 }
 
 
