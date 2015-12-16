@@ -48,6 +48,11 @@ void delfly_guidance_init (void) {
 }
 
 
+static inline void nav_set_heading_towards_carrot (void) {
+  nav_set_heading_towards( POS_FLOAT_OF_BFP(navigation_carrot.x), POS_FLOAT_OF_BFP(navigation_carrot.y) );
+}
+
+
 void delfly_guidance_enter (void) {
 
   switch (autopilot_mode) {
@@ -61,6 +66,9 @@ void delfly_guidance_enter (void) {
 	break;
   case AP_MODE_NAV:
 	delfly_guidance.mode = DELFLY_GUIDANCE_MODE_NAV;
+	{
+	  nav_set_heading_towards_carrot();
+	}
 	break;
   default:
 	delfly_guidance.mode = DELFLY_GUIDANCE_MODE_OFF;
@@ -82,8 +90,9 @@ void delfly_guidance_run (void) {
   {
 	static struct NedCoor_i nav_carrot_ned;
 	ENU_OF_TO_NED(nav_carrot_ned /*in NED*/, navigation_carrot /*in ENU*/);
+	// re-set heading set-point if carrot has changed
 	if ( VECT3_EQUALS(nav_carrot_ned, delfly_guidance.sp.pos) ) {
-		nav_set_heading_towards( POS_FLOAT_OF_BFP(navigation_carrot.x), POS_FLOAT_OF_BFP(navigation_carrot.y) );
+	  nav_set_heading_towards_carrot();
 	}
 	//TODO: set position and velocity set-point
 	delfly_guidance.sp.heading = nav_heading;
