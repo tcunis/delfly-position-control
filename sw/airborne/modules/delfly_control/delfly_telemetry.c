@@ -98,10 +98,10 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 	);
 }
 
-static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct link_device* dev) {
-//	DOWNLINK_SEND_DELFLY_STATERAW(DefaultChannel, DefaultDevice
-//	);
-}
+//static void delfly_telemetry_send_stateraw (struct transport_tx* trans, struct link_device* dev) {
+////	DOWNLINK_SEND_DELFLY_STATERAW(DefaultChannel, DefaultDevice
+////	);
+//}
 
 static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
 
