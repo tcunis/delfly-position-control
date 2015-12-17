@@ -982,7 +982,7 @@
 		
 		<message name="DELFLY_GUIDANCE" id="110">
 			<description>Input, states, and output of the Delfly control guidance sub-module. 74 bytes</description>
-			<field name="ap_mode" type="uint8" values="KILL|FAILSAFE|HOME|RATE-D|ATT-D|RATE-RCC|ATT-RCC|RATE-ZH|ATT-ZH|HOVER-D|HOVER-C|HOVER-ZH|NAV|RC-D|CF-D|FWD|MODULE|FLIP">Autopilot mode</field>
+			<field name="ap_mode" type="uint8" values="KILL|FAILSAFE|HOME|RATE-D|ATT-D|RATE-RCC|ATT-RCC|ATT-C|RATE-ZH|ATT-ZH|HOVER-D|HOVER-C|HOVER-ZH|NAV|RC-D|CF-D|FWD|MODULE|FLIP">Autopilot mode</field>
 			<field name="mode" type="uint8" values="OFF|MODULE|NAV">Delfly guidance mode</field>
 			<field name="sp_x"     type="int32" alt_unit=" m"    alt_unit_coef="0.00390625">Position set-point in x-axis (geographic frame)</field>
 			<field name="sp_y"     type="int32" alt_unit=" m"    alt_unit_coef="0.00390625">Position set-point in y-axis (geographic frame)</field>
