@@ -39,6 +39,8 @@
 
 #include "delfly_algebra_int.h"
 
+#include "firmwares/rotorcraft/autopilot.h"
+
 
 static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
 
@@ -51,13 +53,13 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct lin
 
 static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_DELFLY_GUIDANCE(trans, dev, AC_ID,
-		&guidance_h.mode,
-		&guidance_v_mode,
-		&guidance_h.sp.pos.x,
-		&guidance_h.sp.pos.y,
-		&guidance_v_z_sp,
+		&autopilot_mode, //&guidance_h.mode,
+		&delfly_guidance.mode, //&guidance_v_mode,
+		&delfly_guidance.sp.pos.x,
+		&delfly_guidance.sp.pos.y,
+		&delfly_guidance.sp.pos.z,
 		&delfly_guidance.sp.vel_rc.fv.fwd,
-		&guidance_h.rc_sp.psi,
+		&delfly_guidance.sp.att_rc.psi,
 		&delfly_guidance.err.pos.x,
 		&delfly_guidance.err.pos.y,
 		&delfly_guidance.err.pos.z,

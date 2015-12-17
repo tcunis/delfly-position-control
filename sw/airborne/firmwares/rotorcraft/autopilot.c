@@ -63,6 +63,7 @@
 #include "pprz_version.h"
 
 uint8_t  autopilot_mode;
+uint8_t  autopilot_new_mode;
 uint8_t  autopilot_mode_auto2;
 
 bool_t   autopilot_in_flight;
@@ -283,6 +284,7 @@ void autopilot_init(void)
 {
   /* mode is finally set at end of init if MODE_STARTUP is not KILL */
   autopilot_mode = AP_MODE_KILL;
+  autopilot_new_mode = AP_MODE_KILL;
   autopilot_motors_on = FALSE;
   kill_throttle = ! autopilot_motors_on;
   autopilot_in_flight = FALSE;
@@ -401,6 +403,8 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
   }
 
   if (new_autopilot_mode != autopilot_mode) {
+    autopilot_new_mode = new_autopilot_mode;
+
     /* horizontal mode */
     switch (new_autopilot_mode) {
       case AP_MODE_FAILSAFE:

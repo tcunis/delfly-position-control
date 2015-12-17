@@ -155,7 +155,6 @@ void guidance_h_module_run(bool_t in_flight) {
 
 void guidance_h_module_run_traj( bool_t in_flight ) {
 
-  delfly_guidance_run();
 
   switch (delfly_guidance.mode) {
 

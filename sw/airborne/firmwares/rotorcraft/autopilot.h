@@ -54,6 +54,7 @@
 #define AP_MODE_FLIP              18
 
 extern uint8_t autopilot_mode;
+extern uint8_t autopilot_new_mode; //todo: when entering a new guidance mode, tell module about new ap mode
 extern uint8_t autopilot_mode_auto2;
 extern bool_t autopilot_motors_on;
 extern bool_t autopilot_in_flight;
