@@ -80,6 +80,7 @@ extern void speed_control_run(bool_t in_flight);
 
 
 /*	  state filter                  */
+extern void ins_module_int_init(void);
 extern void ins_module_int_propagate(struct NedCoor_i* acc, float dt);
 extern void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, float dt);
 

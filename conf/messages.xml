@@ -887,8 +887,8 @@
   
   <message name="DELFLY_STATEESTIMATION" id="108">
    <description>Parameters and states of the Delfly control state estimator and wind-tunnel navigation sub-module. 13 bytes</description>
-   <field name="mode"        type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
-   <field name="res_x"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
+   <field name="mode"        type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|GPS_FILTER|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
+   <!--field name="res_x"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="res_y"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="res_z"       type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="est_cov_11"  type="int32" alt_unit=""     alt_unit_coef="0.0000610"/>
@@ -896,7 +896,7 @@
    <field name="res_cov_inv" type="int32" alt_unit=""     alt_unit_coef="0.00006104"/>
    <field name="gain_pos"    type="int32" alt_unit=""     alt_unit_coef="0.00006104"/>
    <field name="gain_vel"    type="int32" alt_unit=""     alt_unit_coef="0.00006104"/>
-   <field name="gain_acc"    type="int32" alt_unit=""     alt_unit_coef="0.00006104"/>
+   <field name="gain_acc"    type="int32" alt_unit=""     alt_unit_coef="0.00006104"/-->
    <field name="est_pos_x"   type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="est_pos_y"   type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
    <field name="est_pos_z"   type="int32" alt_unit=" m"   alt_unit_coef="0.00390625"/>
@@ -2014,9 +2014,9 @@
     <field name="avrg_msgtimediff" type="double" unit="usec"/-->
     <field name="dl_pkgtimediff" type="uint32" unit="usec"/>
     <!--field name="count" type="uint8"/-->
-    <field name="gps_ned_x" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
-    <field name="gps_ned_y" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
-    <field name="gps_ned_z" type="int32" alt_unit=" m" alt_unit_coef="0.00003906"/>
+    <field name="gps_ned_x" type="int32" alt_unit=" m" alt_unit_coef="0.0039063"/>
+    <field name="gps_ned_y" type="int32" alt_unit=" m" alt_unit_coef="0.0039063"/>
+    <field name="gps_ned_z" type="int32" alt_unit=" m" alt_unit_coef="0.0039063"/>
   </message>
 
   <message name="BEBOP_ACTUATORS" id="218">

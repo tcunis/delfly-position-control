@@ -60,7 +60,7 @@ void delfly_control_init(void){
 
   delfly_telemetry_init_all();
 
-  state_estimation_enter();
+//  state_estimation_enter();
 }
 
 void delfly_control_start(void){
