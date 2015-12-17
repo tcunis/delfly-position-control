@@ -50,7 +50,7 @@
     <subsystem name="gps" type="datalink_acm"/>
     <subsystem name="guidance" type="delfly" />
     <subsystem name="imu" type="lisa_s_v1.0" />
-    <subsystem name="ins" type="gps_passthrough"/>
+    <subsystem name="ins" /><!--type="gps_passthrough"/-->
     <subsystem name="motor_mixing" />
     
 	  <subsystem name="rpm_sensor" type="eagletree">
@@ -210,7 +210,8 @@
   <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
     <define name="USE_GPS_ALT" value="1"/>
-    <define name="VFF_R_GPS" value="0.01"/>
+    <define name="USE_MODULE" value="TRUE"/>
+   <define name="VFF_R_GPS" value="0.01"/>
   </section><!--INS-->
 
   <section name="SIMULATOR" prefix="NPS_">

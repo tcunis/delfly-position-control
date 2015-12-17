@@ -94,6 +94,15 @@ PRINT_CONFIG_MSG("INS_SONAR_UPDATE_ON_AGL defaulting to FALSE")
 
 #endif // USE_SONAR
 
+#ifndef INS_USE_MODULE
+#define USE_MODULE	FALSE
+#else
+#define USE_MODULE  INS_USE_MODULE
+#if USE_MODULE
+#include "ins_module_int.h"
+#endif // USE_MODULE
+#endif // INS_USE_MODULE
+
 #ifndef INS_VFF_R_GPS
 #define INS_VFF_R_GPS 2.0
 #endif
@@ -272,6 +281,9 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
 
   float z_accel_meas_float = ACCEL_FLOAT_OF_BFP(accel_meas_ltp.z);
 
+#if USE_MODULE
+  ins_module_int_propagate( &accel_meas_ltp, dt );
+#else
   /* Propagate only if we got any measurement during the last INS_MAX_PROPAGATION_STEPS.
    * Otherwise halt the propagation to not diverge and only set the acceleration.
    * This should only be relevant in the startup phase when the baro is not yet initialized
@@ -296,6 +308,8 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
   ins_int.ltp_accel.x = accel_meas_ltp.x;
   ins_int.ltp_accel.y = accel_meas_ltp.y;
 #endif /* USE_HFF */
+
+#endif /* USE_MODULE */
 
   ins_ned_to_state();
 
@@ -335,7 +349,7 @@ static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
 }
 
 #if USE_GPS
-void ins_int_update_gps(struct GpsState *gps_s)
+void ins_int_update_gps(struct GpsState *gps_s, float dt)
 {
   if (gps_s->fix < GPS_FIX_3D) {
     return;
@@ -369,6 +383,15 @@ void ins_int_update_gps(struct GpsState *gps_s)
   struct NedCoor_i gps_speed_cm_s_ned;
   ned_of_ecef_vect_i(&gps_speed_cm_s_ned, &ins_int.ltp_def, &gps_s->ecef_vel);
 
+#if USE_MODULE
+  struct NedCoor_i gps_pos_ned, gps_speed_ned;
+  INT32_VECT2_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
+                      INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
+  INT32_VECT2_SCALE_2(gps_speed_ned, gps_speed_cm_s_ned,
+                      INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
+  ins_module_int_update_gps( &gps_pos_ned, &gps_speed_ned, dt );
+#else
+
 #if INS_USE_GPS_ALT
   vff_update_z_conf(((float)gps_pos_cm_ned.z) / 100.0, INS_VFF_R_GPS);
 #endif
@@ -401,13 +424,15 @@ void ins_int_update_gps(struct GpsState *gps_s)
                       INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
 #endif /* USE_HFF */
 
+#endif /* USE_MODULE */
+
   ins_ned_to_state();
 
   /* reset the counter to indicate we just had a measurement update */
   ins_int.propagation_cnt = 0;
 }
 #else
-void ins_int_update_gps(struct GpsState *gps_s __attribute__((unused))) {}
+void ins_int_update_gps(struct GpsState *gps_s __attribute__((unused)), float dt __attribute__((unused))) {}
 #endif /* USE_GPS */
 
 
@@ -512,7 +537,14 @@ static void gps_cb(uint8_t sender_id __attribute__((unused)),
                    uint32_t stamp __attribute__((unused)),
                    struct GpsState *gps_s)
 {
-  ins_int_update_gps(gps_s);
+  PRINT_CONFIG_MSG("Calculating dt for INS int propagation.")
+  /* timestamp in usec when last callback was received */
+  static uint32_t last_stamp = 0;
+
+  float dt = (float)(stamp - last_stamp) * 1e-6;
+  ins_int_update_gps(gps_s, dt);
+
+  last_stamp = stamp;
 }
 
 static void vel_est_cb(uint8_t sender_id __attribute__((unused)),

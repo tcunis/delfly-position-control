@@ -161,6 +161,10 @@ static void gps_cb(uint8_t sender_id __attribute__((unused)), uint32_t stamp __a
 }
 
 
+void ins_module_int_propagate(struct NedCoor_i* acc, float dt) {}
+void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, float dt) {}
+
+
 void state_estimation_enter (void) {
 
   state_estimation_enter_mode( state_estimation.mode );
