@@ -107,27 +107,27 @@ static void delfly_telemetry_send_state (struct transport_tx* trans, struct link
 
 static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, struct link_device* dev) {
 
-	int32_t est_cov11, res_cov, res_cov_inv;
-	int32_t gain_pos, gain_vel, gain_acc;
+//	int32_t est_cov11, res_cov, res_cov_inv;
+//	int32_t gain_pos, gain_vel, gain_acc;
 
-	INT32_MAT33_DET(est_cov11,   state_estimation.covariance.estimate.pos_pos, INT32_MATLAB_FRAC);
-	INT32_MAT33_DET(res_cov,     state_estimation.covariance.residual, INT32_MATLAB_FRAC);
-	INT32_MAT33_DET(res_cov_inv, state_estimation.covariance.residual_inv, INT32_MATLAB_FRAC);
-	INT32_MAT33_DET(gain_pos, state_estimation.gain.pos_err, INT32_MATLAB_FRAC);
-	INT32_MAT33_DET(gain_vel, state_estimation.gain.vel_err, INT32_MATLAB_FRAC);
-	INT32_MAT33_DET(gain_acc, state_estimation.gain.acc_err, INT32_MATLAB_FRAC);
+//	INT32_MAT33_ZERO(est_cov11,   state_estimation.covariance.estimate.pos_pos, INT32_MATLAB_FRAC);
+//	INT32_MAT33_DET(res_cov,     state_estimation.covariance.residual, INT32_MATLAB_FRAC);
+//	INT32_MAT33_DET(res_cov_inv, state_estimation.covariance.residual_inv, INT32_MATLAB_FRAC);
+//	INT32_MAT33_DET(gain_pos, state_estimation.gain.pos_err, INT32_MATLAB_FRAC);
+//	INT32_MAT33_DET(gain_vel, state_estimation.gain.vel_err, INT32_MATLAB_FRAC);
+//	INT32_MAT33_DET(gain_acc, state_estimation.gain.acc_err, INT32_MATLAB_FRAC);
 
 	pprz_msg_send_DELFLY_STATEESTIMATION(trans, dev, AC_ID,
 		&state_estimation.mode,
-		&state_estimation.res.x,
-		&state_estimation.res.y,
-		&state_estimation.res.z,
-		&est_cov11,
-		&res_cov,
-		&res_cov_inv,
-		&gain_pos,
-		&gain_vel,
-		&gain_acc,
+//		&state_estimation.res.x,
+//		&state_estimation.res.y,
+//		&state_estimation.res.z,
+//		&est_cov11,
+//		&res_cov,
+//		&res_cov_inv,
+//		&gain_pos,
+//		&gain_vel,
+//		&gain_acc,
 		&state_estimation.states.pos.x,
 		&state_estimation.states.pos.y,
 		&state_estimation.states.pos.z,

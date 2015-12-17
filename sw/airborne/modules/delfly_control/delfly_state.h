@@ -149,26 +149,26 @@ static inline int32_t set_azimuth ( int32_t azimuth ) { return delfly_state.h.az
 static inline int32_t set_heading_rate ( int32_t head_rate ) { return delfly_state.h.head_rate = head_rate; }
 
 
-//static inline void set_position_ned_i ( struct Int32Vect3* pos, struct NedCoor_i* ned_i ) {
-//  pos->x = ned_i->x;
-//  pos->y = ned_i->y;
-//  pos->z   = ned_i->z;
-//}
-//static inline void set_velocity_ned_i ( struct Int32Vect3* vel, struct NedCoor_i* ned_i ) {
-//  vel->x = ned_i->x;
-//  vel->y = ned_i->y;
-//  vel->z = ned_i->z;
-//}
-//static inline void set_airspeed_ned_i ( struct Int32Vect3* air, struct NedCoor_i* ned_i ) {
-//  air->x = ned_i->x;
-//  air->y = ned_i->y;
-//  air->z = ned_i->z;
-//}
-//static inline void set_acceleration_ned_i ( struct Int32Vect3* acc, struct NedCoor_i* ned_i ) {
-//  acc->x = ned_i->x;
-//  acc->y = ned_i->y;
-//  acc->z = ned_i->z;
-//}
+static inline void set_position_ned_i ( struct Int32Vect3* pos, struct NedCoor_i* ned_i ) {
+  pos->x = ned_i->x;
+  pos->y = ned_i->y;
+  pos->z   = ned_i->z;
+}
+static inline void set_velocity_ned_i ( struct Int32Vect3* vel, struct NedCoor_i* ned_i ) {
+  vel->x = ned_i->x;
+  vel->y = ned_i->y;
+  vel->z = ned_i->z;
+}
+static inline void set_airspeed_ned_i ( struct Int32Vect3* air, struct NedCoor_i* ned_i ) {
+  air->x = ned_i->x;
+  air->y = ned_i->y;
+  air->z = ned_i->z;
+}
+static inline void set_acceleration_ned_i ( struct Int32Vect3* acc, struct NedCoor_i* ned_i ) {
+  acc->x = ned_i->x;
+  acc->y = ned_i->y;
+  acc->z = ned_i->z;
+}
 
 static inline void set_position ( struct Int32Vect3* pos ) {
   delfly_state.h.pos.x = pos->x;
