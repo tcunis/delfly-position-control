@@ -139,8 +139,8 @@ void speed_control_estimate_error (void) {
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
   //TODO: use reference model!
   VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
-		  	  	    speed_control_var.ref.acceleration.xy,
-				    SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+		  	  	       speed_control_var.ref.acceleration.xy,
+				           SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;
@@ -215,13 +215,15 @@ void speed_control_run (bool_t in_flight) {
   stabilization_attitude_run(in_flight);
 
   if ( cmd_throttle == speed_control_var.cmd.throttle ) {
-	// throttle command un-saturated
+	  // throttle command un-saturated
     delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
     VECT2_COPY(speed_control_var.ref.acceleration.xy, speed_control.sp.acceleration.xy);
   } else {
-	// throttle command saturated
-	speed_control_var.cmd.throttle = cmd_throttle;
-  }
+	  // throttle command saturated
+	  speed_control_var.cmd.throttle = cmd_throttle;
+	  delfly_model_set_cmd( 0, 0 );
+	  VECT2_ZERO(speed_control_var.ref.acceleration.xy);
+	}
 
 }
 
