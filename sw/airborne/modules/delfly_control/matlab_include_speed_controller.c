@@ -13,7 +13,7 @@ struct Int32Vect2 matlab_throttle_matrix_v04 = {.x = 16, .y = -782};
 /* V = 0.8 */
 int32_t matlab_pitch_equilibrium_v08 = 18829;
 int32_t matlab_throttle_equilibrium_v08 = 11115;
-struct Int32Vect2 matlab_pitch_matrix_v08 = {.x = 1259, .y = -485};
+struct Int32Vect2 matlab_pitch_matrix_v08 = {.x = -1259, .y = 485};
 struct Int32Vect2 matlab_throttle_matrix_v08 = {.x = -117, .y = -777};
 
 /* V = 1.2 */

@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="47" ground_alt="45" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
+<flight_plan alt="46" ground_alt="45" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
   <header>
 #include "autopilot.h"
 </header>
@@ -59,7 +59,7 @@
       <stay wp="STDBY"/>
     </block>
     <block name="stay_p1" strip_button="Encircle P1" strip_icon="flat_theme/circle-right.png">
-      <circle wp="p1" radius="3"/>
+      <circle wp="p1" radius="2"/>
     </block>
     <block name="go_p2">
       <call fun="nav_set_heading_deg(90)"/>
