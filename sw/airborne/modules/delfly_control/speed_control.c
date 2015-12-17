@@ -73,6 +73,7 @@ void speed_control_init (void) {
   speed_control_set_pitch_offset(SPEED_CONTROL_PITCH_OFFSET);
 
   VECT2_ZERO(speed_control_var.ref.velocity.xy);
+  VECT2_ZERO(speed_control_var.ref.acceleration.xy);
 
   VECT2_ZERO(speed_control_var.now.acceleration.xy);
   VECT2_ZERO(speed_control_var.now.velocity.xy);
@@ -138,7 +139,7 @@ void speed_control_estimate_error (void) {
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
   //TODO: use reference model!
   VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
-		  	  	    speed_control.sp.acceleration.xy,
+		  	  	    speed_control_var.ref.acceleration.xy,
 				    SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
 
   //velocity error: v_err = v_ref - v_now
@@ -196,7 +197,7 @@ void speed_control_run (bool_t in_flight) {
 
   speed_control_calculate_cmd(&speed_control_var.cmd, &speed_control_var.eq, &speed_control_var.mat);
 
-  speed_control_var.cmd.throttle    = TRIM_UPPRZ(speed_control_var.cmd.throttle);
+  int32_t cmd_throttle    = TRIM_UPPRZ(speed_control_var.cmd.throttle);
 
   //for telemetry:
   speed_control_calculate_cmd(&speed_control_var.ff_cmd, &speed_control_eq_zero, &speed_control_var.mat);
@@ -209,11 +210,19 @@ void speed_control_run (bool_t in_flight) {
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
-  stabilization_cmd[COMMAND_THRUST] = speed_control_var.cmd.throttle;
+  stabilization_cmd[COMMAND_THRUST] = cmd_throttle;
 
   stabilization_attitude_run(in_flight);
 
-  delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
+  if ( cmd_throttle == speed_control_var.cmd.throttle ) {
+	// throttle command un-saturated
+    delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
+    VECT2_COPY(speed_control_var.ref.acceleration.xy, speed_control.sp.acceleration.xy);
+  } else {
+	// throttle command saturated
+	speed_control_var.cmd.throttle = cmd_throttle;
+  }
+
 }
 
 

@@ -39,6 +39,10 @@ struct SpeedControlRef {
 	/* (estimated) velocity reference
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
+
+	/* (commanded) acceleration reference
+	 * in m/s2, with #INT32_ACCEL_FRAC */
+	union Int32VectLong acceleration;
 };
 
 struct SpeedControlNow {
