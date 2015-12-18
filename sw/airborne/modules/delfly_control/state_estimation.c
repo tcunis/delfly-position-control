@@ -35,6 +35,7 @@
 
 #include "matlab_include.h"
 #include "delfly_algebra_int.h"
+#include "filters/low_pass_filter.h"
 
 #include "state.h"
 #include "subsystems/ins/ins_int.h"
@@ -44,10 +45,44 @@
 #define INS_INT_IMU_ID ABI_BROADCAST
 #endif
 
+#define init_butterworth_2_low_pass_vect3(__FILTER__,__SAMPLE__,__CUTOFF__,__VAL0__)  {     \
+    init_butterworth_2_low_pass_int(&(__FILTER__)->x, __SAMPLE__, __CUTOFF__, (__VAL0__).x);  \
+    init_butterworth_2_low_pass_int(&(__FILTER__)->y, __SAMPLE__, __CUTOFF__, (__VAL0__).y);  \
+    init_butterworth_2_low_pass_int(&(__FILTER__)->z, __SAMPLE__, __CUTOFF__, (__VAL0__).z);  \
+  }
+
+#define update_butterworth_2_low_pass_vect3(__FILTER__,__VALUE__)  {      \
+    update_butterworth_2_low_pass_int(&(__FILTER__)->x, (__VALUE__).x);   \
+    update_butterworth_2_low_pass_int(&(__FILTER__)->y, (__VALUE__).y);   \
+    update_butterworth_2_low_pass_int(&(__FILTER__)->z, (__VALUE__).z);   \
+  }
+
+#define get_butterworth_2_low_pass_vect3(__RETURN__, __FILTER__)  {     \
+    (__RETURN__).x = get_butterworth_2_low_pass_int(&(__FILTER__)->x);  \
+    (__RETURN__).y = get_butterworth_2_low_pass_int(&(__FILTER__)->y);  \
+    (__RETURN__).z = get_butterworth_2_low_pass_int(&(__FILTER__)->z);  \
+  }
+
+typedef struct {
+  Butterworth2LowPass_int x;
+  Butterworth2LowPass_int y;
+  Butterworth2LowPass_int z;
+} Butterworth2LowPass_vect3;
+
+struct StateFilter {
+
+  Butterworth2LowPass_vect3 pos;
+
+  float sample_time;
+  float cut_off;
+};
+
 
 struct DelflyState delfly_state;
 
 struct StateEstimation state_estimation = {.mode = STATE_ESTIMATION_MODE_OFF};
+
+struct StateFilter state_filter;
 
 
 static void state_estimation_aftermath (void);
@@ -65,6 +100,9 @@ void state_estimation_init (void) {
 
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
+
+  state_filter.sample_time = 1/(STATE_ESTIMATION_GPS_FREQ);
+  state_filter.cut_off 	   = STATE_ESTIMATION_FILTER_CUTOFF;
 
   VECT2_ZERO( delfly_state.h.pos );
   VECT2_ZERO( delfly_state.h.vel );
@@ -92,21 +130,41 @@ void state_estimation_init (void) {
 void ins_module_int_init (void) {
 
   if ( state_estimation.mode == STATE_ESTIMATION_MODE_OFF ) {
-	state_estimation_init();
+    state_estimation_init();
   }
+
+  ins_module_int_reset_local_origin();
+
+  state_estimation.mode = state_estimation.type;
+}
+
+void ins_module_int_reset_local_origin (void) {
 
   VECT3_COPY(state_estimation.states.pos, ins_int.ltp_pos);
   VECT3_COPY(state_estimation.states.vel, ins_int.ltp_speed);
   VECT3_COPY(state_estimation.states.acc, ins_int.ltp_accel);
 
-  state_estimation.mode = state_estimation.type;
+  init_butterworth_2_low_pass_vect3( &state_filter.pos, state_filter.cut_off, state_filter.sample_time, state_estimation.states.pos );
 }
 
 
-void ins_module_int_propagate(struct NedCoor_i* acc, float dt __attribute__((unused))) {
+void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((unused))) {
 
   VECT3_COPY(state_estimation.out.acc, *acc);
   state_estimation.out.acc.z += ACCEL_BFP_OF_REAL(9.81);
+
+  switch (state_estimation.mode) {
+
+  case STATE_ESTIMATION_TYPE_GPS:
+  case STATE_ESTIMATION_TYPE_GPS_FILTER: {
+    // ignore accelerometer data
+    } break;
+
+  default: {
+    // accelerometer pass-through
+    VECT3_COPY(ins_int.ltp_accel, state_estimation.out.acc);
+    } break;
+  }
 }
 
 
@@ -115,39 +173,62 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
   VECT3_COPY(state_estimation.out.pos, *pos);
   VECT3_COPY(state_estimation.out.vel, *vel);
 
+  // default: get current position from gps
+  struct Int32Vect3 this_pos;
+  VECT3_COPY(this_pos, state_estimation.out.pos);
+
+  /* for all types:
+   *  - store last position and velocity state;
+   *  - put current position into filter        */
+  struct Int32Vect3 last_pos, last_vel;
+  VECT3_COPY(last_pos, state_estimation.states.pos);
+  VECT3_COPY(last_vel, state_estimation.states.vel);
+  //get_butterworth_2_low_pass_vect3(last_pos_filter, &state_filter.pos);
+  update_butterworth_2_low_pass_vect3(&state_filter.pos, state_estimation.out.pos);
+
+  // get current heading from gps
+  state_estimation.states.att.psi = gps.course;
 
   switch (state_estimation.mode) {
 
-	case STATE_ESTIMATION_TYPE_GPS:
-	case STATE_ESTIMATION_TYPE_GPS_FILTER: {
-	  struct Int32Vect3 pos_diff, vel_diff;
-	  struct Int32Vect3 last_pos, last_vel;
-	  if ( dt > 0 ) // new gps message
-	  {
-		VECT3_COPY(last_pos, ins_int.ltp_pos);
-		VECT3_COPY(last_vel, ins_int.ltp_speed);
+  case STATE_ESTIMATION_TYPE_GPS_FILTER: {
+      // get position from filter
+      get_butterworth_2_low_pass_vect3(this_pos, &state_filter.pos);
+    }
+    //no break
+	case STATE_ESTIMATION_TYPE_GPS: {
+      struct Int32Vect3 pos_diff, vel_diff;
 
-		// get position from gps
-		VECT3_COPY(ins_int.ltp_pos, state_estimation.out.pos);
+      /* get estimation state position
+       * (according to type)                 */
+      VECT3_COPY(state_estimation.states.pos, this_pos);
 
-		// get velocity as 1st discrete time derivative
-		VECT3_DIFF(pos_diff, ins_int.ltp_pos, last_pos);
-		VECT3_ASSIGN_SCALED2(ins_int.ltp_speed, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
+      if ( dt > 0 ) { // new gps message
 
-		// get acceleration as 2nd discrete time derivative
-		VECT3_DIFF(vel_diff, ins_int.ltp_speed, last_vel);
-		VECT3_ASSIGN_SCALED2(ins_int.ltp_accel, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
-	  }
-	} break;
+        // get velocity as 1st discrete time derivative
+        VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
+        VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
+
+        // get acceleration as 2nd discrete time derivative
+        VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
+        VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+      }
+
+      /* get ltp state position from gps
+       * (both type GPS and GPS_FILTER)      */
+      VECT3_COPY(ins_int.ltp_pos, state_estimation.out.pos);
+      /* get ltp state speed & acceleration
+       * from state estimation               */
+      VECT3_COPY(ins_int.ltp_speed, state_estimation.states.vel);
+      VECT3_COPY(ins_int.ltp_accel, state_estimation.states.acc);
+    } break;
 
 	default: {
-	  //nothing to do yet
-	} break;
+      // GPS pass-through
+      VECT3_COPY(ins_int.ltp_pos, state_estimation.out.pos);
+      VECT3_COPY(ins_int.ltp_speed, state_estimation.out.vel);
+    } break;
   }
-
-  VECT3_COPY(state_estimation.states.pos, ins_int.ltp_pos);
-  VECT3_COPY(state_estimation.states.vel, ins_int.ltp_speed);
-  VECT3_COPY(state_estimation.states.acc, ins_int.ltp_accel);
 
   gps_diagnostics_log_pos( pos );
 }
@@ -172,7 +253,8 @@ void state_estimation_run (void) {
   delfly_state.flap_freq = rpm_sensor.motor_frequency;
 
   //TODO: get heading, azimuth
-  delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
+  delfly_state.h.heading = state_estimation.states.att.psi;
+  state_estimation.out.att.psi = stateGetNedToBodyEulers_i()->psi;
   delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
 

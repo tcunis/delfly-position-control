@@ -253,6 +253,10 @@ void ins_reset_local_origin(void)
   ins_int.ltp_initialized = FALSE;
 #endif
 
+#if USE_MODULE
+    ins_module_int_reset_local_origin();
+#endif
+
 #if USE_HFF
   ins_int.hf_realign = TRUE;
 #endif

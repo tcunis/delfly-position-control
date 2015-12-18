@@ -47,7 +47,6 @@
 #endif
 
 
-
 struct StateEstimation {
 
   uint8_t mode;

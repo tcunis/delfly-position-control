@@ -90,9 +90,9 @@ void delfly_control_run(void) {
 
 #ifdef STATE_ESTIMATION_MODE_SWITCH
   if (radio_control.values[STATE_ESTIMATION_MODE_SWITCH] > 0)
-    state_estimation.mode = (!state_estimation.mode)? STATE_ESTIMATION_MODE_ENTER : state_estimation.mode;
+    state_estimation.type = STATE_ESTIMATION_TYPE_GPS_FILTER;
   else
-    state_estimation.mode = STATE_ESTIMATION_MODE_OFF;
+    state_estimation.type = STATE_ESTIMATION_TYPE_GPS;
 #endif
 
   state_estimation_run();
