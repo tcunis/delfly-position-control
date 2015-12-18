@@ -393,9 +393,9 @@ void ins_int_update_gps(struct GpsState *gps_s, float dt)
 
 #if USE_MODULE
   struct NedCoor_i gps_pos_ned, gps_speed_ned;
-  INT32_VECT2_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
+  INT32_VECT3_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
                       INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
-  INT32_VECT2_SCALE_2(gps_speed_ned, gps_speed_cm_s_ned,
+  INT32_VECT3_SCALE_2(gps_speed_ned, gps_speed_cm_s_ned,
                       INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
   ins_module_int_update_gps( &gps_pos_ned, &gps_speed_ned, dt );
 #else

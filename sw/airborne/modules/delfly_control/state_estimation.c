@@ -92,7 +92,7 @@ static void state_estimation_aftermath (void);
 void state_estimation_init (void) {
 
   if ( state_estimation.mode != STATE_ESTIMATION_MODE_OFF )
-	return;
+    return;
 
   //else:
   state_estimation.mode = STATE_ESTIMATION_MODE_ENTER;
@@ -236,6 +236,15 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
 
 void state_estimation_run (void) {
 
+  switch (state_estimation.mode) {
+    case STATE_ESTIMATION_MODE_OFF:
+    case STATE_ESTIMATION_MODE_ENTER:
+      return; //nothing to do, init first
+
+    default:
+      break;
+  }
+  //else:
   state_estimation.mode = state_estimation.type;
 
   struct Int32Vect3 pos, vel, air, acc;
@@ -253,8 +262,7 @@ void state_estimation_run (void) {
   delfly_state.flap_freq = rpm_sensor.motor_frequency;
 
   //TODO: get heading, azimuth
-  delfly_state.h.heading = state_estimation.states.att.psi;
-  state_estimation.out.att.psi = stateGetNedToBodyEulers_i()->psi;
+  delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
   delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
 
