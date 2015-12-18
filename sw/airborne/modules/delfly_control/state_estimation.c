@@ -35,7 +35,6 @@
 
 #include "matlab_include.h"
 #include "delfly_algebra_int.h"
-#include "filters/low_pass_filter.h"
 
 #include "state.h"
 #include "subsystems/ins/ins_int.h"
@@ -63,19 +62,6 @@
     (__RETURN__).z = get_butterworth_2_low_pass_int(&(__FILTER__)->z);  \
   }
 
-typedef struct {
-  Butterworth2LowPass_int x;
-  Butterworth2LowPass_int y;
-  Butterworth2LowPass_int z;
-} Butterworth2LowPass_vect3;
-
-struct StateFilter {
-
-  Butterworth2LowPass_vect3 pos;
-
-  float sample_time;
-  float cut_off;
-};
 
 
 struct DelflyState delfly_state;

@@ -31,6 +31,9 @@
 
 #include "delfly_model.h"
 
+#include "filters/low_pass_filter.h"
+
+
 
 #define STATE_ESTIMATION_MODE_OFF		    0
 #define STATE_ESTIMATION_MODE_ENTER         1
@@ -45,6 +48,22 @@
 #ifndef STATE_ESTIMATION_MODE
 #define STATE_ESTIMATION_MODE           STATE_ESTIMATION_MODE_OFF
 #endif
+
+
+typedef struct {
+  Butterworth2LowPass_int x;
+  Butterworth2LowPass_int y;
+  Butterworth2LowPass_int z;
+} Butterworth2LowPass_vect3;
+
+
+struct StateFilter {
+
+  Butterworth2LowPass_vect3 pos;
+
+  float sample_time;
+  float cut_off;
+};
 
 
 struct StateEstimation {
@@ -69,7 +88,7 @@ struct StateEstimation {
 
 
 extern struct StateEstimation state_estimation;
-
+extern struct StateFilter state_filter;
 
 extern void state_estimation_init(void);
 
