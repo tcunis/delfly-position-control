@@ -118,7 +118,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
     <!--define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
-    <define name="MODE_AUTO2" value="AP_MODE_MODULE"/>
+    <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
     <define name="GUIDANCE_H_MODE_IN_NAV" value="GUIDANCE_H_MODE_MODULE"/>
     <define name="GUIDANCE_V_MODE_IN_NAV" value="GUIDANCE_V_MODE_MODULE"/>

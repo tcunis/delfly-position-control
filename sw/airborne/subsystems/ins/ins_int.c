@@ -254,7 +254,7 @@ void ins_reset_local_origin(void)
 #endif
 
 #if USE_MODULE
-    ins_module_int_reset_local_origin();
+  ins_module_int_reset_local_origin();
 #endif
 
 #if USE_HFF

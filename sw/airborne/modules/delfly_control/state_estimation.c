@@ -101,9 +101,6 @@ void state_estimation_init (void) {
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
 
-  state_filter.sample_time = 1/(STATE_ESTIMATION_GPS_FREQ);
-  state_filter.cut_off 	   = STATE_ESTIMATION_FILTER_CUTOFF;
-
   VECT2_ZERO( delfly_state.h.pos );
   VECT2_ZERO( delfly_state.h.vel );
   VECT2_ZERO( delfly_state.h.air );
@@ -143,6 +140,9 @@ void ins_module_int_reset_local_origin (void) {
   VECT3_COPY(state_estimation.states.pos, ins_int.ltp_pos);
   VECT3_COPY(state_estimation.states.vel, ins_int.ltp_speed);
   VECT3_COPY(state_estimation.states.acc, ins_int.ltp_accel);
+
+  state_filter.sample_time = 1.0/(STATE_ESTIMATION_GPS_FREQ);
+  state_filter.cut_off     = STATE_ESTIMATION_FILTER_CUTOFF;
 
   init_butterworth_2_low_pass_vect3( &state_filter.pos, state_filter.cut_off, state_filter.sample_time, state_estimation.states.pos );
 }
