@@ -31,6 +31,8 @@
 #include "generated/modules.h"
 
 //#include "generated/airframe.h"
+#include "subsystems/ins/ins_int.h"
+#include "subsystems/gps.h"
 
 
 #define SEC_OF_USEC(_USEC_)         ( (_USEC_)*1.0/USEC_OF_SEC(1) )
@@ -100,7 +102,7 @@ void gps_diagnostics_init(void) {
     dl_pkgtimediff = 0;
     count = -1;
 
-    INT_VECT3_ZERO(gps_pos_ned);
+    INT_VECT3_ZERO(gps_pos_cm_ned);
 
     prev_gps_state = gps;
     prev_msg_time = USEC_OF_GPS_MSG(gps);
@@ -115,7 +117,7 @@ void gps_diagnostics_init(void) {
 void gps_diagnostics_log_pos( struct NedCoor_i* pos_ned ) {
 
 //	struct NedCoor_i gps_pos_cm_ned;
-  ned_of_ecef_point_i(&gps_pos_cm_ned, &ins_int.ltp_def, &gps_s->ecef_pos);
+  ned_of_ecef_point_i(&gps_pos_cm_ned, &ins_int.ltp_def, &gps.ecef_pos);
 
 //	gps_pos_ned.x = pos_ned->x;
 //	gps_pos_ned.x = pos_ned->y;
