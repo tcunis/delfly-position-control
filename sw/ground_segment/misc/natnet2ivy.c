@@ -524,7 +524,7 @@ gboolean timeout_transmit_callback(gpointer data) {
 
     // Log position data
     double time1 = difftime(time(NULL), time0);
-    printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d", time1, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
+    printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d\n", time1, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
 
     // Transmit the REMOTE_GPS packet on the ivy bus (either small or big)
     if(small_packets) {
@@ -815,7 +815,7 @@ int main(int argc, char** argv)
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
                  sample_data, NULL);
   time0 = time(NULL);
-  log_file = fopen("natnet2ivy_log.data", "w+");
+  log_file = fopen("var/logs/natnet2ivy_log.data", "w+");
 
   // Run the main loop
   g_main_loop_run(ml);
