@@ -38,6 +38,7 @@
 #include <Ivy/ivy.h>
 #include <Ivy/ivyglibloop.h>
 #include <time.h>
+#include "sys/time.h"
 
 #include "std.h"
 #include "arch/linux/udp_socket.h"
@@ -47,7 +48,7 @@
 /** Debugging & logging options */
 uint8_t verbose = 0;
 FILE* log_file = NULL;
-time_t time0; //start-up time for natnet2ivy log
+struct timeval time0; //start-up time for natnet2ivy log
 #define printf_natnet   if(verbose > 1) printf
 #define printf_debug    if(verbose > 0) printf
 #define printf_log      if(log_file)         fprintf
@@ -523,8 +524,11 @@ gboolean timeout_transmit_callback(gpointer data) {
       rigidBodies[i].ecef_vel.x, rigidBodies[i].ecef_vel.y, rigidBodies[i].ecef_vel.z);
 
     // Log position data
-    double time1 = difftime(time(NULL), time0);
-    printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d\n", time1, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
+    struct timeval time1, timediff;
+    gettimeofday(&time1, NULL);
+    timersub(&time1, &time0, &timediff);
+    double t = timediff.tv_sec + timediff.tv_usec*1E-6;
+    printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d\n", t, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
 
     // Transmit the REMOTE_GPS packet on the ivy bus (either small or big)
     if(small_packets) {
@@ -814,7 +818,7 @@ int main(int argc, char** argv)
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
                  sample_data, NULL);
-  time0 = time(NULL);
+  gettimeofday(&time0, NULL);
   log_file = fopen("var/logs/natnet2ivy_log.data", "w+");
 
   // Run the main loop

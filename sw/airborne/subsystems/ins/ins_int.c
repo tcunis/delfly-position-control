@@ -113,8 +113,22 @@ PRINT_CONFIG_MSG("INS_SONAR_UPDATE_ON_AGL defaulting to FALSE")
 #endif
 
 #ifndef USE_INS_NAV_INIT
-#define USE_INS_NAV_INIT TRUE
+#define USE_INS_NAV_INIT    TRUE
 PRINT_CONFIG_MSG("USE_INS_NAV_INIT defaulting to TRUE")
+#endif
+
+#ifndef USE_INS_LOCAL_INIT
+#define USE_INS_LOCAL_INIT  FALSE
+#elif USE_INS_LOCAL_INIT
+#ifndef GPS_LOCAL_ECEF_ORIGIN_X
+#error Local x coordinate in ECEF of the local origin required
+#endif
+#ifndef GPS_LOCAL_ECEF_ORIGIN_Y
+#error Local y coordinate in ECEF of the local origin required
+#endif
+#ifndef GPS_LOCAL_ECEF_ORIGIN_Z
+#error Local z coordinate in ECEF of the local origin required
+#endif
 #endif
 
 #ifdef INS_BARO_SENS
@@ -183,6 +197,7 @@ static void send_ins_ref(struct transport_tx *trans, struct link_device *dev)
 #endif
 
 static void ins_init_origin_from_flightplan(void);
+static void ins_init_origin_from_local(void);
 static void ins_ned_to_state(void);
 static void ins_update_from_vff(void);
 #if USE_HFF
@@ -195,6 +210,9 @@ void ins_int_init(void)
 
 #if USE_INS_NAV_INIT
   ins_init_origin_from_flightplan();
+  ins_int.ltp_initialized = TRUE;
+#elif USE_INS_LOCAL_INIT
+  ins_init_origin_from_local();
   ins_int.ltp_initialized = TRUE;
 #else
   ins_int.ltp_initialized  = FALSE;
@@ -496,7 +514,18 @@ static void ins_init_origin_from_flightplan(void)
   ltp_def_from_ecef_i(&ins_int.ltp_def, &ecef_nav0);
   ins_int.ltp_def.hmsl = NAV_ALT0;
   stateSetLocalOrigin_i(&ins_int.ltp_def);
+}
 
+/** initialize the local origin (ltp_def) from GPS_LOCAL_ECEF_ORIGIN define */
+static void ins_init_origin_from_local(void)
+{
+  struct EcefCoor_i ecef_local;
+  ecef_local.x = GPS_LOCAL_ECEF_ORIGIN_X;
+  ecef_local.y = GPS_LOCAL_ECEF_ORIGIN_Y;
+  ecef_local.z = GPS_LOCAL_ECEF_ORIGIN_Z;
+
+  ltp_def_from_ecef_i(&ins_int.ltp_def, &ecef_local);
+  stateSetLocalOrigin_i(&ins_int.ltp_def);
 }
 
 /** copy position and speed to state interface */
