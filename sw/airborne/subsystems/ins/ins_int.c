@@ -367,8 +367,16 @@ void ins_int_update_gps(struct GpsState *gps_s, float dt)
     ins_reset_local_origin();
   }
 
-  struct NedCoor_i gps_pos_cm_ned;
+  struct NedCoor_i gps_pos_cm_ned, gps_pos_ned;
+#if GPS_HIGH_PRECISION
+  VECT3_COPY(gps_pos_ned, gps_s->ned_pos_hp);
+  INT32_VECT3_SCALE_2(gps_pos_cm_ned, gps_pos_ned,
+                      INT32_POS_OF_CM_DEN, INT32_POS_OF_CM_NUM);
+#else
   ned_of_ecef_point_i(&gps_pos_cm_ned, &ins_int.ltp_def, &gps_s->ecef_pos);
+  INT32_VECT3_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
+                      INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
+#endif
 
   /* calculate body frame position taking BODY_TO_GPS translation (in cm) into account */
 #ifdef INS_BODY_TO_GPS_X
@@ -392,9 +400,9 @@ void ins_int_update_gps(struct GpsState *gps_s, float dt)
   ned_of_ecef_vect_i(&gps_speed_cm_s_ned, &ins_int.ltp_def, &gps_s->ecef_vel);
 
 #if USE_MODULE
-  struct NedCoor_i gps_pos_ned, gps_speed_ned;
-  INT32_VECT3_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
-                      INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
+  struct NedCoor_i /*gps_pos_ned,*/ gps_speed_ned;
+//  INT32_VECT3_SCALE_2(gps_pos_ned, gps_pos_cm_ned,
+//                      INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
   INT32_VECT3_SCALE_2(gps_speed_ned, gps_speed_cm_s_ned,
                       INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
   ins_module_int_update_gps( &gps_pos_ned, &gps_speed_ned, dt );

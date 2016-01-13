@@ -51,6 +51,12 @@ struct LtpDef_i tracking_ltp;
 
 struct EnuCoor_i enu_pos, enu_speed;
 
+#if GPS_HIGH_PRECISION
+struct EnuCoor_i enu_pos_cm;
+#else
+#define enu_pos_cm    enu_pos
+#endif
+
 struct EcefCoor_i ecef_pos, ecef_vel;
 
 struct LlaCoor_i lla_pos;
@@ -80,22 +86,32 @@ void gps_impl_init(void)
 void parse_gps_datalink_small(uint8_t num_sv, uint32_t pos_xyz, uint32_t speed_xy)
 {
 
-  // Position in ENU coordinates
-  enu_pos.x = (int32_t)((pos_xyz >> 22) & 0x3FF); // bits 31-22 x position in cm
+  // Position in ENU coordinates, either in cm or #GPS_POS_FRAC
+  enu_pos.x = (int32_t)((pos_xyz >> 22) & 0x3FF); // bits 31-22 x position
   if (enu_pos.x & 0x200) {
     enu_pos.x |= 0xFFFFFC00;  // fix for twos complements
   }
-  enu_pos.y = (int32_t)((pos_xyz >> 12) & 0x3FF); // bits 21-12 y position in cm
+  enu_pos.y = (int32_t)((pos_xyz >> 12) & 0x3FF); // bits 21-12 y position
   if (enu_pos.y & 0x200) {
     enu_pos.y |= 0xFFFFFC00;  // fix for twos complements
   }
-  enu_pos.z = (int32_t)(pos_xyz >> 2 & 0x3FF); // bits 11-2 z position in cm
+  enu_pos.z = (int32_t)(pos_xyz >> 2 & 0x3FF); // bits 11-2 z position
   // bits 1 and 0 are free
 
   // printf("ENU Pos: %u (%d, %d, %d)\n", pos_xyz, enu_pos.x, enu_pos.y, enu_pos.z);
 
+#if GPS_HIGH_PRECISION
+  // GPS position is in #GPS_POS_FRAC
+  // increase resolution to INT32_POS_FRAC:
+  INT32_VECT3_LSHIFT(enu_pos, enu_pos, (INT32_POS_FRAC-GPS_POS_FRAC));
+  // convert BFP to cm:
+  INT32_VECT3_SCALE_2(enu_pos_cm, enu_pos, INT32_POS_OF_CM_DEN, INT32_POS_OF_CM_NUM);
+
+  ENU_OF_TO_NED(gps.ned_pos_hp, enu_pos);
+#endif
+
   // Convert the ENU coordinates to ECEF
-  ecef_of_enu_point_i(&ecef_pos, &tracking_ltp, &enu_pos);
+  ecef_of_enu_point_i(&ecef_pos, &tracking_ltp, &enu_pos_cm);
   gps.ecef_pos = ecef_pos;
 
   lla_of_ecef_i(&lla_pos, &ecef_pos);
@@ -115,7 +131,7 @@ void parse_gps_datalink_small(uint8_t num_sv, uint32_t pos_xyz, uint32_t speed_x
 
   ecef_of_enu_vect_i(&gps.ecef_vel , &tracking_ltp , &enu_speed);
 
-  gps.hmsl = tracking_ltp.hmsl + enu_pos.z * 10; // TODO: try to compensate for the loss in accuracy
+  gps.hmsl = tracking_ltp.hmsl + enu_pos_cm.z * 10; // TODO: try to compensate for the loss in accuracy
 
   gps.course = (int32_t)((speed_xy >> 2) & 0x3FF); // bits 11-2 heading in rad*1e2
   if (gps.course & 0x200) {

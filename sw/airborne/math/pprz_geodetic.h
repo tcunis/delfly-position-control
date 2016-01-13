@@ -38,6 +38,13 @@
 extern "C" {
 #endif
 
+#define GPS_HIGH_PRECISION    TRUE
+#if GPS_HIGH_PRECISION
+#define GPS_POS_FRAC          8
+//#define GPS_POS_OF_CM_NUM     64
+//#define GPS_POS_OF_CM_DEN     25
+#endif
+
 #define ENU_OF_TO_NED(_po, _pi) {   \
     (_po).x =  (_pi).y;       \
     (_po).y =  (_pi).x;       \

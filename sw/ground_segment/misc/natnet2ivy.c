@@ -44,10 +44,13 @@
 #include "math/pprz_geodetic_double.h"
 #include "math/pprz_algebra_double.h"
 
-/** Debugging options */
+/** Debugging & logging options */
 uint8_t verbose = 0;
+FILE* log_file = NULL;
+time_t time0; //start-up time for natnet2ivy log
 #define printf_natnet   if(verbose > 1) printf
 #define printf_debug    if(verbose > 0) printf
+#define printf_log      if(log_file)         fprintf
 
 /** NatNet defaults */
 char *natnet_addr               = "255.255.255.255";
@@ -88,6 +91,20 @@ bool small_packets              = FALSE;
 #define NAT_MESSAGESTRING           8
 #define NAT_UNRECOGNIZED_REQUEST    100
 #define UNDEFINED                   999999.9999
+
+/** Rounding function floating-point to integer */
+#define to_int(__F__)   round(__F__)
+
+#ifndef GPS_HIGH_PRECISION
+#define GPS_HIGH_PRECISION          FALSE
+#endif
+
+#if GPS_HIGH_PRECISION
+#define GPS_POS_MULT                (1<<GPS_POS_FRAC)
+#else
+#define GPS_POS_MULT                100.0
+#endif
+
 
 /** Tracked rigid bodies */
 struct RigidBody {
@@ -505,6 +522,10 @@ gboolean timeout_transmit_callback(gpointer data) {
       rigidBodies[i].x, rigidBodies[i].y, rigidBodies[i].z,
       rigidBodies[i].ecef_vel.x, rigidBodies[i].ecef_vel.y, rigidBodies[i].ecef_vel.z);
 
+    // Log position data
+    double time1 = difftime(time(NULL), time0);
+    printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d", time1, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
+
     // Transmit the REMOTE_GPS packet on the ivy bus (either small or big)
     if(small_packets) {
       /* The GPS messages are most likely too large to be send over either the datalink
@@ -512,16 +533,16 @@ gboolean timeout_transmit_callback(gpointer data) {
        * a single integer. The z axis is considered unsigned and only the latter 10 LSBs are
        * used.
        */
-      uint32_t pos_xyz = (((uint32_t)(pos.x*100.0)) & 0x3FF) << 22; // bits 31-22 x position in cm
-      pos_xyz |= (((uint32_t)(pos.y*100.0)) & 0x3FF) << 12; // bits 21-12 y position in cm
-      pos_xyz |= (((uint32_t)(pos.z*100.0)) & 0x3FF) << 2; // bits 11-2 z position in cm
+      uint32_t pos_xyz = (((uint32_t) to_int(pos.x*GPS_POS_MULT)) & 0x3FF) << 22; // bits 31-22 x position in cm
+              pos_xyz |= (((uint32_t) to_int(pos.y*GPS_POS_MULT)) & 0x3FF) << 12; // bits 21-12 y position in cm
+              pos_xyz |= (((uint32_t) to_int(pos.z*GPS_POS_MULT)) & 0x3FF) << 2; // bits 11-2 z position in cm
       // bits 1 and 0 are free
 
       // printf("ENU Pos: %u (%.2f, %.2f, %.2f)\n", pos_xyz, pos.x, pos.y, pos.z);
 
-      uint32_t speed_xy = (((uint32_t)(speed.x*100.0)) & 0x3FF) << 22; // bits 31-22 speed x in cm/s
-      speed_xy |= (((uint32_t)(speed.y*100.0)) & 0x3FF) << 12; // bits 21-12 speed y in cm/s
-      speed_xy |= (((uint32_t)(heading*100.0)) & 0x3FF) << 2; // bits 11-2 heading in rad*1e2 (The heading is already subsampled)
+      uint32_t speed_xy = (((uint32_t) to_int(speed.x*100.0)) & 0x3FF) << 22; // bits 31-22 speed x in cm/s
+              speed_xy |= (((uint32_t) to_int(speed.y*100.0)) & 0x3FF) << 12; // bits 21-12 speed y in cm/s
+              speed_xy |= (((uint32_t) to_int(heading*100.0)) & 0x3FF) << 2; // bits 11-2 heading in rad*1e2 (The heading is already subsampled)
       // bits 1 and 0 are free
 
       // printf("ENU Vel: %u (%.2f, %.2f, 0.0)\n", speed_xy, speed.x, speed.y);
@@ -793,9 +814,13 @@ int main(int argc, char** argv)
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
                  sample_data, NULL);
+  time0 = time(NULL);
+  log_file = fopen("natnet2ivy_log.data", "w+");
 
   // Run the main loop
   g_main_loop_run(ml);
+
+  fclose(log_file);
 
   return 0;
 }
