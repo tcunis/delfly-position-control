@@ -60,7 +60,8 @@ void guidance_v_module_init(void) {
   delfly_guidance.cmd.v_acc = 0;
   VECT2_ZERO(delfly_guidance.err.ver.xy);
 
-  VECT2_COPY(delfly_guidance.gains.ver.xy, matlab_guidance_gain);
+  //VECT2_COPY(delfly_guidance.gains.ver.xy, matlab_guidance_gain);
+  VECT2_ASSIGN(delfly_guidance.gains.ver.xy, 1<<INT32_MATLAB_FRAC, 2<<INT32_MATLAB_FRAC);
 }
 
 
