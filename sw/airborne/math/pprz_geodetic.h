@@ -40,7 +40,7 @@ extern "C" {
 
 #define GPS_HIGH_PRECISION    TRUE
 #if GPS_HIGH_PRECISION
-#define GPS_POS_FRAC          8
+#define GPS_POS_FRAC          7
 //#define GPS_POS_OF_CM_NUM     64
 //#define GPS_POS_OF_CM_DEN     25
 #endif

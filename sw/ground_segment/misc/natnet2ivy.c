@@ -44,6 +44,7 @@
 #include "arch/linux/udp_socket.h"
 #include "math/pprz_geodetic_double.h"
 #include "math/pprz_algebra_double.h"
+#include "math/pprz_algebra_int.h"
 
 /** Debugging & logging options */
 uint8_t verbose = 0;
@@ -537,16 +538,43 @@ gboolean timeout_transmit_callback(gpointer data) {
        * a single integer. The z axis is considered unsigned and only the latter 10 LSBs are
        * used.
        */
-      uint32_t pos_xyz = (((uint32_t) to_int(pos.x*GPS_POS_MULT)) & 0x3FF) << 22; // bits 31-22 x position in cm
-              pos_xyz |= (((uint32_t) to_int(pos.y*GPS_POS_MULT)) & 0x3FF) << 12; // bits 21-12 y position in cm
-              pos_xyz |= (((uint32_t) to_int(pos.z*GPS_POS_MULT)) & 0x3FF) << 2; // bits 11-2 z position in cm
+      uint32_t pos_xyz, speed_xy;
+
+#if GPS_HIGH_PRECISION
+#if (INT32_POS_FRAC-GPS_POS_FRAC) > 6
+#error "Resolution of position is too high to send via high-precise GPS small message."
+#endif
+      /* The GPS position from OptiTrack in double is converted into int32 BFP
+       * with INT32_POS_FRAC by rounding towards the next integer.
+       * The additional bits of INT32_POS_FRAC resolution beyond GPS_POS_FRAC resolution,
+       * i.e. the INT32_POS_FRAC-GPS_POS_FRAC -- albeit less than 6 -- LSBs are sent instead
+       * of speed, the 10 next significant bits are sent via the first integer. */
+      struct Int32Vect3 pos_i;
+      VECT3_SMUL(pos_i, pos, (1<<INT32_POS_FRAC));
+
+      /* Send the 10 next significant bits within GPS resolution. */
+      pos_xyz  = (((uint32_t) to_int(pos_i.x))>>(INT32_POS_FRAC-GPS_POS_FRAC) & 0x3FF) << 22; // bits 31-22 x position in cm
+      pos_xyz |= (((uint32_t) to_int(pos_i.y))>>(INT32_POS_FRAC-GPS_POS_FRAC) & 0x3FF) << 12; // bits 21-12 y position in cm
+      pos_xyz |= (((uint32_t) to_int(pos_i.z))>>(INT32_POS_FRAC-GPS_POS_FRAC) & 0x3FF) << 2; // bits 11-2 z position in cm
+
+      /* Send the 6 LSBs (i.e. beyond GPS position resolution). */
+      speed_xy  = (((uint32_t) to_int(pos_i.x)) & 0x03F) << 26; // bits 31-26 x position accuracy
+      speed_xy |= (((uint32_t) to_int(pos_i.y)) & 0x03F) << 20; // bits 25-20 y position accuracy
+      speed_xy |= (((uint32_t) to_int(pos_i.z)) & 0x03F) << 14; // bits 19-14 z position accuracy
+      // bits 13 and 12 are free
+#else
+      pos_xyz  = (((uint32_t) to_int(pos.x*100.0)) & 0x3FF) << 22; // bits 31-22 x position in cm
+      pos_xyz |= (((uint32_t) to_int(pos.y*100.0)) & 0x3FF) << 12; // bits 21-12 y position in cm
+      pos_xyz |= (((uint32_t) to_int(pos.z*100.0)) & 0x3FF) << 2; // bits 11-2 z position in cm
       // bits 1 and 0 are free
 
       // printf("ENU Pos: %u (%.2f, %.2f, %.2f)\n", pos_xyz, pos.x, pos.y, pos.z);
 
-      uint32_t speed_xy = (((uint32_t) to_int(speed.x*100.0)) & 0x3FF) << 22; // bits 31-22 speed x in cm/s
-              speed_xy |= (((uint32_t) to_int(speed.y*100.0)) & 0x3FF) << 12; // bits 21-12 speed y in cm/s
-              speed_xy |= (((uint32_t) to_int(heading*100.0)) & 0x3FF) << 2; // bits 11-2 heading in rad*1e2 (The heading is already subsampled)
+      /* Send speed in x and y axis in cm/s */
+      speed_xy  = (((uint32_t) to_int(speed.x*100.0)) & 0x3FF) << 22; // bits 31-22 speed x in cm/s
+      speed_xy |= (((uint32_t) to_int(speed.y*100.0)) & 0x3FF) << 12; // bits 21-12 speed y in cm/s
+#endif
+      speed_xy |= (((uint32_t) to_int(heading*100.0)) & 0x3FF) << 2; // bits 11-2 heading in rad*1e2 (The heading is already subsampled)
       // bits 1 and 0 are free
 
       // printf("ENU Vel: %u (%.2f, %.2f, 0.0)\n", speed_xy, speed.x, speed.y);
@@ -818,8 +846,12 @@ int main(int argc, char** argv)
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
                  sample_data, NULL);
+
   gettimeofday(&time0, NULL);
-  log_file = fopen("var/logs/natnet2ivy_log.data", "w+");
+  char stime0[64], slog[64];
+  strftime(stime0, sizeof(stime0), "%Y_%m_%d__%H_%M_%S", localtime(&time0.tv_sec));
+  snprintf(slog, sizeof(slog), "var/logs/%s_natnet2ivy.data", stime0);
+  log_file = fopen(slog, "w+");
 
   // Run the main loop
   g_main_loop_run(ml);

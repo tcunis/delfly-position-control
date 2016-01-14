@@ -65,10 +65,18 @@ struct Int16Vect3 {
   int16_t z;
 };
 
-#define INT32_POS_FRAC 8
+#define INT32_POS_FRAC 13
+#if INT32_POS_FRAC == 8
 #define INT32_POS_OF_CM 2.56
 #define INT32_POS_OF_CM_NUM 64
 #define INT32_POS_OF_CM_DEN 25
+#elif INT32_POS_FRAC == 13
+#define INT32_POS_OF_CM 81.92
+#define INT32_POS_OF_CM_NUM 2048
+#define INT32_POS_OF_CM_DEN 25
+#else
+#error "INT32_POS_OF_CM undefined!"
+#endif
 
 #define INT32_SPEED_FRAC 19
 #define INT32_SPEED_OF_CM_S 5242.88

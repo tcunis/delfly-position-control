@@ -32,6 +32,7 @@
 
 // #include <stdio.h> 
 
+#define GPS_USE_DATALINK_SMALL TRUE
 #if GPS_USE_DATALINK_SMALL
 #ifndef GPS_LOCAL_ECEF_ORIGIN_X
 #error Local x coordinate in ECEF of the remote GPS required
@@ -102,21 +103,29 @@ void parse_gps_datalink_small(uint8_t num_sv, uint32_t pos_xyz, uint32_t speed_x
 
 #if GPS_HIGH_PRECISION
   // GPS position is in #GPS_POS_FRAC
-  // increase resolution to INT32_POS_FRAC:
-  INT32_VECT3_LSHIFT(enu_pos, enu_pos, (INT32_POS_FRAC-GPS_POS_FRAC));
-  // convert BFP to cm:
+  // increase resolution to INT32_POS_FRAC
+  VECT3_SMUL(enu_pos, enu_pos, 1<<(INT32_POS_FRAC-GPS_POS_FRAC));
+
+  // get additional bits from speed_xy
+  struct EnuCoor_i enu_pos_lsb;
+  enu_pos_lsb.x = (int32_t)((speed_xy >> 26) & 0x03F); // bits 31-26 lsb x
+  enu_pos_lsb.y = (int32_t)((speed_xy >> 20) & 0x03F); // bits 25-20 lsb y
+  enu_pos_lsb.z = (int32_t)((speed_xy >> 14) & 0x03F); // bits 19-14 lsb z
+
+  enu_pos.x |= enu_pos_lsb.x;
+  enu_pos.y |= enu_pos_lsb.y;
+  enu_pos.z |= enu_pos_lsb.z;
+
+  INT32_VECT3_ZERO(enu_speed);
+
+  // convert BFP to cm
   INT32_VECT3_SCALE_2(enu_pos_cm, enu_pos, INT32_POS_OF_CM_DEN, INT32_POS_OF_CM_NUM);
-
+  // assign high precision position to GPS state
   ENU_OF_TO_NED(gps.ned_pos_hp, enu_pos);
-#endif
+#else
 
-  // Convert the ENU coordinates to ECEF
-  ecef_of_enu_point_i(&ecef_pos, &tracking_ltp, &enu_pos_cm);
-  gps.ecef_pos = ecef_pos;
-
-  lla_of_ecef_i(&lla_pos, &ecef_pos);
-  gps.lla_pos = lla_pos;
-
+  // if either not GPS_HIGH_PRECISION or GPS_POS_FRAC = INT32_POS_FRAC
+  // read speed in x and y from speed_xy
   enu_speed.x = (int32_t)((speed_xy >> 22) & 0x3FF); // bits 31-22 speed x in cm/s
   if (enu_speed.x & 0x200) {
     enu_speed.x |= 0xFFFFFC00;  // fix for twos complements
@@ -128,7 +137,16 @@ void parse_gps_datalink_small(uint8_t num_sv, uint32_t pos_xyz, uint32_t speed_x
   enu_speed.z = 0;
 
   // printf("ENU Speed: %u (%d, %d, %d)\n", speed_xy, enu_speed.x, enu_speed.y, enu_speed.z);
+#endif
 
+  // Convert the ENU coordinates to ECEF and LLA
+  ecef_of_enu_point_i(&ecef_pos, &tracking_ltp, &enu_pos_cm);
+  gps.ecef_pos = ecef_pos;
+
+  lla_of_ecef_i(&lla_pos, &ecef_pos);
+  gps.lla_pos = lla_pos;
+
+  // Convert ENU velocity to ECEF
   ecef_of_enu_vect_i(&gps.ecef_vel , &tracking_ltp , &enu_speed);
 
   gps.hmsl = tracking_ltp.hmsl + enu_pos_cm.z * 10; // TODO: try to compensate for the loss in accuracy
