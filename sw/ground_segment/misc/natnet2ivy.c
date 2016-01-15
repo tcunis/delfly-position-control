@@ -101,11 +101,6 @@ bool small_packets              = FALSE;
 #define GPS_HIGH_PRECISION          FALSE
 #endif
 
-#if GPS_HIGH_PRECISION
-#define GPS_POS_MULT                (1<<GPS_POS_FRAC)
-#else
-#define GPS_POS_MULT                100.0
-#endif
 
 
 /** Tracked rigid bodies */
@@ -549,7 +544,7 @@ gboolean timeout_transmit_callback(gpointer data) {
        * The additional bits of INT32_POS_FRAC resolution beyond GPS_POS_FRAC resolution,
        * i.e. the INT32_POS_FRAC-GPS_POS_FRAC -- albeit less than 6 -- LSBs are sent instead
        * of speed, the 10 next significant bits are sent via the first integer. */
-      struct Int32Vect3 pos_i;
+      struct EnuCoor_d pos_i;
       VECT3_SMUL(pos_i, pos, (1<<INT32_POS_FRAC));
 
       /* Send the 10 next significant bits within GPS resolution. */
