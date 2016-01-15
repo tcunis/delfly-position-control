@@ -20,6 +20,7 @@
       <message name="ROTORCRAFT_FP"          period="0.5"   phase="0.25"/><!-- 58 bytes -->
       <message name="ROTORCRAFT_NAV_STATUS"  period="1.5"   />            <!-- 15 bytes -->
       <message name="ROTORCRAFT_STATUS"      period="1.5"   phase="0.75"/><!-- 17 bytes -->
+      <message name="RPM_SENSOR"             period="0.25"  />
       <message name="STAB_ATTITUDE_INT"      period="0.25"  />
       <message name="UART_ERRORS"            period="3."    phase="0."/>  <!-- 7 bytes -->
       <message name="WP_MOVED"               period="1.5"/>

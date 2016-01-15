@@ -83,7 +83,7 @@ static void gps_diagnostics_send_diagnostics( struct transport_tx* trans, struct
 //        &count,
         &gps_pos_cm_ned.x,
         &gps_pos_cm_ned.y,
-        &gps_pos_cm_ned.z
+        &gps_pos_cm_ned.z,
         &gps_pos_ned.x,
         &gps_pos_ned.y,
         &gps_pos_ned.z

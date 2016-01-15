@@ -245,7 +245,7 @@ void state_estimation_run (void) {
   set_airspeed( &air );
   set_acceleration( &acc );
 
-  delfly_state.flap_freq = rpm_sensor.motor_frequency;
+  delfly_state.flap_freq = round(rpm_sensor.motor_frequency*10)/10;
 
   //TODO: get heading, azimuth
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;

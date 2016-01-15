@@ -32,7 +32,6 @@
 
 // #include <stdio.h> 
 
-#define GPS_USE_DATALINK_SMALL TRUE
 #if GPS_USE_DATALINK_SMALL
 #ifndef GPS_LOCAL_ECEF_ORIGIN_X
 #error Local x coordinate in ECEF of the remote GPS required

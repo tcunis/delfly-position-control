@@ -2134,7 +2134,13 @@
       <field name="AMSL_GPS" type="float" unit="ft" alt_unit="m"/>
     </message>
     
-    <!--224 is free -->
+    <message name="RPM_SENSOR" id="224">
+      <field name="pulses" type="uint32" unit=""/>
+      <field name="prev_count" type="uint16" unit=""/>
+      <field name="pulses_per_rot" type="float" unit=""/>
+      <field name="prev_freq" type="float" unit="Hz"/>
+      <field name="motor_freq" type="float" unit="Hz"/>
+    </message>
     
     <message name="VIDEO_SYNC" id="225">
       <field name="id" type="uint8"/>
