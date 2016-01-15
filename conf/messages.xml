@@ -384,9 +384,9 @@
     
     <message name="WP_MOVED_ENU" id="49">
       <field name="wp_id" type="uint8"/>
-      <field name="east" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="north" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="up" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="east" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="north" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="up" type="int32" unit="2^8m" alt_unit="m" alt_unit_coef="0.00390625"/>
     </message>
     
     <message name="WINDTURBINE_STATUS_" id="50">
@@ -1344,21 +1344,21 @@
     </message>
     
     <message name="GUIDANCE_H_INT" id="144">
-      <field name="sp_x"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="sp_y"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="ref_x"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="ref_y"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="est_x"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="est_y"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="sp_x"      type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="sp_y"      type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="ref_x"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="ref_y"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="est_x"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="est_y"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
     </message>
     
     <message name="VERT_LOOP" id="145">
-      <field name="z_sp"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="z_sp"      type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
       <field name="zd_sp"     type="int32" alt_unit="m"    alt_unit_coef="0.0000019"/>
-      <field name="est_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="est_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
       <field name="est_zd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
       <field name="est_zdd"   type="int32" alt_unit="m/s2" alt_unit_coef="0.0009766"/>
-      <field name="ref_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="ref_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
       <field name="ref_zd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
       <field name="ref_zdd"   type="int32" alt_unit="m/s2" alt_unit_coef="0.0009766"/>
       <field name="adp_inv_m" type="int32" alt_unit="foo" alt_unit_coef="0.0000000596"/>
@@ -1372,17 +1372,17 @@
     
     
     <message name="HOVER_LOOP" id="146">
-      <field name="sp_x" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="sp_y" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="sp_x" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
+      <field name="sp_y" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
       <field name="sp_heading" type="int32" alt_unit="rad" alt_unit_coef="0.0002441"/>
-      <field name="est_x" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="est_y" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="est_x" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
+      <field name="est_y" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
       <field name="est_xd" type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="est_yd" type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="est_xdd" type="int32" alt_unit="m/s2" alt_unit_coef="0.0009765"/>
       <field name="est_ydd" type="int32" alt_unit="m/s2" alt_unit_coef="0.0009765"/>
-      <field name="err_x" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="err_y" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="err_x" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
+      <field name="err_y" type="int32" alt_unit="m" alt_unit_coef="0.00012207"/>
       <field name="err_xd" type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="err_yd" type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="err_sum_x" type="int32"/>
@@ -1393,18 +1393,18 @@
     </message>
     
     <message name="ROTORCRAFT_FP" id="147">
-      <field name="east"     type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="north"    type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="up"       type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="east"     type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="north"    type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="up"       type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
       <field name="veast"    type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="vnorth"   type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="vup"      type="int32" alt_unit="m/s" alt_unit_coef="0.0000019"/>
       <field name="phi"      type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
       <field name="theta"    type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
       <field name="psi"      type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
-      <field name="carrot_east" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="carrot_north" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
-      <field name="carrot_up" type="int32" alt_unit="m" alt_unit_coef="0.0039063"/>
+      <field name="carrot_east" type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="carrot_north" type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
+      <field name="carrot_up" type="int32" alt_unit="m" alt_unit_coef="0.00390625"/>
       <field name="carrot_psi" type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
       <field name="thrust"        type="int32"/>
       <field name="flight_time"   type="uint16" unit="s"/>
@@ -1417,13 +1417,13 @@
     </message>
     
     <message name="GUIDANCE_H_REF_INT" id="149">
-      <field name="sp_x"    type="int32" alt_unit="m"     alt_unit_coef="0.0039063"/>
-      <field name="ref_x"   type="int32" alt_unit="m"     alt_unit_coef="0.0039063"/>
+      <field name="sp_x"    type="int32" alt_unit="m"     alt_unit_coef="0.00012207"/>
+      <field name="ref_x"   type="int32" alt_unit="m"     alt_unit_coef="0.00012207"/>
       <field name="sp_xd"   type="int32" alt_unit="m/s"   alt_unit_coef="0.0000019"/>
       <field name="ref_xd"  type="int32" alt_unit="m/s"   alt_unit_coef="0.0000019"/>
       <field name="ref_xdd" type="int32" alt_unit="m/s2"  alt_unit_coef="0.0009766"/>
-      <field name="sp_y"    type="int32" alt_unit="m"     alt_unit_coef="0.0039063"/>
-      <field name="ref_y"   type="int32" alt_unit="m"     alt_unit_coef="0.0039063"/>
+      <field name="sp_y"    type="int32" alt_unit="m"     alt_unit_coef="0.00012207"/>
+      <field name="ref_y"   type="int32" alt_unit="m"     alt_unit_coef="0.00012207"/>
       <field name="sp_yd"   type="int32" alt_unit="m/s"   alt_unit_coef="0.0000019"/>
       <field name="ref_yd"  type="int32" alt_unit="m/s"   alt_unit_coef="0.0000019"/>
       <field name="ref_ydd" type="int32" alt_unit="m/s2"  alt_unit_coef="0.0009766"/>
@@ -1444,7 +1444,7 @@
     
     <message name="INS_Z" id="151">
       <field name="baro_z"    type="float" unit="m"/>
-      <field name="ins_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="ins_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00390625"/>
       <field name="ins_zd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
       <field name="ins_zdd"   type="int32" alt_unit="m/s2" alt_unit_coef="0.0009766"/>
     </message>
@@ -1920,9 +1920,9 @@
     </message>
     
     <message name="INS" id="198">
-      <field name="ins_x"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="ins_y"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="ins_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="ins_x"     type="int32" alt_unit="m"    alt_unit_coef="0.00390625"/>
+      <field name="ins_y"     type="int32" alt_unit="m"    alt_unit_coef="0.00390625"/>
+      <field name="ins_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00390625"/>
       <field name="ins_xd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
       <field name="ins_yd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
       <field name="ins_zd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
@@ -2023,9 +2023,9 @@
     </message>
     
     <message name="TUNE_VERT" id="213">
-      <field name="z_sp"      type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="est_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
-      <field name="ref_z"     type="int32" alt_unit="m"    alt_unit_coef="0.0039063"/>
+      <field name="z_sp"      type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="est_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
+      <field name="ref_z"     type="int32" alt_unit="m"    alt_unit_coef="0.00012207"/>
       <field name="ref_zd"    type="int32" alt_unit="m/s"  alt_unit_coef="0.0000019"/>
     </message>
     

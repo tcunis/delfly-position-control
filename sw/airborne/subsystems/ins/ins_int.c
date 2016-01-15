@@ -173,16 +173,22 @@ struct InsInt ins_int;
 
 static void send_ins(struct transport_tx *trans, struct link_device *dev)
 {
+  struct NedCoor_i pos_i;
+  VECT3_SDIV(pos_i, ins_int.ltp_pos, 1<<(INT32_POS_FRAC-8));
+
   pprz_msg_send_INS(trans, dev, AC_ID,
-                    &ins_int.ltp_pos.x, &ins_int.ltp_pos.y, &ins_int.ltp_pos.z,
+                    //&ins_int.ltp_pos.x, &ins_int.ltp_pos.y, &ins_int.ltp_pos.z,
+                    &pos_i.x,             &pos_i.y,             &pos_i.z,
                     &ins_int.ltp_speed.x, &ins_int.ltp_speed.y, &ins_int.ltp_speed.z,
                     &ins_int.ltp_accel.x, &ins_int.ltp_accel.y, &ins_int.ltp_accel.z);
 }
 
 static void send_ins_z(struct transport_tx *trans, struct link_device *dev)
 {
+  int32_t pos_z = ins_int.ltp_pos.z / (1<<(INT32_POS_FRAC-8));
   pprz_msg_send_INS_Z(trans, dev, AC_ID,
-                      &ins_int.baro_z, &ins_int.ltp_pos.z, &ins_int.ltp_speed.z, &ins_int.ltp_accel.z);
+                      //&ins_int.baro_z, &ins_int.ltp_pos.z, &ins_int.ltp_speed.z, &ins_int.ltp_accel.z);
+                      &ins_int.baro_z, &pos_z, &ins_int.ltp_speed.z, &ins_int.ltp_accel.z);
 }
 
 static void send_ins_ref(struct transport_tx *trans, struct link_device *dev)

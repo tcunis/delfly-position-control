@@ -82,7 +82,7 @@ void rpm_sensor_send_tm(struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_RPM_SENSOR(trans, dev, AC_ID,
       &rpm_sensor.rot_count,
       &rpm_sensor.previous_cnt,
-      (uint8_t*) &pulse_per_rot,
+      &pulse_per_rot,
       &rpm_sensor.previous_frequency,
       &rpm_sensor.motor_frequency
   );

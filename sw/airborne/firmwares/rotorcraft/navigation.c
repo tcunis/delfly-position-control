@@ -105,8 +105,8 @@ float flight_altitude;
 
 static inline void nav_set_altitude(void);
 
-#define CLOSE_TO_WAYPOINT (15 << 8)
-#define CARROT_DIST (12 << 8)
+#define CLOSE_TO_WAYPOINT (15 << INT32_POS_FRAC)
+#define CARROT_DIST (12 << INT32_POS_FRAC)
 
 /** minimum horizontal distance to waypoint to mark as arrived */
 #ifndef ARRIVED_AT_WAYPOINT
@@ -148,11 +148,16 @@ static void send_wp_moved(struct transport_tx *trans, struct link_device *dev)
   static uint8_t i;
   i++;
   if (i >= nb_waypoint) { i = 0; }
+  struct EnuCoor_i wp_i;
+  VECT3_SDIV(wp_i, waypoints[i].enu_i, 1<<(INT32_POS_FRAC-8));
   pprz_msg_send_WP_MOVED_ENU(trans, dev, AC_ID,
                              &i,
-                             &(waypoints[i].enu_i.x),
-                             &(waypoints[i].enu_i.y),
-                             &(waypoints[i].enu_i.z));
+                             &wp_i.x,
+                             &wp_i.y,
+                             &wp_i.z);
+//                             &(waypoints[i].enu_i.x),
+//                             &(waypoints[i].enu_i.y),
+//                             &(waypoints[i].enu_i.z));
 }
 #endif
 

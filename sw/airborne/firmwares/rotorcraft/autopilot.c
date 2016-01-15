@@ -216,19 +216,31 @@ static void send_energy(struct transport_tx *trans, struct link_device *dev)
 static void send_fp(struct transport_tx *trans, struct link_device *dev)
 {
   int32_t carrot_up = -guidance_v_z_sp;
+  struct EnuCoor_i pos_enu_i, carrot_enu_i;
+  VECT3_SDIV(pos_enu_i, *stateGetPositionEnu_i(), 1<<(INT32_POS_FRAC-8));
+  VECT3_SDIV(carrot_enu_i, navigation_carrot, 1<<(INT32_POS_FRAC-8));
+//  carrot_enu_i.x = guidance_h.sp.pos.y / (1<<(INT32_POS_FRAC-8));
+//  carrot_enu_i.y = guidance_h.sp.pos.x / (1<<(INT32_POS_FRAC-8));
+//  carrot_enu_i.z = carrot_up / (1<<(INT32_POS_FRAC-8));
   pprz_msg_send_ROTORCRAFT_FP(trans, dev, AC_ID,
-                              &(stateGetPositionEnu_i()->x),
-                              &(stateGetPositionEnu_i()->y),
-                              &(stateGetPositionEnu_i()->z),
+                              &pos_enu_i.x,
+                              &pos_enu_i.y,
+                              &pos_enu_i.z,
+//                              &(stateGetPositionEnu_i()->x),
+//                              &(stateGetPositionEnu_i()->y),
+//                              &(stateGetPositionEnu_i()->z),
                               &(stateGetSpeedEnu_i()->x),
                               &(stateGetSpeedEnu_i()->y),
                               &(stateGetSpeedEnu_i()->z),
                               &(stateGetNedToBodyEulers_i()->phi),
                               &(stateGetNedToBodyEulers_i()->theta),
                               &(stateGetNedToBodyEulers_i()->psi),
-                              &guidance_h.sp.pos.y,
-                              &guidance_h.sp.pos.x,
-                              &carrot_up,
+                              &carrot_enu_i.x,
+                              &carrot_enu_i.y,
+                              &carrot_enu_i.z,
+//                              &guidance_h.sp.pos.y,
+//                              &guidance_h.sp.pos.x,
+//                              &carrot_up,
                               &guidance_h.sp.heading,
                               &stabilization_cmd[COMMAND_THRUST],
                               &autopilot_flight_time);
