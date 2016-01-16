@@ -126,8 +126,10 @@ void waypoint_move_enu_i(uint8_t wp_id, struct EnuCoor_i *new_pos)
 {
   if (wp_id < nb_waypoint) {
     waypoint_set_enu_i(wp_id, new_pos);
-    DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id, &(new_pos->x),
-                               &(new_pos->y), &(new_pos->z));
+    struct EnuCoor_i new_pos_i;
+    VECT3_SDIV(new_pos_i, *new_pos, 1<<(INT32_POS_FRAC-8));
+    DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id, &(new_pos_i.x),
+                               &(new_pos_i.y), &(new_pos_i.z));
   }
 }
 
@@ -189,10 +191,15 @@ void waypoint_move_lla(uint8_t wp_id, struct LlaCoor_i *lla)
     DOWNLINK_SEND_WP_MOVED_LLA(DefaultChannel, DefaultDevice, &wp_id,
                                &lla->lat, &lla->lon, &hmsl);
   } else {
+    struct EnuCoor_i wp_i;
+    VECT3_SDIV(wp_i, waypoints[wp_id].enu_i, 1<<(INT32_POS_FRAC-8));
     DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,
-                               &waypoints[wp_id].enu_i.x,
-                               &waypoints[wp_id].enu_i.y,
-                               &waypoints[wp_id].enu_i.z);
+                                &wp_i.x,
+                                &wp_i.y,
+                                &wp_i.z);
+//                               &waypoints[wp_id].enu_i.x,
+//                               &waypoints[wp_id].enu_i.y,
+//                               &waypoints[wp_id].enu_i.z);
   }
 }
 
