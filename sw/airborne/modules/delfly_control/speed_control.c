@@ -122,6 +122,8 @@ void speed_control_enter (void) {
   //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
 
+  flap_control_enter();
+
   delfly_model_enter();
   delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
 

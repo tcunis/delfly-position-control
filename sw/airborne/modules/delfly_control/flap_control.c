@@ -28,6 +28,8 @@
 #include "paparazzi.h"
 #include "generated/airframe.h"
 
+#include "delfly_control.h"
+
 #include "subsystems/sensors/rpm_sensor.h"
 #include "firmwares/rotorcraft/stabilization.h"
 
@@ -48,6 +50,7 @@ struct FlapControl flap_control;
 bool_t flap_control_antiwindup;
 
 
+
 void flap_control_init(void) {
 
   flap_control.gains.p = FLAP_CONTROL_PGAIN;
@@ -62,7 +65,8 @@ void flap_control_init(void) {
 }
 
 
-void flap_control_enter(void) {}
+void flap_control_enter(void) {
+}
 
 
 bool_t flap_control_run(void) {
@@ -70,8 +74,19 @@ bool_t flap_control_run(void) {
   flap_control.freq_now = rpm_sensor.motor_frequency;
   flap_control.freq_err = flap_control.freq_sp - flap_control.freq_now;
 
+  static int32_t throttle_cmd = 0;
+
   //todo:
-  int32_t throttle_cmd = flap_control.gains.p*MAX_PPRZ/100;
+  if ( flap_control.gains.p > 0 ) {
+    static uint32_t time = 0;
+    time++;
+    if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
+      throttle_cmd += flap_control.gains.i;
+      time = 0;
+    }
+  } else {
+    throttle_cmd = 25*MAX_PPRZ/100;
+  }
 
   flap_control.throttle_cmd = TRIM_UPPRZ(throttle_cmd);
 
