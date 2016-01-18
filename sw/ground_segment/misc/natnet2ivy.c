@@ -844,7 +844,7 @@ int main(int argc, char** argv)
 
   gettimeofday(&time0, NULL);
   char stime0[64], slog[64];
-  strftime(stime0, sizeof(stime0), "%Y_%m_%d__%H_%M_%S", localtime(&time0.tv_sec));
+  strftime(stime0, sizeof(stime0), "%y_%m_%d__%H_%M_%S", localtime(&time0.tv_sec));
   snprintf(slog, sizeof(slog), "var/logs/%s_natnet2ivy.data", stime0);
   log_file = fopen(slog, "w+");
 
