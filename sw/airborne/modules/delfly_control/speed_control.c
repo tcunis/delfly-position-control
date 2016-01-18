@@ -32,6 +32,8 @@
 #include "speed_control_var.h"
 #include "delfly_control.h"
 
+#include "flap_control.h"
+
 #include "delfly_model.h"
 #include "delfly_state.h"
 
@@ -210,7 +212,8 @@ void speed_control_run (bool_t in_flight) {
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
-  stabilization_cmd[COMMAND_THRUST] = cmd_throttle;
+  //stabilization_cmd[COMMAND_THRUST] = cmd_throttle;
+  flap_control_run();
 
   stabilization_attitude_run(in_flight);
 

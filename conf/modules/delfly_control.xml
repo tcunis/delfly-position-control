@@ -15,6 +15,7 @@
     <file name="delfly_guidance.c"/>    
     <file name="delfly_model.c"/>
     <file name="delfly_telemetry.c"/>
+    <file name="flap_control.c"/>
     <file name="guidance_h_module.c"/>
     <file name="guidance_v_module.c"/>
     <file name="speed_control.c"/>

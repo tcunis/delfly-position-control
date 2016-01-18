@@ -29,6 +29,7 @@
 
 #include "delfly_state.h"
 #include "state_estimation.h"
+#include "flap_control.h"
 #include "speed_control_var.h"
 #include "delfly_guidance.h"
 
@@ -42,13 +43,22 @@
 #include "firmwares/rotorcraft/autopilot.h"
 
 
+static void delfly_telemetry_send_flapcontrol (struct transport_tx*, struct link_device*);
 static void delfly_telemetry_send_guidance (struct transport_tx*, struct link_device*);
-
 static void delfly_telemetry_send_state (struct transport_tx*, struct link_device*);
 //static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*);
 static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*);
-
 static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*);
+
+
+static void delfly_telemetry_send_flapcontrol (struct transport_tx* trans, struct link_device* dev) {
+  pprz_msg_send_DELFLY_FLAPCONTROL(trans, dev, AC_ID,
+    &flap_control.freq_now,
+    &flap_control.freq_sp,
+    &flap_control.freq_err,
+    &flap_control.throttle_cmd
+  );
+}
 
 
 static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct link_device* dev) {
@@ -178,6 +188,7 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, stru
 
 void delfly_telemetry_init_all (void) {
 
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_FLAPCONTROL,     &delfly_telemetry_send_flapcontrol);
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_GUIDANCE,        &delfly_telemetry_send_guidance);
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATE,           &delfly_telemetry_send_state);
 	//register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATERAW,        &delfly_telemetry_send_stateraw);

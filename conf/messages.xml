@@ -984,8 +984,8 @@
     
     <message name="DELFLY_GUIDANCE" id="110">
       <description>Input, states, and output of the Delfly control guidance sub-module. 74 bytes</description>
-      <field name="ap_mode" type="uint8" values="KILL|FAILSAFE|HOME|RATE-D|ATT-D|RATE-RCC|ATT-RCC|ATT-C|RATE-ZH|ATT-ZH|HOVER-D|HOVER-C|HOVER-ZH|NAV|RC-D|CF-D|FWD|MODULE|FLIP">Autopilot mode</field>
-      <field name="mode" type="uint8" values="OFF|MODULE|NAV">Delfly guidance mode</field>
+      <field name="ap_mode"  type="uint8" values="KILL|FAILSAFE|HOME|RATE-D|ATT-D|RATE-RCC|ATT-RCC|ATT-C|RATE-ZH|ATT-ZH|HOVER-D|HOVER-C|HOVER-ZH|NAV|RC-D|CF-D|FWD|MODULE|FLIP">Autopilot mode</field>
+      <field name="mode"     type="uint8" values="OFF|MODULE|NAV">Delfly guidance mode</field>
       <field name="sp_x"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in x-axis (geographic frame)</field>
       <field name="sp_y"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in y-axis (geographic frame)</field>
       <field name="sp_z"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in z-axis (geographic frame)</field>
@@ -1004,6 +1004,13 @@
       <field name="cmd_h"    type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration command (in xy-plane, geographic frame)</field>
       <field name="cmd_v"    type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration command (in z-axis, geographic frame)</field>
       <field name="cmd_psi"  type="int32" alt_unit=" deg"  alt_unit_coef="0.01398823">Heading command</field>
+    </message>
+    
+    <message name="DELFLY_FLAPCONTROL" id="230">
+      <field name="now_freq"     type="float" unit=" Hz"/>
+      <field name="sp_freq"      type="float" unit=" Hz"/>
+      <field name="err_freq"     type="float" unit=" Hz"/>
+      <field name="cmd_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667"/>
     </message>
     <!-- end module -->
     
@@ -2177,7 +2184,7 @@
       <field name="imageBuffer" type="uint8[]"/>
     </message>
     
-    <!--230 is free -->
+    <!--230 is part of module DELFLY_CONTROL, see id 107ff. -->
     
     <message name="ROTORCRAFT_STATUS" id="231">
       <field name="link_imu_nb_err" type="uint32"/>

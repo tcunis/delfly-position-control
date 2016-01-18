@@ -6,11 +6,17 @@
   	<!-- This settings file for the delfy guidance module contains ONLY the additional settings 
   	 	 w.r.t. rotorcraft_guidance.xml. In order to use all settings, load the latter as well! -->
   	
-    <dl_settings NAME="Delfly">
+    <dl_settings name="Delfly">
       <dl_setting var="guidance_lat.gains.p" min="1" step="1" max="1000" module="guidance/guidance_lat" shortname="kp" param="GUIDANCE_LAT_PGAIN" type="int32" persistent="true"/>
     <!--/dl_settings>
     
-    <dl_settings NAME="Speed/thrust loop"-->
+    <dl_settings name="Flap control"-->
+      <dl_setting var="flap_control.gains.p" min="0" step="1" max="1000" module="delfly_control/flap_control" shortname="flap_kp" param="FLAP_CONTROL_PGAIN" type="int32"/>
+      <dl_setting var="flap_control.gains.i" min="0" step="1" max="1000" module="delfly_control/flap_control" shortname="flap_ki" param="FLAP_CONTROL_IGAIN" type="int32"/>
+      <dl_setting var="flap_control.gains.gamma" min="0" step="1" max="100" module="delfly_control/flap_control" shortname="flap_gamma" param="FLAP_CONTROL_ADAPT" type="int32"/>
+    <!--/dl_settings>
+       
+    <dl_settings name="Speed/thrust loop"-->
       <dl_setting var="ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(speed_control.pitch_offset))" min="-90" step="1" max="90" module="delfly_control/speed_control" shortname="Th_off" param="SPEED_CONTROL_PITCH_OFFSET" type="int32" persistent="true" handler="set_pitch_offset"/>
       <dl_setting var="speed_control.fb_gains.p" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_kp" param="SPEED_CONTROL_FB_PGAIN" type="int32" persistent="true"/>
       <dl_setting var="speed_control.fb_gains.i" min="0" step="1" max="1000" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>
