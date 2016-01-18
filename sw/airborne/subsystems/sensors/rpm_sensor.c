@@ -29,6 +29,8 @@
 #include "subsystems/sensors/rpm_sensor.h"
 #include "subsystems/datalink/telemetry.h"
 
+#include "firmwares/rotorcraft/stabilization.h"
+
 
 struct RpmSensor rpm_sensor;
 
@@ -43,6 +45,7 @@ void rpm_sensor_init(void)
   rpm_sensor_arch_init();
 
   rpm_sensor.pulse_count = 0;
+  rpm_sensor.sample_count = 0;
 
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_RPM_SENSOR, &rpm_sensor_send_tm);
 }
@@ -51,6 +54,20 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
 {
   (void) overflow_cnt;
   static uint32_t last_rot_count = 0;
+  static int32_t last_throttle = 0;
+  float motor_frequency;
+
+  if ( stabilization_cmd[COMMAND_THRUST] == 0 ) {
+    rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
+    rpm_sensor.motor_frequency = 0.f;
+    rpm_sensor.average_frequency = 0.f;
+    last_throttle = 0;
+    return;
+  } else if ( stabilization_cmd[COMMAND_THRUST] != last_throttle ) {
+    rpm_sensor.sample_count = 0;
+    last_throttle = stabilization_cmd[COMMAND_THRUST];
+  } else {
+  }
 
   rpm_sensor.pulse_count++;
   rpm_sensor.rot_count = (rpm_sensor.pulse_count / pulse_per_rot);
@@ -62,12 +79,13 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
 
     uint16_t cnt_diff = cnt - rpm_sensor.previous_cnt;
 
-    if ((cnt_diff > 0 && overflow_cnt > 0)) { //|| (overflow_cnt > 1)) {
-      rpm_sensor.motor_frequency = 0.0f;
-    } else if (overflow_cnt > 1) {
-      //nothing to do
+    if ((cnt_diff > 0 && overflow_cnt > 0) || (overflow_cnt > 1)) {
+      //motor_frequency = 0.0f;
     } else {
+      rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
       rpm_sensor.motor_frequency = 281250.0/cnt_diff/rot_diff;
+
+      rpm_sensor.average_frequency = (rpm_sensor.sample_count*rpm_sensor.average_frequency + rpm_sensor.motor_frequency)/(++rpm_sensor.sample_count);
     }
 
     /* Remember count */
@@ -84,6 +102,8 @@ void rpm_sensor_send_tm(struct transport_tx* trans, struct link_device* dev) {
       &rpm_sensor.previous_cnt,
       &pulse_per_rot,
       &rpm_sensor.previous_frequency,
-      &rpm_sensor.motor_frequency
+      &rpm_sensor.motor_frequency,
+      &rpm_sensor.average_frequency,
+      &rpm_sensor.sample_count
   );
 }

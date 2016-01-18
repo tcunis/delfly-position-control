@@ -85,7 +85,7 @@ bool_t flap_control_run(void) {
       time = 0;
     }
   } else {
-    throttle_cmd = 25*MAX_PPRZ/100;
+    throttle_cmd = flap_control.gains.gamma*MAX_PPRZ/100;
   }
 
   flap_control.throttle_cmd = TRIM_UPPRZ(throttle_cmd);

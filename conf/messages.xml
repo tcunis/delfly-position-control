@@ -2147,6 +2147,8 @@
       <field name="pulses_per_rot" type="float" unit=""/>
       <field name="prev_freq" type="float" unit="Hz"/>
       <field name="motor_freq" type="float" unit="Hz"/>
+      <field name="avg_freq" type="float" unit="Hz"/>
+      <field name="samples" type="uint32" unit=""/>
     </message>
     
     <message name="VIDEO_SYNC" id="225">
