@@ -55,45 +55,51 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
   (void) overflow_cnt;
   static uint32_t last_rot_count = 0;
   static int32_t last_throttle = 0;
-  float motor_frequency;
+  static uint32_t total_cnt_diff = 0;
 
-  if ( stabilization_cmd[COMMAND_THRUST] == 0 ) {
+  if ( stabilization_cmd[COMMAND_THRUST] == 0 || overflow_cnt > 1 ) {
     rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
     rpm_sensor.motor_frequency = 0.f;
     rpm_sensor.average_frequency = 0.f;
+    rpm_sensor.pulse_count = 0;
     last_throttle = 0;
-    return;
-  } else if ( stabilization_cmd[COMMAND_THRUST] != last_throttle ) {
-    rpm_sensor.sample_count = 0;
-    last_throttle = stabilization_cmd[COMMAND_THRUST];
+
   } else {
-  }
 
-  rpm_sensor.pulse_count++;
-  rpm_sensor.rot_count = (rpm_sensor.pulse_count / pulse_per_rot);
-
-  //total_cnt_since += cnt;
-
-  if ( rpm_sensor.rot_count > last_rot_count ) {
-    uint32_t rot_diff = rpm_sensor.rot_count - last_rot_count;
-
-    uint16_t cnt_diff = cnt - rpm_sensor.previous_cnt;
-
-    if ((cnt_diff > 0 && overflow_cnt > 0) || (overflow_cnt > 1)) {
-      //motor_frequency = 0.0f;
-    } else {
-      rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
-      rpm_sensor.motor_frequency = 281250.0/cnt_diff/rot_diff;
-
-      rpm_sensor.average_frequency = (rpm_sensor.sample_count*rpm_sensor.average_frequency + rpm_sensor.motor_frequency)/(++rpm_sensor.sample_count);
+    if ( stabilization_cmd[COMMAND_THRUST] != last_throttle ) {
+      rpm_sensor.sample_count = 0;
+      last_throttle = stabilization_cmd[COMMAND_THRUST];
     }
 
-    /* Remember count */
-    rpm_sensor.previous_cnt = cnt;
-    last_rot_count = rpm_sensor.rot_count;
+    rpm_sensor.pulse_count++;
+    rpm_sensor.rot_count = (rpm_sensor.pulse_count / pulse_per_rot);
 
-    /* Zero integrals */
+    int32_t cnt_diff = cnt - rpm_sensor.previous_cnt;
+
+    if ( overflow_cnt > 0 ) {
+      cnt_diff += (1<<sizeof(cnt)) - 1; // add uint16_max
+    }
+
+    total_cnt_diff += cnt_diff;
+
+    if ( rpm_sensor.rot_count > last_rot_count ) {
+      uint32_t rot_diff = rpm_sensor.rot_count - last_rot_count;
+
+      rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
+      rpm_sensor.motor_frequency = 281250.0/total_cnt_diff/rot_diff;
+
+      rpm_sensor.average_frequency = (rpm_sensor.sample_count*rpm_sensor.average_frequency + rpm_sensor.motor_frequency)/(++rpm_sensor.sample_count);
+
+      /* Remember count */
+      last_rot_count = rpm_sensor.rot_count;
+
+      /* Zero integrals */
+      total_cnt_diff = 0;
+      rpm_sensor.pulse_count -= (rpm_sensor.rot_count*pulse_per_rot);
+    }
   }
+
+  rpm_sensor.previous_cnt = cnt;
 }
 
 void rpm_sensor_send_tm(struct transport_tx* trans, struct link_device* dev) {

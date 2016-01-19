@@ -63,7 +63,7 @@
 #define RPM_PPM_CC_IE           TIM_DIER_CC1IE
 #define RPM_PPM_CC_IF           TIM_SR_CC1IF
 
-static uint8_t rpm_sensor_arch_overflow_cnt;
+static uint8_t rpm_sensor_arch_overflow_cnt = 2;
 
 
 
