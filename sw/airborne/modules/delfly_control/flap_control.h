@@ -41,7 +41,10 @@ struct FlapControl {
   float freq_sp;
   float freq_now;
   float freq_err;
+
   int32_t throttle_cmd;
+
+  float ratio;
 };
 
 extern struct FlapControl flap_control;

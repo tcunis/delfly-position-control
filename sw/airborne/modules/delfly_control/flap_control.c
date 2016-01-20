@@ -43,6 +43,10 @@
 #ifndef FLAP_CONTROL_ADAPT
 #define FLAP_CONTROL_ADAPT    0
 #endif
+#ifndef FLAP_CONTROL_RATIO
+#define FLAP_CONTROL_RATIO    0
+#endif
+
 
 
 struct FlapControl flap_control;
@@ -61,6 +65,8 @@ void flap_control_init(void) {
 
   flap_control.throttle_cmd = 0;
 
+  flap_control.ratio = FLAP_CONTROL_RATIO;
+
   flap_control_antiwindup = FALSE;
 }
 
@@ -72,21 +78,31 @@ void flap_control_enter(void) {
 bool_t flap_control_run(void) {
 
   flap_control.freq_now = rpm_sensor.average_frequency;
-  flap_control.freq_err = flap_control.freq_sp - flap_control.freq_now;
 
-  static int32_t throttle_cmd = 0;
+  //todo: implement flap model, if necessary
+  float freq_ref = flap_control.freq_sp;
+  flap_control.freq_err = freq_ref - flap_control.freq_now;
 
-  //todo:
-  if ( flap_control.gains.p > 0 && !flap_control_antiwindup ) {
-    static uint32_t time = 0;
-    time++;
-    if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
-      throttle_cmd += flap_control.gains.i*MAX_PPRZ/100;
-      time = 0;
-    }
-  } else {
-    throttle_cmd = flap_control.gains.gamma*MAX_PPRZ/100;
-  }
+  //change of adaptable parameter, d(ratio)/dt = - gamma/100 * (now - ref) in (%/Hz)/s
+  float ratio_dt = flap_control.gains.gamma * (flap_control.freq_err) / 100;
+
+  //integrate parameter throttle to flapping-frequency (in %) ratio in %/Hz
+  flap_control.ratio += ratio_dt * FLAP_CONTROL_RUN_PERIOD;
+
+  //calculate current throttle command: frequency set-point * throttle-to-frequency-ratio * MAX_PPRZ/100
+  int32_t throttle_cmd = flap_control.ratio * flap_control.freq_sp * MAX_PPRZ / 100;
+
+
+//  if ( flap_control.gains.p > 0 && !flap_control_antiwindup ) {
+//    static uint32_t time = 0;
+//    time++;
+//    if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
+//      throttle_cmd += flap_control.gains.i*MAX_PPRZ/100;
+//      time = 0;
+//    }
+//  } else {
+//    throttle_cmd = flap_control.gains.gamma*MAX_PPRZ/100;
+//  }
 
   flap_control.throttle_cmd = TRIM_UPPRZ(throttle_cmd);
 

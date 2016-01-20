@@ -1011,6 +1011,7 @@
       <field name="sp_freq"      type="float" unit=" Hz"/>
       <field name="err_freq"     type="float" unit=" Hz"/>
       <field name="cmd_throttle" type="int32" unit="" alt_unit=" %" alt_unit_coef="0.01041667"/>
+      <field name="ratio"        type="float" unit=" %/Hz"/>
     </message>
     <!-- end module -->
     

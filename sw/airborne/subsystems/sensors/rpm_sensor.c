@@ -31,6 +31,9 @@
 
 #include "firmwares/rotorcraft/stabilization.h"
 
+#include "filters/averaging_filter.h"
+
+
 #ifndef PULSES_PER_REVOLUTION
 #define PULSES_PER_REVOLUTION   PULSES_PER_ROTATION
 #endif

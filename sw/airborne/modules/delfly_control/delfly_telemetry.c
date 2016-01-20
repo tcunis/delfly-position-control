@@ -56,7 +56,8 @@ static void delfly_telemetry_send_flapcontrol (struct transport_tx* trans, struc
     &flap_control.freq_now,
     &flap_control.freq_sp,
     &flap_control.freq_err,
-    &flap_control.throttle_cmd
+    &flap_control.throttle_cmd,
+    &flap_control.ratio
   );
 }
 
