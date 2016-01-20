@@ -2142,12 +2142,13 @@
     </message>
     
     <message name="RPM_SENSOR" id="224">
-      <field name="pulses" type="uint32" unit=""/>
-      <field name="prev_count" type="uint16" unit=""/>
+      <field name="rot_count" type="uint32" unit=""/>
+      <field name="prev_cnt" type="uint16" unit=""/>
       <field name="pulses_per_rot" type="float" unit=""/>
-      <field name="prev_freq" type="float" unit="Hz"/>
-      <field name="motor_freq" type="float" unit="Hz"/>
-      <field name="avg_freq" type="float" unit="Hz"/>
+      <field name="prev_freq" type="float" unit=" Hz"/>
+      <field name="rot_freq" type="float" unit=" Hz"/>
+      <field name="avg_freq" type="float" unit=" Hz"/>
+      <field name="motor_freq" type="float" unit=" Hz"/>
       <field name="samples" type="uint32" unit=""/>
     </message>
     

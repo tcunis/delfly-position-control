@@ -31,10 +31,15 @@
 
 #include "firmwares/rotorcraft/stabilization.h"
 
+#ifndef PULSES_PER_REVOLUTION
+#define PULSES_PER_REVOLUTION   PULSES_PER_ROTATION
+#endif
 
 struct RpmSensor rpm_sensor;
 
 float pulse_per_rot = PULSES_PER_ROTATION;
+float pulse_per_rev = PULSES_PER_REVOLUTION;
+float rev_per_rot   = pulse_per_rot / pulse_per_rev;
 
 
 static void rpm_sensor_send_tm(struct transport_tx*, struct link_device*);
@@ -57,17 +62,19 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
   static int32_t last_throttle = 0;
   static uint32_t total_cnt_diff = 0;
 
-  if ( stabilization_cmd[COMMAND_THRUST] == 0 || overflow_cnt > 1 ) {
-    rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
-    rpm_sensor.motor_frequency = 0.f;
-    rpm_sensor.average_frequency = 0.f;
+  if ( stabilization_cmd[COMMAND_THRUST] <= 0 || overflow_cnt > 1 ) {
+    rpm_sensor.previous_frequency = rpm_sensor.rotation_frequency;
+    rpm_sensor.motor_frequency    = 0.f;
+    rpm_sensor.rotation_frequency = 0.f;
+    rpm_sensor.average_frequency  = 0.f;
     rpm_sensor.pulse_count = 0;
+    last_rot_count = 0;
     last_throttle = 0;
 
   } else {
 
     if ( stabilization_cmd[COMMAND_THRUST] != last_throttle ) {
-      rpm_sensor.sample_count = 0;
+      //rpm_sensor.sample_count = 0;
       last_throttle = stabilization_cmd[COMMAND_THRUST];
     }
 
@@ -77,25 +84,42 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
     int32_t cnt_diff = cnt - rpm_sensor.previous_cnt;
 
     if ( overflow_cnt > 0 ) {
-      cnt_diff += (1<<sizeof(cnt)) - 1; // add uint16_max
+      cnt_diff += 0xFFFF; // add uint16_max
     }
+
+    rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
+    rpm_sensor.motor_frequency = 281250.0/cnt_diff/pulse_per_rev;
+
+    static float sum_motor_frequency = 0.f;
+    /* Check motor frequency maximum */
+//    if ( rpm_sensor.motor_frequency < rpm_sensor.previous_frequency ) {
+//      rpm_sensor.average_frequency = sum_frequency/rpm_sensor.sample_count;
+//      sum_frequency = rpm_sensor.motor_frequency;
+//      rpm_sensor.sample_count = 1;
+//    } else {
+      sum_motor_frequency += rpm_sensor.motor_frequency;
+      rpm_sensor.sample_count++;
+//    }
 
     total_cnt_diff += cnt_diff;
 
     if ( rpm_sensor.rot_count > last_rot_count ) {
       uint32_t rot_diff = rpm_sensor.rot_count - last_rot_count;
 
-      rpm_sensor.previous_frequency = rpm_sensor.motor_frequency;
-      rpm_sensor.motor_frequency = 281250.0/total_cnt_diff/rot_diff;
+      //rpm_sensor.previous_frequency = rpm_sensor.rotation_frequency;
+      rpm_sensor.rotation_frequency = 281250.0/total_cnt_diff/rot_diff;
 
-      rpm_sensor.average_frequency = (rpm_sensor.sample_count*rpm_sensor.average_frequency + rpm_sensor.motor_frequency)/(++rpm_sensor.sample_count);
+      //rpm_sensor.average_frequency = (rpm_sensor.sample_count*rpm_sensor.average_frequency + rpm_sensor.rotation_frequency)/(++rpm_sensor.sample_count);
+            rpm_sensor.average_frequency = (sum_motor_frequency/rpm_sensor.sample_count)/rev_per_rot;
+            sum_motor_frequency = 0;
+            rpm_sensor.sample_count = 0;
 
       /* Remember count */
       last_rot_count = rpm_sensor.rot_count;
 
       /* Zero integrals */
       total_cnt_diff = 0;
-      rpm_sensor.pulse_count -= (rpm_sensor.rot_count*pulse_per_rot);
+      //rpm_sensor.pulse_count -= (rpm_sensor.rot_count*pulse_per_rot);
     }
   }
 
@@ -108,8 +132,9 @@ void rpm_sensor_send_tm(struct transport_tx* trans, struct link_device* dev) {
       &rpm_sensor.previous_cnt,
       &pulse_per_rot,
       &rpm_sensor.previous_frequency,
-      &rpm_sensor.motor_frequency,
+      &rpm_sensor.rotation_frequency,
       &rpm_sensor.average_frequency,
+      &rpm_sensor.motor_frequency,
       &rpm_sensor.sample_count
   );
 }

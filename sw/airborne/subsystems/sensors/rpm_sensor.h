@@ -41,6 +41,7 @@ struct RpmSensor {
   uint16_t previous_cnt;
   float previous_frequency;
   float motor_frequency;
+  float rotation_frequency;
   float average_frequency;
   uint32_t sample_count;
 };

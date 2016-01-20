@@ -55,6 +55,7 @@
     
 	  <subsystem name="rpm_sensor" type="eagletree">
 	  	<define name="PULSES_PER_ROTATION" value="106.666666"/>
+	  	<define name="PULSES_PER_REVOLUTION" value="5"/>
 	  </subsystem><!--rpm_sensor-->
     
     <subsystem name="stabilization" type="int_quat" />
