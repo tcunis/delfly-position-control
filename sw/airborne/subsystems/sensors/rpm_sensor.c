@@ -37,9 +37,9 @@
 
 struct RpmSensor rpm_sensor;
 
-float pulse_per_rot = PULSES_PER_ROTATION;
-float pulse_per_rev = PULSES_PER_REVOLUTION;
-float rev_per_rot   = pulse_per_rot / pulse_per_rev;
+const float pulse_per_rot = PULSES_PER_ROTATION;
+const float pulse_per_rev = PULSES_PER_REVOLUTION;
+const float rev_per_rot   = (PULSES_PER_ROTATION) / (PULSES_PER_REVOLUTION);
 
 
 static void rpm_sensor_send_tm(struct transport_tx*, struct link_device*);

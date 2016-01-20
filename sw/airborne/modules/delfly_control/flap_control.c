@@ -71,17 +71,17 @@ void flap_control_enter(void) {
 
 bool_t flap_control_run(void) {
 
-  flap_control.freq_now = rpm_sensor.motor_frequency;
+  flap_control.freq_now = rpm_sensor.average_frequency;
   flap_control.freq_err = flap_control.freq_sp - flap_control.freq_now;
 
   static int32_t throttle_cmd = 0;
 
   //todo:
-  if ( flap_control.gains.p > 0 ) {
+  if ( flap_control.gains.p > 0 && !flap_control_antiwindup ) {
     static uint32_t time = 0;
     time++;
     if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
-      throttle_cmd += flap_control.gains.i;
+      throttle_cmd += flap_control.gains.i*MAX_PPRZ/100;
       time = 0;
     }
   } else {
