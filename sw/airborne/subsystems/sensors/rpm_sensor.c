@@ -44,6 +44,8 @@ const float pulse_per_rot = PULSES_PER_ROTATION;
 const float pulse_per_rev = PULSES_PER_REVOLUTION;
 const float rev_per_rot   = (PULSES_PER_ROTATION) / (PULSES_PER_REVOLUTION);
 
+//struct AveragingFilter avg_filter;
+
 
 static void rpm_sensor_send_tm(struct transport_tx*, struct link_device*);
 
@@ -54,6 +56,8 @@ void rpm_sensor_init(void)
 
   rpm_sensor.pulse_count = 0;
   rpm_sensor.sample_count = 0;
+
+//  init_averaging_filter(&avg_filter, (uint8_t) pulse_per_rot);
 
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_RPM_SENSOR, &rpm_sensor_send_tm);
 }
@@ -70,10 +74,11 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
     rpm_sensor.motor_frequency    = 0.f;
     rpm_sensor.rotation_frequency = 0.f;
     rpm_sensor.average_frequency  = 0.f;
+//    rpm_sensor.avgfilt_frequency  = 0.f;
     rpm_sensor.pulse_count = 0;
     last_rot_count = 0;
     last_throttle = 0;
-
+//    init_averaging_filter(&avg_filter, (uint8_t) pulse_per_rot);
   } else {
 
     if ( stabilization_cmd[COMMAND_THRUST] != last_throttle ) {
@@ -104,11 +109,16 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
       rpm_sensor.sample_count++;
 //    }
 
+//    update_averaging_filter(&avg_filter, rpm_sensor.motor_frequency);
+
     total_cnt_diff += cnt_diff;
 
     if ( rpm_sensor.rot_count > last_rot_count ) {
       uint32_t rot_diff = rpm_sensor.rot_count - last_rot_count;
 
+//      if (avg_filter.capacity > rpm_sensor.sample_count) {
+//        shrink_averaging_filter(&avg_filter);
+//      }
       //rpm_sensor.previous_frequency = rpm_sensor.rotation_frequency;
       rpm_sensor.rotation_frequency = 281250.0/total_cnt_diff/rot_diff;
 
@@ -124,7 +134,12 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
       total_cnt_diff = 0;
       //rpm_sensor.pulse_count -= (rpm_sensor.rot_count*pulse_per_rot);
     }
+//    else if (avg_filter.capacity < rpm_sensor.sample_count) {
+//      expand_averaging_filter(&avg_filter);
+//    }
   }
+
+//  rpm_sensor.avgfilt_frequency = get_averaging_filter(&avg_filter)/rev_per_rot;
 
   rpm_sensor.previous_cnt = cnt;
 }
@@ -133,10 +148,11 @@ void rpm_sensor_send_tm(struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_RPM_SENSOR(trans, dev, AC_ID,
       &rpm_sensor.rot_count,
       &rpm_sensor.previous_cnt,
-      &pulse_per_rot,
+      (float*) &pulse_per_rot,
       &rpm_sensor.previous_frequency,
       &rpm_sensor.rotation_frequency,
       &rpm_sensor.average_frequency,
+//      &rpm_sensor.avgfilt_frequency,
       &rpm_sensor.motor_frequency,
       &rpm_sensor.sample_count
   );

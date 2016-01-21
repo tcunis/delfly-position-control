@@ -29,10 +29,12 @@
 #include "std.h"
 
 
-#define AVERAGING_MAX_CAPACITY    20
+#define AVERAGING_MAX_CAPACITY    128
 
 /* Increments the pointer to a ring-buffer. */
-#define INCR_PTR(index)           index = ((index+1) % AVERAGING_MAX_CAPACITY)
+#define AVERAGING_SET_PTR(index,index2)     index = ((index2) % AVERAGING_MAX_CAPACITY)
+#define AVERAGING_INCR_PTR(index)           AVERAGING_SET_PTR(index,index+1)
+#define AVERAGING_DECR_PTR(index)           AVERAGING_SET_PTR(index,index-1)
 
 
 struct AveragingFilter {
@@ -40,6 +42,7 @@ struct AveragingFilter {
   float sum;
   uint8_t capacity;
   uint8_t length;
+  uint8_t max_length; //remember maximum length over time
   uint8_t index_head; //index of element inserted earliest
   uint8_t index_tail; //index AFTER element inserted last
 };
@@ -48,7 +51,7 @@ struct AveragingFilter {
 static inline void init_averaging_filter ( struct AveragingFilter* filter, uint8_t capacity ) {
 
   filter->sum = 0;
-  filter->length = 0;
+  filter->length = filter->max_length = 0;
   filter->capacity = Min(capacity, AVERAGING_MAX_CAPACITY);
   filter->index_head = filter->index_tail = 0;
 
@@ -63,7 +66,7 @@ static inline float pop_averaging_filter ( struct AveragingFilter* filter ) {
 
   //else: remove and return head value
   float head_value = filter->data[filter->index_head];
-  INCR_PTR(filter->index_head);
+  AVERAGING_INCR_PTR(filter->index_head);
 
   //update sum and length
   filter->sum -= head_value;
@@ -82,11 +85,14 @@ static inline void update_averaging_filter ( struct AveragingFilter* filter, flo
 
   //add new value
   filter->data[filter->index_tail] = value;
-  INCR_PTR(filter->index_tail);
+  AVERAGING_INCR_PTR(filter->index_tail);
 
   //update sum and length
   filter->sum += value;
   filter->length++;
+  if ( filter->length > filter->max_length ) {
+    filter->max_length = filter->length;
+  }
 }
 
 static inline float get_averaging_filter ( struct AveragingFilter* filter ) {
@@ -121,6 +127,13 @@ static inline void expand_averaging_filter ( struct AveragingFilter* filter ) {
   }
 
   //else
+  if ( filter->length < filter->max_length ) {
+    //if there have been prior values, expand filter beyond head
+    AVERAGING_DECR_PTR(filter->index_head);
+    //update sum and length
+    filter->sum += filter->data[filter->index_head];
+    filter->length++;
+  }
   filter->capacity++;
 }
 
