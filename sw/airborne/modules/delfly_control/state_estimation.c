@@ -114,6 +114,11 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.acc.xy );
 
   INT32_ZERO( delfly_state.flap_freq );
+
+  average_filter.flap_count = rpm_sensor.rot_count;
+  INT32_VECT3_ZERO(average_filter.sum_pos);
+  average_filter.sum_dt = 0;
+  average_filter.sample_count = 0;
 }
 
 
@@ -191,6 +196,10 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
       // get cycle-averaged position
       if ( rpm_sensor.average_frequency == 0 ) {
         //nothing to do, use this_pos = out.pos
+        average_filter.flap_count = rpm_sensor.rot_count;
+        INT32_VECT3_ZERO(average_filter.sum_pos);
+        average_filter.sum_dt = 0;
+        average_filter.sample_count = 0;
       } else {
         //update average filter
         VECT3_ADD(average_filter.sum_pos, this_pos);
@@ -288,7 +297,7 @@ void state_estimation_run (void) {
   set_airspeed( &air );
   set_acceleration( &acc );
 
-  delfly_state.flap_freq = round(rpm_sensor.motor_frequency*10)/10;
+  delfly_state.flap_freq = rpm_sensor.average_frequency;
 
   //TODO: get heading, azimuth
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
