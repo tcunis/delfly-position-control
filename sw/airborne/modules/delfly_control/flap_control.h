@@ -49,6 +49,8 @@ struct FlapControl {
 
 extern struct FlapControl flap_control;
 
+extern bool_t flap_control_antiwindup;
+
 extern void flap_control_init(void);
 extern void flap_control_enter(void);
 extern bool_t flap_control_run(void);
