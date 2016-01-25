@@ -98,7 +98,8 @@ void rpm_sensor_arch_init(void)
   timer_ic_set_polarity(RPM_PPM_TIMER, RPM_PPM_CHANNEL, TIM_IC_RISING);
   timer_ic_set_input(RPM_PPM_TIMER, RPM_PPM_CHANNEL, RPM_PPM_TIMER_INPUT);
   timer_ic_set_prescaler(RPM_PPM_TIMER, RPM_PPM_CHANNEL, TIM_IC_PSC_OFF);
-  timer_ic_set_filter(RPM_PPM_TIMER, RPM_PPM_CHANNEL, TIM_IC_OFF);
+//  timer_ic_set_filter(RPM_PPM_TIMER, RPM_PPM_CHANNEL, TIM_IC_OFF);
+	timer_ic_set_filter(RPM_PPM_TIMER, RPM_PPM_CHANNEL, TIM_IC_CK_INT_N_8); // Filter enabled
 
   /* Enable timer Interrupt(s). */
   nvic_set_priority(RPM_PPM_IRQ, RPM_PPM_IRQ_PRIO);

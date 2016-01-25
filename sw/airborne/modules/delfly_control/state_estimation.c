@@ -109,6 +109,11 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.acc.xy );
 
   INT32_ZERO( delfly_state.flap_freq );
+	
+	VECT3_ZERO( average_filter.sum_pos );
+	INT32_ZERO( average_filter.flap_count );
+	INT32_ZERO( average_filter.sample_count );
+	INT32_ZERO( average_filter.sum_dt );
 }
 
 
@@ -144,7 +149,8 @@ void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((un
   switch (state_estimation.mode) {
 
   case STATE_ESTIMATION_TYPE_GPS:
-  case STATE_ESTIMATION_TYPE_GPS_FILTER: {
+  case STATE_ESTIMATION_TYPE_GPS_FILTER:
+	case STATE_ESTIMATION_TYPE_GPS_AVERAGE: {
     // ignore accelerometer data
     } break;
 
@@ -186,6 +192,12 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
       // get cycle-averaged position
       if ( rpm_sensor.average_frequency == 0 ) {
         //nothing to do, use this_pos = out.pos
+				//zero integrator and counter
+				INT32_VECT3_ZERO(average_filter.sum_pos);
+				average_filter.sum_dt = 0;
+				average_filter.sample_count = 0;
+				//remember flapping cycle count
+				average_filter.flap_count = rpm_sensor.rot_count;
       } else {
         //update average filter
         VECT3_ADD(average_filter.sum_pos, this_pos);
@@ -193,7 +205,8 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
         //integrate flapping period
         average_filter.sum_dt += dt;
 
-        if ( rpm_sensor.rot_count > average_filter.flap_count ) {
+				uint32_t rpm_rot_count = rpm_sensor.rot_count;
+        if ( rpm_rot_count > average_filter.flap_count ) {
           //flapping cycle passed:
           //calculate average position
           VECT3_SDIV(this_pos, average_filter.sum_pos, average_filter.sample_count);
@@ -205,7 +218,7 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
           average_filter.sum_dt = 0;
           average_filter.sample_count = 0;
           //remember flapping cycle count
-          average_filter.flap_count = rpm_sensor.rot_count;
+          average_filter.flap_count = rpm_rot_count;
         } else {
           //within flapping cycle:
           //use last position
@@ -283,7 +296,7 @@ void state_estimation_run (void) {
   set_airspeed( &air );
   set_acceleration( &acc );
 
-  delfly_state.flap_freq = round(rpm_sensor.motor_frequency*10)/10;
+  delfly_state.flap_freq = rpm_sensor.average_frequency;
 
   //TODO: get heading, azimuth
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
