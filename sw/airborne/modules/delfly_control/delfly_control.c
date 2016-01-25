@@ -94,7 +94,7 @@ void delfly_control_run(void) {
   if (radio_control.values[STATE_ESTIMATION_MODE_SWITCH] > 0)
     state_estimation.type = STATE_ESTIMATION_TYPE_GPS_FILTER;
   else
-    state_estimation.type = STATE_ESTIMATION_TYPE_GPS;
+    state_estimation.type = STATE_ESTIMATION_TYPE_GPS_AVERAGE;
 #endif
 
   state_estimation_run();

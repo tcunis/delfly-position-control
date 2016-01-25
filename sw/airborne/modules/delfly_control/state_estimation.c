@@ -70,12 +70,7 @@ struct StateEstimation state_estimation = {.mode = STATE_ESTIMATION_MODE_OFF};
 
 struct StateFilter state_filter;
 
-struct FlapFilter {
-  uint32_t sample_count;
-  uint32_t flap_count;
-  struct Int32Vect3 sum_pos;
-  float sum_dt;
-} average_filter;
+struct FlapFilter average_filter;
 
 
 static void state_estimation_aftermath (void);
