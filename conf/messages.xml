@@ -931,7 +931,7 @@
         name="gain_acc" type="int32" alt_unit="" alt_unit_coef="0.00006104"/-->
       <field name="sample_time" type="float" unit=" s" />
       <field name="cut_off"     type="float" unit=" Hz"/>
-      <field name="avg_samples" type="uint32" unit=""  />
+      <field name="avg_samples" type="int32" unit=""  />
       <field name="est_pos_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_y" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_z" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>

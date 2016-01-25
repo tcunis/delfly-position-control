@@ -197,7 +197,7 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
 				average_filter.sum_dt = 0;
 				average_filter.sample_count = 0;
 				//remember flapping cycle count
-				average_filter.flap_count = rpm_sensor.rot_count;
+				average_filter.flap_count = 0;
       } else {
         //update average filter
         VECT3_ADD(average_filter.sum_pos, this_pos);
