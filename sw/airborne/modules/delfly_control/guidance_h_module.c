@@ -47,35 +47,11 @@
 #include "matlab_include.h"
 
 
-/* horizontal acceleration command
- * in m/s2, with #INT32_ACCEL_FRAC */
-//int32_t guidance_cmd_h_accelerate;
 
-/* heading command
- * in rad, with #INT32_ANGLE_FRAC  */
-//int32_t guidance_cmd_heading;
-
-/* horizontal position and velocity error
- * in m, with #INT32_POS_FRAC;
- * in m/s, with #INT32_VEL_FRAC;
- */
-//struct Int32Vect2 guidance_h_module_pos_err;
-//struct Int32Vect2 guidance_h_module_vel_err;
-
-/* forward position and velocity error
- * in m, with #INT32_POS_FRAC;
- * in m/s, with #INT32_SPEED_FRAC;
- */
-//union Int32VectState2 guidance_h_module_fwd_err;
-
-/* forward state gain matrix
- * in 1/s2, with #INT32_MATLAB_FRAC;
- * in 1/s, with #INT32_MATLAB_FRAC;
- */
-//union Int32VectState2 guidance_h_module_fwd_gain;
-
-
-//union Int32VectLong guidance_h_module_vel_rc_sp;
+#ifndef DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN
+//use heading pseudo command directly
+#define DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN    100
+#endif
 
 
 static void guidance_h_module_run_traj( bool_t );
@@ -85,7 +61,15 @@ void guidance_h_module_init() {
 
   delfly_guidance_init();
 
-  VECT2_COPY(delfly_guidance.gains.fwd.xy, matlab_guidance_gain_fwd);
+  delfly_guidance.gains.h.complementary_gain = DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN;
+
+//  VECT2_COPY(delfly_guidance.gains.fwd.xy, matlab_guidance_gain_fwd);
+  VECT2_ASSIGN(delfly_guidance.gains.fwd.xy, 1<<INT32_MATLAB_FRAC, 2<<INT32_MATLAB_FRAC);
+
+//  VECT2_COPY(delfly_guidance.gains.lat.xy, matlab_guidance_gain_fwd);
+  VECT2_ASSIGN(delfly_guidance.gains.lat.xy, 1<<INT32_MATLAB_FRAC, 2<<INT32_MATLAB_FRAC);
+
+
 //  guidance_h_module_fwd_gain.states.pos /= (1 << INT32_POS_FRAC);
 //  guidance_h_module_fwd_gain.states.vel /= (1 << INT32_SPEED_FRAC);
 }
@@ -159,39 +143,53 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
   switch (delfly_guidance.mode) {
 
   case DELFLY_GUIDANCE_MODE_MODULE:
-  {
-	delfly_guidance.err.fwd.states.pos = 0;
-	delfly_guidance.err.fwd.states.vel = delfly_guidance.sp.vel_rc.fv.fwd;
+    {
+      delfly_guidance.err.fwd.states.pos = 0;
+      delfly_guidance.err.fwd.states.vel = delfly_guidance.sp.vel_rc.fv.fwd;
 
-//	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
-//	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-//	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
-//	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+//    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+//    	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+//    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+//    	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
 
-	delfly_guidance.cmd.h_acc = delfly_guidance.sp.vel_rc.fv.fwd/(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-	delfly_guidance.cmd.heading = delfly_guidance.sp.heading; //delfly_state.h.heading
-  } break;
+      delfly_guidance.cmd.h_acc = delfly_guidance.sp.vel_rc.fv.fwd/(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      delfly_guidance.cmd.heading = delfly_guidance.sp.heading; //delfly_state.h.heading
+    }
+    break;
 
   case DELFLY_GUIDANCE_MODE_NAV:
-  {
-	VECT2_DIFF(delfly_guidance.err.pos, guidance_h.sp.pos, delfly_state.h.pos);
-	VECT2_DIFF(delfly_guidance.err.vel, guidance_h.sp.speed, delfly_state.h.vel);
+    {
+      VECT2_DIFF(delfly_guidance.err.pos, guidance_h.sp.pos, delfly_state.h.pos);
+      VECT2_DIFF(delfly_guidance.err.vel, guidance_h.sp.speed, delfly_state.h.vel);
 
-	delfly_guidance.err.fwd.states.pos = VECT2_GET_FWD(delfly_guidance.err.pos, delfly_guidance.sp.heading);
-	delfly_guidance.err.fwd.states.vel = VECT2_GET_FWD(delfly_guidance.err.vel, delfly_guidance.sp.heading);
+      delfly_guidance.err.fwd.states.pos = VECT2_GET_FWD(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+      delfly_guidance.err.fwd.states.vel = VECT2_GET_FWD(delfly_guidance.err.vel, delfly_guidance.sp.heading);
 
-	delfly_guidance.err.lat.states.pos = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
-	delfly_guidance.err.lat.states.vel = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+      delfly_guidance.err.lat.states.pos = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
+      delfly_guidance.err.lat.states.vel = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
 
-//	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
-//	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-//	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
-//	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-	delfly_guidance.cmd.h_acc = 0;
-	delfly_guidance.cmd.heading = delfly_guidance.sp.heading;
+//    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+//    	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+//    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+//    	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      delfly_guidance.cmd.h_acc = 0;
 
-	//guidance_lat_adjust_heading( in_flight, cmd_heading, guidance_h_module_pos_err );
-  } break;
+      /* lateral guidance pseudo acceleration command
+       * in m/s2, with #INT32_ACCEL_FRAC                  */
+      int32_t pseudo_cmd_lat_acc = delfly_guidance.err.lat.states.pos * delfly_guidance.gains.lat.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+                                   + delfly_guidance.err.lat.states.vel * delfly_guidance.gains.lat.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      /* lateral guidance pseudo heading command
+       * i.e. desired heading set-point to attitude control
+       * in rad, with #INT32_ANGLE_FRAC                   */
+      delfly_guidance.cmd.pseudo_heading = delfly_guidance.sp.heading + pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC));
+      /* lateral guidance complementary heading command
+       * i.e. heading reference to attitude control
+       * in rad, with #INT32_ANGLE_FRAC                   */
+      delfly_guidance.cmd.heading = (delfly_guidance.gains.h.complementary_gain*delfly_guidance.cmd.pseudo_heading
+                                     + (100 - delfly_guidance.gains.h.complementary_gain)*delfly_state.h.heading)
+                                    /100;
+    }
+    break;
 
   default:
   {} //nothing to do

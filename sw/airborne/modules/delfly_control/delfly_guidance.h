@@ -46,6 +46,9 @@ struct DelflyGuidanceCommand {
   /* heading angle command
    * in rad, with #INT32_ANGLE_FRAC  */
   int32_t heading;
+  /* heading pseudo command
+   * in rad, with #INT32_ANGLE_FRAC  */
+  int32_t pseudo_heading;
 };
 
 struct DelflyGuidanceError {
@@ -71,6 +74,16 @@ struct DelflyGuidanceError {
   union Int32VectState2 ver;
 };
 
+struct DelflyGuidanceHorizontalGains {
+  /* constant of complementary control
+   * in percent                     */
+  int32_t complementary_gain;
+
+  /* adapt forward control
+   * to current heading             */
+  int32_t forward_adaption;
+};
+
 struct DelflyGuidanceGains {
   /* forward gain matrix
    * with #INT32_MATLAB_FRAC         */
@@ -81,6 +94,9 @@ struct DelflyGuidanceGains {
   /* forward gain matrix
    * with #INT32_MATLAB_FRAC         */
   union Int32VectState2 ver;
+
+  /* gains related to heading        */
+  struct DelflyGuidanceHorizontalGains h;
 };
 
 struct DelflyGuidanceSetPoint {
