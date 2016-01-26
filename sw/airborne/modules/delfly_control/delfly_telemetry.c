@@ -142,7 +142,7 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 //		&gain_acc,
 		&state_filter.sample_time,
 		&state_filter.cut_off,
-		&average_filter.sample_count,
+		&average_filter.last_samples,
 		&state_estimation.states.pos.x,
 		&state_estimation.states.pos.y,
 		&state_estimation.states.pos.z,

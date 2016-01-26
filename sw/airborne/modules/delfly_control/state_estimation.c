@@ -113,6 +113,7 @@ void state_estimation_init (void) {
 	VECT3_ZERO( average_filter.sum_pos );
 	INT32_ZERO( average_filter.flap_count );
 	INT32_ZERO( average_filter.sample_count );
+	INT32_ZERO( average_filter.last_samples );
 	INT32_ZERO( average_filter.sum_dt );
 }
 
@@ -213,12 +214,13 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
           VECT3_COPY(ltp_pos, this_pos);
           //use flapping period to derivate velocity and acceleration
           dt = average_filter.sum_dt;
+          //remember flapping cycle count and samples
+          average_filter.flap_count = rpm_rot_count;
+          average_filter.last_samples = average_filter.sample_count;
           //zero integrator and counter
           INT32_VECT3_ZERO(average_filter.sum_pos);
           average_filter.sum_dt = 0;
           average_filter.sample_count = 0;
-          //remember flapping cycle count
-          average_filter.flap_count = rpm_rot_count;
         } else {
           //within flapping cycle:
           //use last position

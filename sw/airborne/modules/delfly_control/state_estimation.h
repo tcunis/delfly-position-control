@@ -68,6 +68,7 @@ struct StateFilter {
 
 struct FlapFilter {
   int32_t sample_count;
+  int32_t last_samples;
   uint32_t flap_count;
   struct Int32Vect3 sum_pos;
   float sum_dt;
