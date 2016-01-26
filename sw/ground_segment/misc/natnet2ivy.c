@@ -45,6 +45,7 @@
 #include "math/pprz_geodetic_double.h"
 #include "math/pprz_algebra_double.h"
 #include "math/pprz_algebra_int.h"
+#include "filters/low_pass_filter.h"
 
 /** Debugging & logging options */
 uint8_t verbose = 0;
@@ -73,6 +74,13 @@ char *ivy_bus                   = "127.255.255.255:2010";
 uint32_t freq_transmit          = 30;     ///< Transmitting frequency in Hz
 uint16_t min_velocity_samples   = 4;      ///< The amount of position samples needed for a valid velocity
 bool small_packets              = FALSE;
+
+bool use_filter                 = FALSE;
+Butterworth2LowPass filter_pos_x;
+Butterworth2LowPass filter_pos_y;
+Butterworth2LowPass filter_pos_z;
+uint32_t freq_natnet            = 120;
+float    freq_cutoff            = 0;
 
 /** Connection timeout when not receiving **/
 #define CONNECTION_TIMEOUT          .5
@@ -434,6 +442,14 @@ void natnet_parse(unsigned char *in) {
 gboolean timeout_transmit_callback(gpointer data) {
   int i;
 
+  struct timeval time1, timediff;
+  gettimeofday(&time1, NULL);
+  timersub(&time1, &time0, &timediff);
+  double t = timediff.tv_sec + timediff.tv_usec*1E-6;
+
+  static uint scheduler = 0;
+  scheduler++;
+
   // Loop trough all the available rigidbodies (TODO: optimize)
   for(i = 0; i < MAX_RIGIDBODIES; i++) {
     // Check if ID's are correct
@@ -479,6 +495,26 @@ gboolean timeout_transmit_callback(gpointer data) {
     pos.y = sin(tracking_offset_angle) * rigidBodies[i].x + cos(tracking_offset_angle) * rigidBodies[i].y;
     pos.z = rigidBodies[i].z;
 
+    if (use_filter) {
+      update_butterworth_2_low_pass(&filter_pos_x, pos.x);
+      update_butterworth_2_low_pass(&filter_pos_y, pos.y);
+      update_butterworth_2_low_pass(&filter_pos_z, pos.z);
+
+      printf_log(log_file, "%f %d NATNET2IVY_FILT %f %f %f\n", t, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z);
+
+
+      //transmit at freq_transmit
+      if (scheduler % freq_transmit != 0) {
+        //do not transmit, log position only.
+        continue;
+      } else {
+        //transmit filtered position
+        pos.x = get_butterworth_2_low_pass(&filter_pos_x);
+        pos.y = get_butterworth_2_low_pass(&filter_pos_y);
+        pos.z = get_butterworth_2_low_pass(&filter_pos_z);
+      }
+    }
+
     // Convert the position to ecef and lla based on the Optitrack LTP
     ecef_of_enu_point_d(&ecef_pos ,&tracking_ltp ,&pos);
     lla_of_ecef_d(&lla_pos, &ecef_pos);
@@ -520,10 +556,10 @@ gboolean timeout_transmit_callback(gpointer data) {
       rigidBodies[i].ecef_vel.x, rigidBodies[i].ecef_vel.y, rigidBodies[i].ecef_vel.z);
 
     // Log position data
-    struct timeval time1, timediff;
-    gettimeofday(&time1, NULL);
-    timersub(&time1, &time0, &timediff);
-    double t = timediff.tv_sec + timediff.tv_usec*1E-6;
+//    struct timeval time1, timediff;
+//    gettimeofday(&time1, NULL);
+//    timersub(&time1, &time0, &timediff);
+//    double t = timediff.tv_sec + timediff.tv_usec*1E-6;
     printf_log(log_file, "%f %d NATNET2IVY %f %f %f %f %f %f %f %d\n", t, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z, speed.x, speed.y, speed.z, heading, small_packets);
 
     // Transmit the REMOTE_GPS packet on the ivy bus (either small or big)
@@ -653,6 +689,7 @@ void print_help(char* filename) {
     "   -offset_angle <degree>    Tracking system angle offset compared to the North in degrees\n\n"
 
     "   -tf <freq>                Transmit frequency to the ivy bus in hertz (60)\n"
+    "   -filter <fs> <fc>         Set low-pass filter with sample frequency fs, cut-off frequency fc\n"
     "   -vel_samples <samples>    Minimum amount of samples for the velocity differentiator (4)\n"
     "   -small                    Send small packets instead of bigger (FALSE)\n\n"
 
@@ -770,6 +807,22 @@ static void parse_options(int argc, char** argv) {
 
       freq_transmit = atoi(argv[++i]);
     }
+    // Set filter sample and cut-off frequency
+    else if(strcmp(argv[i], "-filter") == 0) {
+      check_argcount(argc, argv, i, 2);
+
+      use_filter  = TRUE;
+      freq_natnet = atoi(argv[++i]);
+      freq_cutoff = atof(argv[++i]);
+      if (freq_natnet < freq_transmit) {
+        fprintf(stderr, "Filter sample frequency must be greater than or equal transmission frequency, but got %d < %d.", freq_natnet, freq_transmit);
+      } else if (freq_natnet % freq_transmit != 0) {
+        fprintf(stderr, "Filter sample frequency must be an even multiple of transmission frequency.");
+      }
+      if (freq_cutoff <= 0.f) {
+        fprintf(stderr, "Filter cut-off frequency must be positive non-zero, but got %f <= 0", freq_cutoff);
+      }
+    }
     // Set the minimum amount of velocity samples for the differentiator
     else if(strcmp(argv[i], "-vel_samples") == 0) {
       check_argcount(argc, argv, i, 1);
@@ -828,15 +881,24 @@ int main(int argc, char** argv)
   udp_socket_create(&natnet_cmd, natnet_addr, natnet_cmd_port, 0, 1);
   udp_socket_set_recvbuf(&natnet_cmd, 0x100000); // 1MB
 
+  if (use_filter) {
+    printf_debug("Use 2nd-order butterworth filter with fs=%d, fc=%f.\n", freq_natnet, freq_cutoff);
+
+    init_butterworth_2_low_pass(&filter_pos_x, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+    init_butterworth_2_low_pass(&filter_pos_y, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+    init_butterworth_2_low_pass(&filter_pos_z, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+  }
+
   // Create the Ivy Client
   GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
   IvyInit("natnet2ivy", "natnet2ivy READY", 0, 0, 0, 0);
   IvyStart(ivy_bus);
 
   // Create the main timers
+  uint32_t freq_callback = (!use_filter)? freq_transmit : freq_natnet;
   printf_debug("Starting transmitting and sampling timeouts (transmitting frequency: %dHz, minimum velocity samples: %d)\n",
-    freq_transmit, min_velocity_samples);
-  g_timeout_add(1000/freq_transmit, timeout_transmit_callback, NULL);
+    freq_callback, min_velocity_samples);
+  g_timeout_add(1000/freq_callback, timeout_transmit_callback, NULL);
 
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
