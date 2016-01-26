@@ -76,7 +76,7 @@ void flap_control_init(void) {
 
   flap_control_antiwindup = FALSE;
 
-  flap_control_mode = FLAP_CONTROL_MODE_THROTTLE;
+  flap_control_mode = FLAP_CONTROL_MODE_FLAP;
 }
 
 
@@ -92,35 +92,52 @@ bool_t flap_control_run(void) {
   //todo: implement flap model, if necessary
   static float freq_ref = -1;
 
+  static bool_t start = FALSE;
+
+
+  flap_control.freq_now = rpm_sensor.average_frequency;
+
   switch (flap_control_mode) {
   case FLAP_CONTROL_MODE_OFF:
     return FALSE;
   case FLAP_CONTROL_MODE_THROTTLE:
     {
-      if ( flap_control.gains.p > 0 && !flap_control_antiwindup ) {
+      if ( flap_control.gains.p > 0 && start ) {
         static uint32_t time = 0;
         time++;
         if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
-          throttle_cmd += flap_control.gains.i*MAX_PPRZ/100;
+          if ( !flap_control_antiwindup ) {
+            throttle_cmd += flap_control.gains.i*MAX_PPRZ/100;
+          } else {
+            throttle_cmd = 0;
+            flap_control.gains.p = 0;
+          }
           time = 0;
         }
       } else {
         throttle_cmd = 70*MAX_PPRZ/100;
+        start = TRUE;
       }
     }
     break;
 
   case FLAP_CONTROL_MODE_FLAP:
     {
-      if ( flap_control.gains.p > 0 && !flap_control_antiwindup ) {
+      if ( flap_control.gains.p > 0 && start ) {
         static uint32_t time = 0;
         time++;
         if ( time > (flap_control.gains.p*DELFLY_CONTROL_RUN_FREQ) ) {
-          flap_control.freq_sp += flap_control.gains.i/100;
+          if ( !flap_control_antiwindup ) {
+            flap_control.freq_sp += flap_control.gains.i/100.0;
+          } else {
+            flap_control.freq_sp = 0;
+            flap_control.gains.p = 0;
+          }
           time = 0;
         }
       } else {
         flap_control.freq_sp = 5.0;
+        start = TRUE;
       }
     }
     /* no break */
@@ -130,8 +147,6 @@ bool_t flap_control_run(void) {
       if ( flap_control_mode == FLAP_CONTROL_MODE_FLAPCTRL ) {
         flap_control.freq_sp = flap_control.gains.p / 10.0;
       }
-
-      flap_control.freq_now = rpm_sensor.average_frequency;
 
     //  if ( !flap_control_antiwindup || flap_control.freq_sp < flap_control.freq_now ) {
     //    freq_ref = flap_control.freq_sp;

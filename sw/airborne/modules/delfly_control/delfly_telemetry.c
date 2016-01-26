@@ -142,6 +142,7 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 //		&gain_acc,
 		&state_filter.sample_time,
 		&state_filter.cut_off,
+		&average_filter.last_samples,
 		&state_estimation.states.pos.x,
 		&state_estimation.states.pos.y,
 		&state_estimation.states.pos.z,
@@ -161,7 +162,7 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 }
 
 static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {
-  pprz_msg_send_DELFLY_SPEEDCONTROL(trans, dev, AC_ID,
+  pprz_msg_send_DELFLY_SPEEDCTRL(trans, dev, AC_ID,
 		&speed_control.mode,
 		&speed_control.sp.acceleration.fv.fwd,
 		&speed_control.sp.acceleration.fv.ver,
@@ -195,5 +196,5 @@ void delfly_telemetry_init_all (void) {
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATE,           &delfly_telemetry_send_state);
 	//register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATERAW,        &delfly_telemetry_send_stateraw);
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_STATEESTIMATION, &delfly_telemetry_send_stateestimation);
-	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_SPEEDCONTROL,    &delfly_telemetry_send_speedcontrol);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DELFLY_SPEEDCTRL,       &delfly_telemetry_send_speedcontrol);
 }

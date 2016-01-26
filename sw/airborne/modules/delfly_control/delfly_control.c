@@ -35,6 +35,7 @@
 
 #include "state_estimation.h"
 #include "delfly_model.h"
+#include "flap_control.h"
 
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
@@ -57,6 +58,7 @@ void delfly_control_init(void){
 
   state_estimation_init();
   speed_control_init();
+  flap_control_init();
 
   delfly_telemetry_init_all();
 
@@ -92,7 +94,7 @@ void delfly_control_run(void) {
   if (radio_control.values[STATE_ESTIMATION_MODE_SWITCH] > 0)
     state_estimation.type = STATE_ESTIMATION_TYPE_GPS_FILTER;
   else
-    state_estimation.type = STATE_ESTIMATION_TYPE_GPS;
+    state_estimation.type = STATE_ESTIMATION_TYPE_GPS_AVERAGE;
 #endif
 
   state_estimation_run();

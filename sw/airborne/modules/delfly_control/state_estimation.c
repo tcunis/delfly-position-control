@@ -70,12 +70,7 @@ struct StateEstimation state_estimation = {.mode = STATE_ESTIMATION_MODE_OFF};
 
 struct StateFilter state_filter;
 
-struct FlapFilter {
-  uint32_t sample_count;
-  uint32_t flap_count;
-  struct Int32Vect3 sum_pos;
-  float sum_dt;
-} average_filter;
+struct FlapFilter average_filter;
 
 
 static void state_estimation_aftermath (void);
@@ -114,11 +109,12 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.acc.xy );
 
   INT32_ZERO( delfly_state.flap_freq );
-
-  average_filter.flap_count = rpm_sensor.rot_count;
-  INT32_VECT3_ZERO(average_filter.sum_pos);
-  average_filter.sum_dt = 0;
-  average_filter.sample_count = 0;
+	
+	VECT3_ZERO( average_filter.sum_pos );
+	INT32_ZERO( average_filter.flap_count );
+	INT32_ZERO( average_filter.sample_count );
+	INT32_ZERO( average_filter.last_samples );
+	INT32_ZERO( average_filter.sum_dt );
 }
 
 
@@ -184,7 +180,7 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
   struct Int32Vect3 last_pos, last_vel;
   VECT3_COPY(last_pos, state_estimation.states.pos);
   VECT3_COPY(last_vel, state_estimation.states.vel);
-
+  
   // get current heading from gps
   state_estimation.states.att.psi = gps.course;
 

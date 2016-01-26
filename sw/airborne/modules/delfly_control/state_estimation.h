@@ -67,6 +67,14 @@ struct StateFilter {
   float cut_off;
 };
 
+struct FlapFilter {
+  int32_t sample_count;
+  int32_t last_samples;
+  uint32_t flap_count;
+  struct Int32Vect3 sum_pos;
+  float sum_dt;
+};
+
 
 struct StateEstimation {
 
@@ -91,6 +99,7 @@ struct StateEstimation {
 
 extern struct StateEstimation state_estimation;
 extern struct StateFilter state_filter;
+extern struct FlapFilter average_filter;
 
 extern void state_estimation_init(void);
 

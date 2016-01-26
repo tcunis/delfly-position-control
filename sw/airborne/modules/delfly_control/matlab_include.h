@@ -29,6 +29,7 @@
 
 
 #include "delfly_algebra_int.h"
+#include "math/pprz_algebra_float.h"
 
 
 extern const uint8_t INT32_MATLAB_FRAC;
@@ -56,12 +57,19 @@ extern int32_t matlab_pitch_equilibrium_v12;
 extern int32_t matlab_pitch_equilibrium_v25;
 extern int32_t matlab_pitch_equilibrium_v50;
 
-/* throttle at equilibrium, in % with #INT32_MATLAB_FRAC */
+/* throttle at equilibrium, in % with #INT32_MATLAB_FRAC/2 */
 extern int32_t matlab_throttle_equilibrium_v04;
 extern int32_t matlab_throttle_equilibrium_v08;
 extern int32_t matlab_throttle_equilibrium_v12;
 extern int32_t matlab_throttle_equilibrium_v25;
 extern int32_t matlab_throttle_equilibrium_v50;
+
+/* flapping frequency at equilibrium, in Hz */
+extern float matlab_flapfreq_equilibrium_v04;
+extern float matlab_flapfreq_equilibrium_v08;
+extern float matlab_flapfreq_equilibrium_v12;
+extern float matlab_flapfreq_equilibrium_v25;
+extern float matlab_flapfreq_equilibrium_v50;
 
 
 /* pitch matrix in rad, with #INT32_MATLAB_FRAC */
@@ -71,11 +79,18 @@ extern struct Int32Vect2 matlab_pitch_matrix_v12;
 extern struct Int32Vect2 matlab_pitch_matrix_v25;
 extern struct Int32Vect2 matlab_pitch_matrix_v50;
 
-/* throttle in %, with #INT32_MATLAB_FRAC */
+/* throttle in %, with #INT32_MATLAB_FRAC/2 */
 extern struct Int32Vect2 matlab_throttle_matrix_v04;
 extern struct Int32Vect2 matlab_throttle_matrix_v08;
 extern struct Int32Vect2 matlab_throttle_matrix_v12;
 extern struct Int32Vect2 matlab_throttle_matrix_v25;
 extern struct Int32Vect2 matlab_throttle_matrix_v50;
+
+/* flapping frequency in Hz */
+extern struct FloatVect2 matlab_flapfreq_matrix_v04;
+extern struct FloatVect2 matlab_flapfreq_matrix_v08;
+extern struct FloatVect2 matlab_flapfreq_matrix_v12;
+extern struct FloatVect2 matlab_flapfreq_matrix_v25;
+extern struct FloatVect2 matlab_flapfreq_matrix_v50;
 
 #endif // MATLAB_INCLUDE_H

@@ -919,7 +919,7 @@
         Parameters and states of the Delfly control state estimator and wind-tunnel navigation
         sub-module. 13 bytes
       </description>
-      <field name="mode" type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|GPS_FILTER|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
+      <field name="mode" type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|GPS_FILTER|GPS_AVERAGE|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
       <!--field name="res_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
         name="res_y" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
         name="res_z" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
@@ -931,6 +931,7 @@
         name="gain_acc" type="int32" alt_unit="" alt_unit_coef="0.00006104"/-->
       <field name="sample_time" type="float" unit=" s" />
       <field name="cut_off"     type="float" unit=" Hz"/>
+      <field name="avg_samples" type="int32" unit=""  />
       <field name="est_pos_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_y" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_z" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
@@ -954,35 +955,39 @@
         speed in xy-plane (geographic frame)</field-->
     </message>
     
-    <message name="DELFLY_SPEEDCONTROL"  id="109">
+    <message name="DELFLY_SPEEDCTRL"  id="109">
       <description>
         Input, states, and output of the Delfly control speed control sub-module. 77 bytes
       </description>
-      <field name="mode"              type="uint8" values="OFF|ENTER|CONTROL">Speed control mode</field>
-      <field name="sp_acc_h" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
-      <field name="sp_acc_v" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
+      <field name="mode"      type="uint8" values="OFF|ENTER|CONTROL|THROTTLE|FLAPCTRL">Speed control mode</field>
+      <field name="sp_acc_h"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
+      <field name="sp_acc_v"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
       <field name="air_speed" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air speed</field>
-      <field name="eq_pitch" type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
+      <field name="eq_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
       <field name="eq_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.00781250">Equilibrii throttle frequency</field>
-      <field name="inv_lift_pitch" type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>
+      <field name="inv_lift_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>
       <field name="inv_lift_throttle" type="int32" alt_unit=" m/(% s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. throttle frequency</field>
-      <field name="inv_drag_pitch" type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. pitch</field>
+      <field name="inv_drag_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. pitch</field>
       <field name="inv_drag_throttle" type="int32" alt_unit=" m/(% s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. throttle frequency</field>
       <field name="ref_vel_h" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Reference horizontal velocity</field>
       <field name="ref_vel_v" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Reference vertical velocity</field>
-      <field name="err_h" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration error</field>
-      <field name="err_v" type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration error</field>
+      <field name="err_h"     type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration error</field>
+      <field name="err_v"     type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration error</field>
       <field name="err_h_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated horizontal error</field>
       <field name="err_v_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated vertical error</field>
-      <field name="cmd_ff_pitch" type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-forward pitch command</field>
+      <field name="cmd_ff_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-forward pitch command</field>
       <field name="cmd_ff_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-forward throttle frequency command</field>
-      <field name="cmd_fb_pitch" type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-back pitch command</field>
+      <field name="cmd_fb_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-back pitch command</field>
       <field name="cmd_fb_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-back throttle frequency command</field>
-      <field name="cmd_pitch" type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Pitch command (cmd = eq + ff + fb)</field>
-      <field name="cmd_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Throttle frequency command (cmd = eq + ff + fb)</field>
+      <field name="cmd_pitch"       type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Pitch command (cmd = eq + ff + fb)</field>
+      <field name="cmd_throttle"    type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Throttle frequency command (cmd = eq + ff + fb)</field>
     </message>
     
-    <message name="DELFLY_GUIDANCE" id="110">
+    <message name="DELFLY_SPEEDCTRL_GAINS" id="110">
+    	
+    </message>
+    
+    <message name="DELFLY_GUIDANCE" id="230">
       <description>Input, states, and output of the Delfly control guidance sub-module. 74 bytes</description>
       <field name="ap_mode"  type="uint8" values="KILL|FAILSAFE|HOME|RATE-D|ATT-D|RATE-RCC|ATT-RCC|ATT-C|RATE-ZH|ATT-ZH|HOVER-D|HOVER-C|HOVER-ZH|NAV|RC-D|CF-D|FWD|MODULE|FLIP">Autopilot mode</field>
       <field name="mode"     type="uint8" values="OFF|MODULE|NAV">Delfly guidance mode</field>
@@ -1006,7 +1011,7 @@
       <field name="cmd_psi"  type="int32" alt_unit=" deg"  alt_unit_coef="0.01398823">Heading command</field>
     </message>
     
-    <message name="DELFLY_FLAPCONTROL" id="230">
+    <message name="DELFLY_FLAPCONTROL" id="245">
       <field name="now_freq"     type="float" unit=" Hz"/>
       <field name="sp_freq"      type="float" unit=" Hz"/>
       <field name="err_freq"     type="float" unit=" Hz"/>
@@ -2306,7 +2311,7 @@
       <field name="vz"   type="float" unit="m/s"/>
     </message>
     
-    <!-- 245 is free -->
+    <!-- 245 is part of module DELFLY_CONTROL, see id 107ff. -->
     <!-- 246 is free -->
     
     <message name="PPRZ_DEBUG" id="247">
