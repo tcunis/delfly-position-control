@@ -154,7 +154,9 @@ void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((un
   switch (state_estimation.mode) {
 
   case STATE_ESTIMATION_TYPE_GPS:
-  case STATE_ESTIMATION_TYPE_GPS_FILTER: {
+  case STATE_ESTIMATION_TYPE_GPS_FILTER:
+  case STATE_ESTIMATION_TYPE_GPS_AVERAGE:
+  case STATE_ESTIMATION_TYPE_GPS_AVGFILT: {
     // ignore accelerometer data
     } break;
 
@@ -182,8 +184,6 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
   struct Int32Vect3 last_pos, last_vel;
   VECT3_COPY(last_pos, state_estimation.states.pos);
   VECT3_COPY(last_vel, state_estimation.states.vel);
-  //get_butterworth_2_low_pass_vect3(last_pos_filter, &state_filter.pos);
-  update_butterworth_2_low_pass_vect3(&state_filter.pos, state_estimation.out.pos);
 
   // get current heading from gps
   state_estimation.states.att.psi = gps.course;
@@ -191,45 +191,48 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
   switch (state_estimation.mode) {
 
   case STATE_ESTIMATION_TYPE_GPS_AVERAGE:
-  case STATE_ESTIMATION_TYPE_GPS_FILTER:
-    if ( state_estimation.mode == STATE_ESTIMATION_TYPE_GPS_AVERAGE) {
-      // get cycle-averaged position
-      if ( rpm_sensor.average_frequency == 0 ) {
-        //nothing to do, use this_pos = out.pos
-        average_filter.flap_count = rpm_sensor.rot_count;
+  case STATE_ESTIMATION_TYPE_GPS_AVGFILT:
+    // get cycle-averaged position
+    if ( rpm_sensor.average_frequency == 0 ) {
+      //nothing to do, use this_pos = out.pos
+      average_filter.flap_count = rpm_sensor.rot_count;
+      INT32_VECT3_ZERO(average_filter.sum_pos);
+      average_filter.sum_dt = 0;
+      average_filter.sample_count = 0;
+    } else {
+      //update average filter
+      VECT3_ADD(average_filter.sum_pos, this_pos);
+      average_filter.sample_count++;
+      //integrate flapping period
+      average_filter.sum_dt += dt;
+
+      if ( rpm_sensor.rot_count > average_filter.flap_count ) {
+        //flapping cycle passed:
+        //calculate average position
+        VECT3_SDIV(this_pos, average_filter.sum_pos, average_filter.sample_count);
+        VECT3_COPY(ltp_pos, this_pos);
+        //use flapping period to derivate velocity and acceleration
+        dt = average_filter.sum_dt;
+        //zero integrator and counter
         INT32_VECT3_ZERO(average_filter.sum_pos);
         average_filter.sum_dt = 0;
         average_filter.sample_count = 0;
+        //remember flapping cycle count
+        average_filter.flap_count = rpm_sensor.rot_count;
       } else {
-        //update average filter
-        VECT3_ADD(average_filter.sum_pos, this_pos);
-        average_filter.sample_count++;
-        //integrate flapping period
-        average_filter.sum_dt += dt;
+        //within flapping cycle:
+        //use last position
+        VECT3_COPY(this_pos, state_estimation.states.pos);
+        VECT3_COPY(ltp_pos,  this_pos);
 
-        if ( rpm_sensor.rot_count > average_filter.flap_count ) {
-          //flapping cycle passed:
-          //calculate average position
-          VECT3_SDIV(this_pos, average_filter.sum_pos, average_filter.sample_count);
-          VECT3_COPY(ltp_pos, this_pos);
-          //use flapping period to derivate velocity and acceleration
-          dt = average_filter.sum_dt;
-          //zero integrator and counter
-          INT32_VECT3_ZERO(average_filter.sum_pos);
-          average_filter.sum_dt = 0;
-          average_filter.sample_count = 0;
-          //remember flapping cycle count
-          average_filter.flap_count = rpm_sensor.rot_count;
-        } else {
-          //within flapping cycle:
-          //use last position
-          VECT3_COPY(this_pos, state_estimation.states.pos);
-          VECT3_COPY(ltp_pos,  this_pos);
-
-          dt = 0; //DO NOT calculate velocity and acceleration!
-        }
+        dt = 0; //DO NOT calculate velocity and acceleration!
       }
-    } else {
+    }
+    /* no break */
+  case STATE_ESTIMATION_TYPE_GPS_FILTER:
+    if (state_estimation.mode != STATE_ESTIMATION_TYPE_GPS_AVERAGE) {
+      // update filter either with gps or averaged position
+      update_butterworth_2_low_pass_vect3(&state_filter.pos, ltp_pos);
       // get position from filter
       get_butterworth_2_low_pass_vect3(this_pos, &state_filter.pos);
     }
