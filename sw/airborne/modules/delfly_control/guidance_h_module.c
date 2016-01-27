@@ -53,6 +53,8 @@
 #define DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN    100
 #endif
 
+#define MAX_HEADING_DELTA   INT32_ANGLE_PI_4
+
 
 static void guidance_h_module_run_traj( bool_t );
 
@@ -176,12 +178,20 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
 
       /* lateral guidance pseudo acceleration command
        * in m/s2, with #INT32_ACCEL_FRAC                  */
-      int32_t pseudo_cmd_lat_acc = delfly_guidance.err.lat.states.pos * delfly_guidance.gains.lat.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-                                   + delfly_guidance.err.lat.states.vel * delfly_guidance.gains.lat.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      int32_t pseudo_cmd_lat_acc = 0; /*delfly_guidance.err.lat.states.pos * delfly_guidance.gains.lat.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+                                   + delfly_guidance.err.lat.states.vel * delfly_guidance.gains.lat.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));*/
+      /* lateral guidance pseudo heading difference
+       * i.e. additional heading to set-point
+       * in [-MAX_HEADING_DELTA, +MAX_HEADING_DELTA]
+       * in rad, with #INT32_ANGLE_FRAC                   */
+      int32_t pseudo_heading_d   = pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC));
+      INT32_ANGLE_NORMALIZE(pseudo_heading_d);
+      INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
+
       /* lateral guidance pseudo heading command
        * i.e. desired heading set-point to attitude control
        * in rad, with #INT32_ANGLE_FRAC                   */
-      delfly_guidance.cmd.pseudo_heading = delfly_guidance.sp.heading + pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC));
+      delfly_guidance.cmd.pseudo_heading = delfly_guidance.sp.heading + pseudo_heading_d;
       /* lateral guidance complementary heading command
        * i.e. heading reference to attitude control
        * in rad, with #INT32_ANGLE_FRAC                   */
@@ -192,7 +202,7 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
     break;
 
   default:
-  {} //nothing to do
+    {} //nothing to do
   }
 
 }

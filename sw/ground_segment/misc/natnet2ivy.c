@@ -70,18 +70,6 @@ char *ivy_bus                   = "224.255.255.255";
 char *ivy_bus                   = "127.255.255.255:2010";
 #endif
 
-/** Sample frequency and derevitive defaults */
-uint32_t freq_transmit          = 30;     ///< Transmitting frequency in Hz
-uint16_t min_velocity_samples   = 4;      ///< The amount of position samples needed for a valid velocity
-bool small_packets              = FALSE;
-
-bool use_filter                 = FALSE;
-Butterworth2LowPass filter_pos_x;
-Butterworth2LowPass filter_pos_y;
-Butterworth2LowPass filter_pos_z;
-uint32_t freq_natnet            = 120;
-float    freq_cutoff            = 0;
-
 /** Connection timeout when not receiving **/
 #define CONNECTION_TIMEOUT          .5
 
@@ -110,6 +98,20 @@ float    freq_cutoff            = 0;
 #endif
 
 
+/** Sample frequency and derevitive defaults */
+uint32_t freq_transmit          = 30;     ///< Transmitting frequency in Hz
+uint16_t min_velocity_samples   = 4;      ///< The amount of position samples needed for a valid velocity
+bool small_packets              = FALSE;
+
+bool use_filter                 = FALSE;
+//Butterworth2LowPass filter_pos_x;
+//Butterworth2LowPass filter_pos_y;
+//Butterworth2LowPass filter_pos_z;
+uint32_t freq_natnet            = 120;
+float    freq_cutoff            = 0;
+float    filter_tau;
+//uint scheduler[MAX_RIGIDBODIES];
+
 
 /** Tracked rigid bodies */
 struct RigidBody {
@@ -134,6 +136,11 @@ struct Aircraft {
   uint8_t ac_id;
   float lastSample;
   bool connected;
+
+  Butterworth2LowPass filter_pos_x;
+  Butterworth2LowPass filter_pos_y;
+  Butterworth2LowPass filter_pos_z;
+  bool filter_init;
 };
 struct Aircraft aircrafts[MAX_RIGIDBODIES];                  ///< Mapping from rigid body ID to aircraft ID
 
@@ -496,22 +503,32 @@ gboolean timeout_transmit_callback(gpointer data) {
     pos.z = rigidBodies[i].z;
 
     if (use_filter) {
-      update_butterworth_2_low_pass(&filter_pos_x, pos.x);
-      update_butterworth_2_low_pass(&filter_pos_y, pos.y);
-      update_butterworth_2_low_pass(&filter_pos_z, pos.z);
+      if (!aircrafts[rigidBodies[i].id].filter_init) {
+        //aircraft initially tracked
+        init_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_x, filter_tau, (1.0/freq_natnet), pos.x);
+        init_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_y, filter_tau, (1.0/freq_natnet), pos.y);
+        init_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_z, filter_tau, (1.0/freq_natnet), pos.z);
+
+        fprintf(stderr, "#pragma message: Initialized filter for aircraft id %d.\n", aircrafts[rigidBodies[i].id].ac_id);
+        aircrafts[rigidBodies[i].id].filter_init = TRUE;
+      } else {
+        update_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_x, pos.x);
+        update_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_y, pos.y);
+        update_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_z, pos.z);
+      }
 
       printf_log(log_file, "%f %d NATNET2IVY_FILT %f %f %f\n", t, aircrafts[rigidBodies[i].id].ac_id, pos.x, pos.y, pos.z);
 
 
       //transmit at freq_transmit
-      if (scheduler % freq_transmit != 0) {
+      if (scheduler % (freq_natnet/freq_transmit) != 0) {
         //do not transmit, log position only.
         continue;
       } else {
         //transmit filtered position
-        pos.x = get_butterworth_2_low_pass(&filter_pos_x);
-        pos.y = get_butterworth_2_low_pass(&filter_pos_y);
-        pos.z = get_butterworth_2_low_pass(&filter_pos_z);
+        pos.x = get_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_x);
+        pos.y = get_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_y);
+        pos.z = get_butterworth_2_low_pass(&aircrafts[rigidBodies[i].id].filter_pos_z);
       }
     }
 
@@ -811,16 +828,19 @@ static void parse_options(int argc, char** argv) {
     else if(strcmp(argv[i], "-filter") == 0) {
       check_argcount(argc, argv, i, 2);
 
+      uint32_t arg_freq_natnet; float arg_freq_cutoff;
       use_filter  = TRUE;
-      freq_natnet = atoi(argv[++i]);
-      freq_cutoff = atof(argv[++i]);
-      if (freq_natnet < freq_transmit) {
-        fprintf(stderr, "Filter sample frequency must be greater than or equal transmission frequency, but got %d < %d.", freq_natnet, freq_transmit);
-      } else if (freq_natnet % freq_transmit != 0) {
+      arg_freq_natnet = atoi(argv[++i]);
+      arg_freq_cutoff = atof(argv[++i]);
+      if (arg_freq_natnet < freq_transmit) {
+        fprintf(stderr, "Filter sample frequency must be greater than or equal transmission frequency, but got %d < %d.", arg_freq_natnet, freq_transmit);
+      } else if (arg_freq_natnet % freq_transmit != 0) {
         fprintf(stderr, "Filter sample frequency must be an even multiple of transmission frequency.");
-      }
-      if (freq_cutoff <= 0.f) {
-        fprintf(stderr, "Filter cut-off frequency must be positive non-zero, but got %f <= 0", freq_cutoff);
+      } else if (arg_freq_cutoff <= 0.f) {
+        fprintf(stderr, "Filter cut-off frequency must be positive non-zero, but got %f <= 0", arg_freq_cutoff);
+      } else {
+        freq_natnet = arg_freq_natnet;
+        freq_cutoff = arg_freq_cutoff;
       }
     }
     // Set the minimum amount of velocity samples for the differentiator
@@ -882,11 +902,17 @@ int main(int argc, char** argv)
   udp_socket_set_recvbuf(&natnet_cmd, 0x100000); // 1MB
 
   if (use_filter) {
-    printf_debug("Use 2nd-order butterworth filter with fs=%d, fc=%f.\n", freq_natnet, freq_cutoff);
+    /*printf_debug*/ fprintf(stderr, "Use 2nd-order butterworth filter with fs=%d, fc=%f;\n", freq_natnet, freq_cutoff);
+    /*printf_debug*/ fprintf(stderr, "Filter frequency is %d-times transmission frequency.\n", (freq_natnet/freq_transmit));
 
-    init_butterworth_2_low_pass(&filter_pos_x, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
-    init_butterworth_2_low_pass(&filter_pos_y, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
-    init_butterworth_2_low_pass(&filter_pos_z, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+    filter_tau = 7.0f / (44.0f * freq_cutoff);
+
+//    init_butterworth_2_low_pass(&filter_pos_x, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+//    init_butterworth_2_low_pass(&filter_pos_y, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+//    init_butterworth_2_low_pass(&filter_pos_z, 7.0f / (44.0f * freq_cutoff), 1.0/freq_natnet, 0.0);
+
+    int i;
+    for (i = 0; i < MAX_RIGIDBODIES; i++) { aircrafts[i].filter_init = FALSE; }
   }
 
   // Create the Ivy Client
