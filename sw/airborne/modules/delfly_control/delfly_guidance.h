@@ -75,9 +75,13 @@ struct DelflyGuidanceError {
 };
 
 struct DelflyGuidanceHorizontalGains {
-  /* constant of complementary control
+  /* gain of complementary control
    * in percent                     */
   int32_t complementary_gain;
+
+  /* lateral offset-to-heading ratio
+   * in percent                     */
+  int32_t lateral_ratio;
 
   /* adapt forward control
    * to current heading             */

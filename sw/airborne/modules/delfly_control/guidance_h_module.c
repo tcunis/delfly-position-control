@@ -63,6 +63,7 @@ void guidance_h_module_init() {
 
   delfly_guidance_init();
 
+  delfly_guidance.gains.h.lateral_ratio      = DELFLY_GUIDANCE_LATERAL_RATIO;
   delfly_guidance.gains.h.complementary_gain = DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN;
 
 //  VECT2_COPY(delfly_guidance.gains.fwd.xy, matlab_guidance_gain_fwd);
@@ -184,7 +185,7 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
        * i.e. additional heading to set-point
        * in [-MAX_HEADING_DELTA, +MAX_HEADING_DELTA]
        * in rad, with #INT32_ANGLE_FRAC                   */
-      int32_t pseudo_heading_d   = pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC));
+      int32_t pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC)/100);
       INT32_ANGLE_NORMALIZE(pseudo_heading_d);
       INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
 
