@@ -156,6 +156,7 @@
   
   <section name="DELFLY_GUIDANCE" prefix="DELFLY_GUIDANCE_">
   	<define name="COMPLEMENTARY_HEADING_GAIN" value="100"/>
+  	<define name="LATERAL_RATIO" value="100"/>
   </section><!--DELFLY_GUIDANCE-->
 
   <section name="DELFLY_STATE" prefix="STATE_ESTIMATION_">
