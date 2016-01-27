@@ -85,6 +85,10 @@ struct SpeedControlCmd {
 };
 
 struct SpeedControlEquilibrium {
+  /* air speed at equilibrium
+   * in m/s, with #INT32_MATLAB_FRAC */
+  int32_t air_speed;
+
 	/* pitch angle at equilibrium
 	 * in rad, with #INT32_MATLAB_FRAC */
 	int32_t pitch;

@@ -113,6 +113,55 @@ void speed_control_set_pitch_offset( int32_t pitch_offset_deg ) {
 }
 
 
+static inline void speed_control_gain_scheduling (int32_t air_speed) {
+
+  int32_t max_v04 = (matlab_airspeed_v04 + matlab_airspeed_v08)*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC))/2,
+          max_v08 = (matlab_airspeed_v08 + matlab_airspeed_v12)*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC))/2,
+          max_v12 = (matlab_airspeed_v12 + matlab_airspeed_v25)*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC))/2,
+          max_v25 = (matlab_airspeed_v25 + matlab_airspeed_v50)*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC))/2;
+
+  if ( air_speed < max_v04 ) {
+    speed_control_var.eq.air_speed           = matlab_airspeed_v04;
+    VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v04);
+    VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v04);
+    speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v04;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v04;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  } else if ( air_speed <= max_v08 ) {
+    speed_control_var.eq.air_speed           = matlab_airspeed_v08;
+    VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v08);
+    VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
+    speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  } else if ( air_speed <= max_v12 ) {
+    speed_control_var.eq.air_speed           = matlab_airspeed_v12;
+    VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v12);
+    VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v12);
+    speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v12;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v12;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  } else if ( air_speed <= max_v25 ) {
+    speed_control_var.eq.air_speed           = matlab_airspeed_v25;
+    VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v25);
+    VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v25);
+    speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v25;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v25;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  } else {
+    speed_control_var.eq.air_speed           = matlab_airspeed_v50;
+    VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v50);
+    VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v50);
+    speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v50;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v50;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  }
+}
+
+static inline void speed_control_set_airspeed (int32_t air_speed) {
+  if ( speed_control_var.now.air_speed == air_speed ) {
+    return; //nothing to do
+  }
+
+  speed_control_gain_scheduling(air_speed);
+  speed_control_var.now.air_speed = air_speed;
+}
+
 void speed_control_enter (void) {
 
   speed_control.mode = SPEED_CONTROL_MODE_ENTER;
@@ -168,7 +217,8 @@ void speed_control_estimate_error (void) {
 
 void speed_control_run (bool_t in_flight) {
 
-  speed_control_var.now.air_speed = delfly_state.h.speed_air;
+//  speed_control_var.now.air_speed = delfly_state.h.speed_air;
+  speed_control_set_airspeed( delfly_state.h.speed_wind /*delfly_state.h.speed_air*/ );
 
   if (!in_flight || guidance_v_mode != GUIDANCE_V_MODE_MODULE)
 	  return speed_control_enter(); //nothing to do

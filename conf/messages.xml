@@ -963,6 +963,7 @@
       <field name="sp_acc_h"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
       <field name="sp_acc_v"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
       <field name="air_speed" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air speed</field>
+      <field name="eq_speed"  type="int32" alt_unit=" m/s" alt_unit_coef="0.00006104">Equilibrii speed</field>
       <field name="eq_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
       <field name="eq_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.00781250">Equilibrii throttle frequency</field>
       <field name="inv_lift_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>

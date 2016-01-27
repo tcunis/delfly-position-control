@@ -168,6 +168,7 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, stru
 		&speed_control.sp.acceleration.fv.fwd,
 		&speed_control.sp.acceleration.fv.ver,
 		&speed_control_var.now.air_speed,
+		&speed_control_var.eq.air_speed,
 		&speed_control_var.eq.pitch,
 		&speed_control_var.eq.throttle,
 		&speed_control_var.mat.pitch.y,

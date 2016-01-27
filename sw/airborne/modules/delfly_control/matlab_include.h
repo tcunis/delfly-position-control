@@ -50,21 +50,28 @@ extern struct Int32Vect2 matlab_guidance_gain_fwd;
 extern struct Int32Vect2 matlab_guidance_gain_lat;
 
 
-/* pitch angle at equilibrium, in rad with #INT32_MATLAB_FRAC */
+/* speed at equilibria, in m/s with #INT32_MATLAB_FRAC */
+extern int32_t matlab_airspeed_v04;
+extern int32_t matlab_airspeed_v08;
+extern int32_t matlab_airspeed_v12;
+extern int32_t matlab_airspeed_v25;
+extern int32_t matlab_airspeed_v50;
+
+/* pitch angle at equilibria, in rad with #INT32_MATLAB_FRAC */
 extern int32_t matlab_pitch_equilibrium_v04;
 extern int32_t matlab_pitch_equilibrium_v08;
 extern int32_t matlab_pitch_equilibrium_v12;
 extern int32_t matlab_pitch_equilibrium_v25;
 extern int32_t matlab_pitch_equilibrium_v50;
 
-/* throttle at equilibrium, in % with #INT32_MATLAB_FRAC/2 */
+/* throttle at equilibria, in % with #INT32_MATLAB_FRAC/2 */
 extern int32_t matlab_throttle_equilibrium_v04;
 extern int32_t matlab_throttle_equilibrium_v08;
 extern int32_t matlab_throttle_equilibrium_v12;
 extern int32_t matlab_throttle_equilibrium_v25;
 extern int32_t matlab_throttle_equilibrium_v50;
 
-/* flapping frequency at equilibrium, in Hz */
+/* flapping frequency at equilibria, in Hz */
 extern float matlab_flapfreq_equilibrium_v04;
 extern float matlab_flapfreq_equilibrium_v08;
 extern float matlab_flapfreq_equilibrium_v12;

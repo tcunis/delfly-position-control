@@ -49,19 +49,23 @@
 struct DelflyHorizontalState {
   /* xy-position in m, with #INT32_POS_FRAC */
   struct Int32Vect2 pos;
-  /* xy-velocity in m/s, with #INT32_VEL_FRAC */
+  /* xy-velocity in m/s, with #INT32_SPEED_FRAC    */
   struct Int32Vect2 vel;
-  /* xy-airspeed in m/s, with #INT32_VEL_FRAC */
+  /* xy-airspeed in m/s, with #INT32_SPEED_FRAC    */
   struct Int32Vect2 air;
-  /* xy-acceleration in m/s2, with #INT32_ACC_FRAC */
+  /* xy-acceleration in m/s2, with #INT32_ACCEL_FRAC    */
   struct Int32Vect2 acc;
+  /* xy-windspeed in m/s, with #INT32_SPEED_FRAC   */
+  struct Int32Vect2 wind;
 
-  /* ground-speed in m/s, with #INT32_VEL_FRAC */
+  /* ground-speed in m/s, with #INT32_SPEED_FRAC   */
   int32_t speed_vel;
-  /* air-speed in m/s, with #INT32_VEL_FRAC */
+  /* air-speed in m/s, with #INT32_SPEED_FRAC      */
   int32_t speed_air;
-  /* speed acceleration in m/s2, with #INT32_ACC_FRAC */
+  /* acceleration in m/s2, with #INT32_ACCEL_FRAC */
   int32_t speed_acc;
+  /* wind-speed in m/s, with #INT32_SPEED_FRAC    */
+  int32_t speed_wind;
 
   /* heading in rad, with #INT32_ANGLE_FRAC */
   int32_t heading;
@@ -101,6 +105,7 @@ struct DelflyLongitudinalState {
 
 
 struct DelflyState {
+  /* flapping-frequency in Hz */
   float flap_freq;
 
   struct DelflyHorizontalState h;
@@ -191,6 +196,9 @@ static inline void set_acceleration ( struct Int32Vect3* acc ) {
   set_vertical_acceleration( acc->z );
 }
 
+static inline void delfly_state_set_windspeed ( float wind_speed ) {
+  delfly_state.h.speed_wind = SPEED_BFP_OF_REAL(wind_speed);
+}
 
 
 #endif /* DELFLY_STATE_H_ */

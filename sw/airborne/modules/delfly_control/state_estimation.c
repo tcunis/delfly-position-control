@@ -95,9 +95,13 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.h.acc );
   INT32_ZERO( delfly_state.h.speed_air );
   INT32_ZERO( delfly_state.h.speed_vel );
+  INT32_ZERO( delfly_state.h.speed_acc );
   INT32_ZERO( delfly_state.h.heading );
   INT32_ZERO( delfly_state.h.azimuth );
   INT32_ZERO( delfly_state.h.head_rate );
+
+  VECT2_ZERO( delfly_state.h.wind );
+  INT32_ZERO( delfly_state.h.speed_wind );
 
   INT32_ZERO( delfly_state.v.pos );
   INT32_ZERO( delfly_state.v.vel );
@@ -302,6 +306,9 @@ void state_estimation_run (void) {
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
   delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
+
+  //TODO: calculate wind velocity, set speed and direction
+  delfly_state.h.wind.x = delfly_state.h.speed_wind;
 
   state_estimation_aftermath();
 }
