@@ -49,6 +49,7 @@ static void delfly_telemetry_send_state (struct transport_tx*, struct link_devic
 //static void delfly_telemetry_send_stateraw (struct transport_tx*, struct link_device*);
 static void delfly_telemetry_send_stateestimation (struct transport_tx*, struct link_device*);
 static void delfly_telemetry_send_speedcontrol (struct transport_tx*, struct link_device*);
+static void delfly_telemetry_send_speedcontrol_gains (struct transport_tx*, struct link_device*);
 
 
 static void delfly_telemetry_send_flapcontrol (struct transport_tx* trans, struct link_device* dev) {
@@ -91,6 +92,7 @@ static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct l
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_DELFLY_STATE(trans, dev, AC_ID,
+      &state_estimation.status,
 	    &delfly_state.h.pos.x,
 	    &delfly_state.h.pos.y,
 	    &delfly_state.v.pos,
@@ -190,8 +192,8 @@ static void delfly_telemetry_send_speedcontrol_gains (struct transport_tx* trans
       &speed_control_var.eq.pitch,
       &speed_control_var.eq.throttle,
       &speed_control_var.mat.pitch.y,
-      &speed_control_var.mat.pitch.x,
       &speed_control_var.mat.throttle.y,
+      &speed_control_var.mat.pitch.x,
       &speed_control_var.mat.throttle.x
   );
 }
