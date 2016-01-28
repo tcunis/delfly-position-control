@@ -51,6 +51,12 @@
 #define STATE_ESTIMATION_MODE           STATE_ESTIMATION_MODE_OFF
 #endif
 
+enum StateEstimationStatus {
+  STATE_ESTIMATION_STATUS_OK = 0,
+  STATE_ESTIMATION_STATUS_ZEROTIME = 1,
+  STATE_ESTIMATION_STATUS_ACCSPIKE = 2,
+  STATE_ESTIMATION_STATUS_FLAPPING = 3
+};
 
 typedef struct {
   Butterworth2LowPass_int x;
@@ -80,6 +86,8 @@ struct StateEstimation {
 
   uint8_t mode;
   uint8_t type;
+
+  enum StateEstimationStatus status;
 
   /* predicted states
    * in m,    with #INT32_POS_FRAC

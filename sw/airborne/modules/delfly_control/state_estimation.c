@@ -63,6 +63,20 @@
   }
 
 
+/* Minimum time to derivate position;
+ * i.e. lower than third of gps period at 30 Hz
+ * in s                                         */
+#define STATE_ESTIMATION_TIME_MIN       0.01
+
+/* Sample time to derivate position
+ * in s                                         */
+#define STATE_ESTIMATION_SAMPLE_TIME    1.0/(STATE_ESTIMATION_GPS_FREQ)
+
+/* Maximum acceleration, i.e. eigth of g
+ * in m/s2, with #INT32_ACCEL_FRAC              */
+#define STATE_ESTIMATION_ACC_MAX        (ACCEL_BFP_OF_REAL(9.81)/8)
+
+
 
 struct DelflyState delfly_state;
 
@@ -71,6 +85,8 @@ struct StateEstimation state_estimation = {.mode = STATE_ESTIMATION_MODE_OFF};
 struct StateFilter state_filter;
 
 struct FlapFilter average_filter;
+
+float sample_time;
 
 
 static void state_estimation_aftermath (void);
@@ -85,6 +101,10 @@ void state_estimation_init (void) {
   //else:
   state_estimation.mode = STATE_ESTIMATION_MODE_ENTER;
   state_estimation.type = STATE_ESTIMATION_TYPE;
+
+#ifdef STATE_ESTIMATION_SAMPLE_TIME
+  sample_time = STATE_ESTIMATION_SAMPLE_TIME;
+#endif
 
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
@@ -131,6 +151,7 @@ void ins_module_int_init (void) {
   ins_module_int_reset_local_origin();
 
   state_estimation.mode = state_estimation.type;
+  state_estimation.status = STATE_ESTIMATION_STATUS_OK;
 }
 
 void ins_module_int_reset_local_origin (void) {
@@ -169,6 +190,9 @@ void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((un
 
 
 void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, float dt) {
+
+  // assume everything's fine ex ante.
+  state_estimation.status = STATE_ESTIMATION_STATUS_OK;
 
   VECT3_COPY(state_estimation.out.pos, *pos);
   VECT3_COPY(state_estimation.out.vel, *vel);
@@ -225,6 +249,7 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
         VECT3_COPY(this_pos, state_estimation.states.pos);
         VECT3_COPY(ltp_pos,  this_pos);
 
+        state_estimation.status = STATE_ESTIMATION_STATUS_FLAPPING;
         dt = 0; //DO NOT calculate velocity and acceleration!
       }
     }
@@ -244,15 +269,40 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
        * (according to type)                 */
       VECT3_COPY(state_estimation.states.pos, this_pos);
 
-      if ( dt > 0 ) { // new gps message
+      if ( state_estimation.status == STATE_ESTIMATION_STATUS_FLAPPING ) {
+        //nothing to do
+      } else {
+#ifdef STATE_ESTIMATION_SAMPLE_TIME
+        dt = sample_time;
+#else
+        if ( dt < STATE_ESTIMATION_TIME_MIN ) {
+          state_estimation.status = STATE_ESTIMATION_STATUS_ZEROTIME;
+        } else
+#endif
+        {
+          struct Int32Vect3 gps_est_acc, gps_est_vel;
 
-        // get velocity as 1st discrete time derivative
-        VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
-        VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
+          // get velocity as 1st discrete time derivative
+          VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
+          VECT3_ASSIGN_SCALED2(gps_est_vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
 
-        // get acceleration as 2nd discrete time derivative
-        VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
-        VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+          // get acceleration as 2nd discrete time derivative
+          VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
+          VECT3_ASSIGN_SCALED2(gps_est_acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+
+#ifdef STATE_ESTIMATION_ACC_MAX
+          struct Int32Vect3 acc_abs;
+          VECT3_ABS(acc_abs, gps_est_acc);
+
+          if ( !VECT3_EW_CP(acc_abs, <, STATE_ESTIMATION_ACC_MAX) ) {
+            state_estimation.status = STATE_ESTIMATION_STATUS_ACCSPIKE;
+          } else
+#endif
+          {
+            VECT3_COPY(state_estimation.states.vel, gps_est_vel);
+            VECT3_COPY(state_estimation.states.acc, gps_est_acc);
+          }
+        }
       }
 
       /* get ltp state position from gps

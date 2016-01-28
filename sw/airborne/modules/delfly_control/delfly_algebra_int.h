@@ -83,11 +83,21 @@ struct Int64Mat33 {
     (_a).z = ((_b).z * (_num)) / (_den);        \
   }
 
+/* a o b, o in {<, <=, ==, !=, >=, >} */
+#define VECT3_CP(_a, _cp, _b)   	(	\
+    (_a).x _cp (_b).x &&	    			\
+    (_a).y _cp (_b).y &&		    		\
+    (_a).z _cp (_b).z				        \
+  )
+
 /* a == b */
-#define VECT3_EQUALS(_a, _b)	(	\
-	(_a).x == (_b).x &&				\
-	(_a).y == (_b).y &&				\
-	(_a).z == (_b).z				\
+#define VECT3_EQUALS(_a, _b)      VECT3_CP(_a, ==, _b)
+
+/* element-wise a o b, o in {<, <=, ==, !=, >=, >} */
+#define VECT3_EW_CP(_a, _cp, _s)  ( \
+    (_a).x _cp (_s) &&     \
+    (_a).y _cp (_s) &&     \
+    (_a).z _cp (_s)        \
   )
 
 /* m1 += m2 */
