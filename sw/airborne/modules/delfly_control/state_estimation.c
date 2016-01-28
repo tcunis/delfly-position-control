@@ -266,27 +266,26 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
         } else
 #endif
         {
-          struct Int32Vect3 gps_est_acc, gps_est_vel;
+          //struct Int32Vect3 gps_est_acc, gps_est_vel;
 
           // get velocity as 1st discrete time derivative
           VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
-          VECT3_ASSIGN_SCALED2(gps_est_vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
+          VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
 
           // get acceleration as 2nd discrete time derivative
           VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
-          VECT3_ASSIGN_SCALED2(gps_est_acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+          VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
 
 #ifdef STATE_ESTIMATION_ACC_MAX
           struct Int32Vect3 acc_abs;
-          VECT3_ABS(acc_abs, gps_est_acc);
+          VECT3_ABS(acc_abs, state_estimation.states.acc);
 
           if ( !VECT3_EW_CP(acc_abs, <, STATE_ESTIMATION_ACC_MAX) ) {
             state_estimation.status = STATE_ESTIMATION_STATUS_ACCSPIKE;
+            VECT3_STRIM(state_estimation.states.acc, -STATE_ESTIMATION_ACC_MAX, STATE_ESTIMATION_ACC_MAX);
           } else
 #endif
           {
-            VECT3_COPY(state_estimation.states.vel, gps_est_vel);
-            VECT3_COPY(state_estimation.states.acc, gps_est_acc);
           }
         }
       }
@@ -294,10 +293,12 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
       /* get ltp state position from gps
        * (both type GPS and GPS_FILTER)      */
       VECT3_COPY(ins_int.ltp_pos, ltp_pos);
+
       /* get ltp state speed & acceleration
        * from state estimation               */
       VECT3_COPY(ins_int.ltp_speed, state_estimation.states.vel);
       VECT3_COPY(ins_int.ltp_accel, state_estimation.states.acc);
+
     } break;
 
 	default: {

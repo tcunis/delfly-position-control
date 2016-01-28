@@ -101,13 +101,15 @@ void speed_control_init (void) {
 void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading ) {
 
   // saturate acceleration command by maximal acceleration
-  speed_control.sp.acceleration.fv.fwd = INT32_SAT(cmd_h_acceleration, STATE_ESTIMATION_ACC_MAX);
+//  speed_control.sp.acceleration.fv.fwd = INT32_SAT(cmd_h_acceleration, STATE_ESTIMATION_ACC_MAX);
+  speed_control.sp.acceleration.fv.fwd = cmd_h_acceleration;
   speed_control.sp.heading = cmd_heading;
 }
 
 void speed_control_set_cmd_v( int32_t cmd_v_acceleration ) {
 
-  speed_control.sp.acceleration.fv.ver = INT32_SAT(cmd_v_acceleration, STATE_ESTIMATION_ACC_MAX);
+//  speed_control.sp.acceleration.fv.ver = INT32_SAT(cmd_v_acceleration, STATE_ESTIMATION_ACC_MAX);
+  speed_control.sp.acceleration.fv.ver = cmd_v_acceleration;
 }
 
 void speed_control_set_pitch_offset( int32_t pitch_offset_deg ) {
@@ -199,9 +201,7 @@ void speed_control_estimate_error (void) {
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;
-  VECT2_DIFF(velocity_error_new.xy,
-		  	 speed_control_var.ref.velocity.xy,
-  			 speed_control_var.now.velocity.xy);
+  VECT2_DIFF(velocity_error_new.xy, speed_control_var.ref.velocity.xy, speed_control_var.now.velocity.xy);
 
 //  //estimated acceleration error: a_err(k-1) = (v_err(k) - v_err(k-1))/T
 //  VECT2_DIFF_SCALED2(speed_control_var.err.acceleration.xy,
@@ -210,7 +210,7 @@ void speed_control_estimate_error (void) {
 //					SPEED_CONTROL_RUN_FREQ,(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
   VECT2_COPY(speed_control_var.err.velocity.xy, velocity_error_new.xy);
 
-  VECT2_DIFF(speed_control_var.err.acceleration.xy, speed_control.sp.acceleration.xy, speed_control_var.now.acceleration.xy);
+  VECT2_DIFF(speed_control_var.err.acceleration.xy, speed_control_var.ref.acceleration.xy, speed_control_var.now.acceleration.xy);
 
 //  //for telemetry: a_now = a_ref - a_err
 //  VECT2_DIFF(speed_control_var.now.acceleration.xy,
@@ -246,6 +246,9 @@ void speed_control_run (bool_t in_flight) {
 		  	  	     speed_control_var.err.velocity.xy,
 		  	  	     speed_control.fb_gains.i,
 					 (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
+
+  //todo: debug: no feed-back control in horizontal
+  speed_control_var.fb_cmd.acceleration.fv.fwd = 0;
 
   /* pitch and throttle command */
   //cmd = ff_cmd + fb_cmd
