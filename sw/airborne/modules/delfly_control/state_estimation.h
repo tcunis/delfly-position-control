@@ -51,6 +51,21 @@
 #define STATE_ESTIMATION_MODE           STATE_ESTIMATION_MODE_OFF
 #endif
 
+
+/* Minimum time to derivate position;
+ * i.e. lower than third of gps period at 30 Hz
+ * in s                                         */
+#define STATE_ESTIMATION_TIME_MIN       0.01
+
+/* Sample time to derivate position
+ * in s                                         */
+#define STATE_ESTIMATION_SAMPLE_TIME    1.0/(STATE_ESTIMATION_GPS_FREQ)
+
+/* Maximum acceleration, i.e. eigth of g
+ * in m/s2, with #INT32_ACCEL_FRAC              */
+#define STATE_ESTIMATION_ACC_MAX        (ACCEL_BFP_OF_REAL(9.81)/8)
+
+
 enum StateEstimationStatus {
   STATE_ESTIMATION_STATUS_OK = 0,
   STATE_ESTIMATION_STATUS_ZEROTIME = 1,
