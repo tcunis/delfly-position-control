@@ -919,8 +919,12 @@
         Parameters and states of the Delfly control state estimator and wind-tunnel navigation
         sub-module. 13 bytes
       </description>
-      <field name="mode" type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|GPS_FILTER|GPS_AVERAGE|GPS_AVGFILT|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
-      <!--field name="res_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
+      <field name="mode"        type="uint8" values="OFF|ENTER|ESTIMATE|USE_GPS|GPS_FILTER|GPS_AVERAGE|GPS_AVGFILT|PREDICT|COMPLEMENTARY|KALMAN">State estimator mode</field>
+      <field name="status"      type="uint8" values="OK|ZERO_TIME|ACC_SPIKE|FLAPPING">State estimator status</field>
+      <field name="sample_time" type="float" unit=" s" />
+      <field name="cut_off"     type="float" unit=" Hz"/>
+      <field name="avg_samples" type="int32" unit=""  />
+            <!--field name="res_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
         name="res_y" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
         name="res_z" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/> <field
         name="est_cov_11" type="int32" alt_unit="" alt_unit_coef="0.0000610"/> <field
@@ -929,9 +933,6 @@
         name="gain_pos" type="int32" alt_unit="" alt_unit_coef="0.00006104"/> <field
         name="gain_vel" type="int32" alt_unit="" alt_unit_coef="0.00006104"/> <field
         name="gain_acc" type="int32" alt_unit="" alt_unit_coef="0.00006104"/-->
-      <field name="sample_time" type="float" unit=" s" />
-      <field name="cut_off"     type="float" unit=" Hz"/>
-      <field name="avg_samples" type="int32" unit=""  />
       <field name="est_pos_x" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_y" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
       <field name="est_pos_z" type="int32" alt_unit=" m" alt_unit_coef="0.00012207"/>
@@ -947,7 +948,6 @@
       <field name="out_acc_x" type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
       <field name="out_acc_y" type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
       <field name="out_acc_z" type="int32" alt_unit=" m/s" alt_unit_coef="0.00097656"/>
-      
       <!--field name="wind_x" type="int32" alt_unit="m/s" alt_unit_coef="0.00000191">Wind
         velocity in x-axis (geographic frame)</field> <field name="wind_y" type="int32"
         alt_unit="m/s" alt_unit_coef="0.00000191">Wind velocity in y-axis (geographic
@@ -963,13 +963,6 @@
       <field name="sp_acc_h"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
       <field name="sp_acc_v"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
       <field name="air_speed" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air speed</field>
-      <field name="eq_speed"  type="int32" alt_unit=" m/s" alt_unit_coef="0.00006104">Equilibrii speed</field>
-      <field name="eq_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
-      <field name="eq_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.00781250">Equilibrii throttle frequency</field>
-      <field name="inv_lift_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>
-      <field name="inv_lift_throttle" type="int32" alt_unit=" m/(% s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. throttle frequency</field>
-      <field name="inv_drag_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. pitch</field>
-      <field name="inv_drag_throttle" type="int32" alt_unit=" m/(% s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. throttle frequency</field>
       <field name="ref_vel_h" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Reference horizontal velocity</field>
       <field name="ref_vel_v" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Reference vertical velocity</field>
       <field name="err_h"     type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration error</field>
@@ -985,7 +978,13 @@
     </message>
     
     <message name="DELFLY_SPEEDCTRL_GAINS" id="110">
-    	
+      <field name="eq_speed"          type="int32" alt_unit=" m/s" alt_unit_coef="0.00006104">Equilibrii speed</field>
+      <field name="eq_pitch"          type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
+      <field name="eq_throttle"       type="int32" alt_unit=" %"   alt_unit_coef="0.00781250">Equilibrii throttle frequency</field>
+      <field name="inv_lift_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. pitch</field>
+      <field name="inv_lift_throttle" type="int32" alt_unit=" m/(% s2)"   alt_unit_coef="-0.00006104">Inverse derivative lift w.r.t. throttle frequency</field>
+      <field name="inv_drag_pitch"    type="int32" alt_unit=" m/(rad s2)" alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. pitch</field>
+      <field name="inv_drag_throttle" type="int32" alt_unit=" m/(% s2)"   alt_unit_coef="-0.00006104">Inverse derivative drag w.r.t. throttle frequency</field>   	
     </message>
     
     <message name="DELFLY_GUIDANCE" id="230">
