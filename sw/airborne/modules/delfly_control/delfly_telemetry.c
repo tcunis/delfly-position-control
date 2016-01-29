@@ -92,7 +92,7 @@ static void delfly_telemetry_send_guidance (struct transport_tx* trans, struct l
 
 static void delfly_telemetry_send_state (struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_DELFLY_STATE(trans, dev, AC_ID,
-      &state_estimation.status,
+      &delfly_state.est_status,
 	    &delfly_state.h.pos.x,
 	    &delfly_state.h.pos.y,
 	    &delfly_state.v.pos,

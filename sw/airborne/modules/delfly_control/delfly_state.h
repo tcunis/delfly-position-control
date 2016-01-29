@@ -43,7 +43,15 @@
 #define VECT2_ZERO(_v)    VECT2_ASSIGN(_v, 0, 0)
 
 
-/**
+enum StateEstimationStatus {
+  STATE_ESTIMATION_STATUS_OK = 0,
+  STATE_ESTIMATION_STATUS_ZEROTIME = 1,
+  STATE_ESTIMATION_STATUS_ACCSPIKE = 2,
+  STATE_ESTIMATION_STATUS_FLAPPING = 3
+};
+
+
+/*
  * Delfly state in the horizontal, xy-plane.
  */
 struct DelflyHorizontalState {
@@ -75,7 +83,7 @@ struct DelflyHorizontalState {
   int32_t head_rate;
 };
 
-/**
+/*
  * Delfly state in vertical, z-axis;
  * note, that z is pointing downwards!
  */
@@ -91,7 +99,7 @@ struct DelflyVerticalState {
 };
 
 
-/**
+/*
  * Delfly state in longitudinal, xz-plane.
  */
 struct DelflyLongitudinalState {
@@ -105,6 +113,8 @@ struct DelflyLongitudinalState {
 
 
 struct DelflyState {
+  enum StateEstimationStatus est_status;
+
   /* flapping-frequency in Hz */
   float flap_freq;
 

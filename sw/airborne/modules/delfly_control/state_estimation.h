@@ -29,6 +29,7 @@
 #define STATE_ESTIMATION_H_
 
 
+#include "delfly_state.h"
 #include "delfly_model.h"
 
 #include "filters/low_pass_filter.h"
@@ -65,13 +66,6 @@
  * in m/s2, with #INT32_ACCEL_FRAC              */
 #define STATE_ESTIMATION_ACC_MAX        (ACCEL_BFP_OF_REAL(9.81)/8)
 
-
-enum StateEstimationStatus {
-  STATE_ESTIMATION_STATUS_OK = 0,
-  STATE_ESTIMATION_STATUS_ZEROTIME = 1,
-  STATE_ESTIMATION_STATUS_ACCSPIKE = 2,
-  STATE_ESTIMATION_STATUS_FLAPPING = 3
-};
 
 typedef struct {
   Butterworth2LowPass_int x;

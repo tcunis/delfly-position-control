@@ -72,8 +72,6 @@ struct StateFilter state_filter;
 
 struct FlapFilter average_filter;
 
-float sample_time;
-
 
 static void state_estimation_aftermath (void);
 
@@ -88,10 +86,6 @@ void state_estimation_init (void) {
   state_estimation.mode = STATE_ESTIMATION_MODE_ENTER;
   state_estimation.type = STATE_ESTIMATION_TYPE;
 
-#ifdef STATE_ESTIMATION_SAMPLE_TIME
-  sample_time = STATE_ESTIMATION_SAMPLE_TIME;
-#endif
-
   delfly_model_init_states( &state_estimation.states );
   delfly_model_init_states( &state_estimation.out );
 
@@ -101,13 +95,9 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.h.acc );
   INT32_ZERO( delfly_state.h.speed_air );
   INT32_ZERO( delfly_state.h.speed_vel );
-  INT32_ZERO( delfly_state.h.speed_acc );
   INT32_ZERO( delfly_state.h.heading );
   INT32_ZERO( delfly_state.h.azimuth );
   INT32_ZERO( delfly_state.h.head_rate );
-
-  VECT2_ZERO( delfly_state.h.wind );
-  INT32_ZERO( delfly_state.h.speed_wind );
 
   INT32_ZERO( delfly_state.v.pos );
   INT32_ZERO( delfly_state.v.vel );
@@ -119,12 +109,20 @@ void state_estimation_init (void) {
   VECT2_ZERO( delfly_state.fv.acc.xy );
 
   INT32_ZERO( delfly_state.flap_freq );
+<<<<<<< HEAD
+
+  average_filter.flap_count = rpm_sensor.rot_count;
+  INT32_VECT3_ZERO(average_filter.sum_pos);
+  average_filter.sum_dt = 0;
+  average_filter.sample_count = 0;
+=======
 	
 	VECT3_ZERO( average_filter.sum_pos );
 	INT32_ZERO( average_filter.flap_count );
 	INT32_ZERO( average_filter.sample_count );
 	INT32_ZERO( average_filter.last_samples );
 	INT32_ZERO( average_filter.sum_dt );
+>>>>>>> 0c09da76e4300c47c7e93ca5bb102ba90f34d47e
 }
 
 
@@ -137,7 +135,6 @@ void ins_module_int_init (void) {
   ins_module_int_reset_local_origin();
 
   state_estimation.mode = state_estimation.type;
-  state_estimation.status = STATE_ESTIMATION_STATUS_OK;
 }
 
 void ins_module_int_reset_local_origin (void) {
@@ -162,8 +159,12 @@ void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((un
 
   case STATE_ESTIMATION_TYPE_GPS:
   case STATE_ESTIMATION_TYPE_GPS_FILTER:
+<<<<<<< HEAD
   case STATE_ESTIMATION_TYPE_GPS_AVERAGE:
   case STATE_ESTIMATION_TYPE_GPS_AVGFILT: {
+=======
+	case STATE_ESTIMATION_TYPE_GPS_AVERAGE: {
+>>>>>>> 0c09da76e4300c47c7e93ca5bb102ba90f34d47e
     // ignore accelerometer data
     } break;
 
@@ -176,9 +177,6 @@ void ins_module_int_propagate(struct Int32Vect3* acc, float dt __attribute__((un
 
 
 void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, float dt) {
-
-  // assume everything's fine ex ante.
-  state_estimation.status = STATE_ESTIMATION_STATUS_OK;
 
   VECT3_COPY(state_estimation.out.pos, *pos);
   VECT3_COPY(state_estimation.out.vel, *vel);
@@ -194,13 +192,14 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
   struct Int32Vect3 last_pos, last_vel;
   VECT3_COPY(last_pos, state_estimation.states.pos);
   VECT3_COPY(last_vel, state_estimation.states.vel);
-  
+
   // get current heading from gps
   state_estimation.states.att.psi = gps.course;
 
   switch (state_estimation.mode) {
 
   case STATE_ESTIMATION_TYPE_GPS_AVERAGE:
+<<<<<<< HEAD
   case STATE_ESTIMATION_TYPE_GPS_AVGFILT:
     // get cycle-averaged position
     if ( rpm_sensor.average_frequency == 0 ) {
@@ -235,8 +234,50 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
         VECT3_COPY(this_pos, state_estimation.states.pos);
         VECT3_COPY(ltp_pos,  this_pos);
 
-        state_estimation.status = STATE_ESTIMATION_STATUS_FLAPPING;
         dt = 0; //DO NOT calculate velocity and acceleration!
+=======
+  case STATE_ESTIMATION_TYPE_GPS_FILTER:
+    if ( state_estimation.mode == STATE_ESTIMATION_TYPE_GPS_AVERAGE) {
+      // get cycle-averaged position
+      if ( rpm_sensor.average_frequency == 0 ) {
+        //nothing to do, use this_pos = out.pos
+				//zero integrator and counter
+				INT32_VECT3_ZERO(average_filter.sum_pos);
+				average_filter.sum_dt = 0;
+				average_filter.sample_count = 0;
+				//remember flapping cycle count
+				average_filter.flap_count = 0;
+      } else {
+        //update average filter
+        VECT3_ADD(average_filter.sum_pos, this_pos);
+        average_filter.sample_count++;
+        //integrate flapping period
+        average_filter.sum_dt += dt;
+
+				uint32_t rpm_rot_count = rpm_sensor.rot_count;
+        if ( rpm_rot_count > average_filter.flap_count ) {
+          //flapping cycle passed:
+          //calculate average position
+          VECT3_SDIV(this_pos, average_filter.sum_pos, average_filter.sample_count);
+          VECT3_COPY(ltp_pos, this_pos);
+          //use flapping period to derivate velocity and acceleration
+          dt = average_filter.sum_dt;
+          //remember flapping cycle count and samples
+          average_filter.flap_count = rpm_rot_count;
+          average_filter.last_samples = average_filter.sample_count;
+          //zero integrator and counter
+          INT32_VECT3_ZERO(average_filter.sum_pos);
+          average_filter.sum_dt = 0;
+          average_filter.sample_count = 0;
+        } else {
+          //within flapping cycle:
+          //use last position
+          VECT3_COPY(this_pos, state_estimation.states.pos);
+          VECT3_COPY(ltp_pos,  this_pos);
+
+          dt = 0; //DO NOT calculate velocity and acceleration!
+        }
+>>>>>>> 0c09da76e4300c47c7e93ca5bb102ba90f34d47e
       }
     }
     /* no break */
@@ -255,50 +296,24 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
        * (according to type)                 */
       VECT3_COPY(state_estimation.states.pos, this_pos);
 
-      if ( state_estimation.status == STATE_ESTIMATION_STATUS_FLAPPING ) {
-        //nothing to do
-      } else {
-#ifdef STATE_ESTIMATION_SAMPLE_TIME
-        dt = sample_time;
-#else
-        if ( dt < STATE_ESTIMATION_TIME_MIN ) {
-          state_estimation.status = STATE_ESTIMATION_STATUS_ZEROTIME;
-        } else
-#endif
-        {
-          //struct Int32Vect3 gps_est_acc, gps_est_vel;
+      if ( dt > 0 ) { // new gps message
 
-          // get velocity as 1st discrete time derivative
-          VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
-          VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
+        // get velocity as 1st discrete time derivative
+        VECT3_DIFF(pos_diff, state_estimation.states.pos, last_pos);
+        VECT3_ASSIGN_SCALED2(state_estimation.states.vel, pos_diff, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)), dt);
 
-          // get acceleration as 2nd discrete time derivative
-          VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
-          VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
-
-#ifdef STATE_ESTIMATION_ACC_MAX
-          struct Int32Vect3 acc_abs;
-          VECT3_ABS(acc_abs, state_estimation.states.acc);
-
-          if ( !VECT3_EW_CP(acc_abs, <, STATE_ESTIMATION_ACC_MAX) ) {
-            state_estimation.status = STATE_ESTIMATION_STATUS_ACCSPIKE;
-            VECT3_STRIM(state_estimation.states.acc, -STATE_ESTIMATION_ACC_MAX, STATE_ESTIMATION_ACC_MAX);
-          } else
-#endif
-          {
-          }
-        }
+        // get acceleration as 2nd discrete time derivative
+        VECT3_DIFF(vel_diff, state_estimation.states.vel, last_vel);
+        VECT3_ASSIGN_SCALED2(state_estimation.states.acc, vel_diff, 1, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
       }
 
       /* get ltp state position from gps
        * (both type GPS and GPS_FILTER)      */
       VECT3_COPY(ins_int.ltp_pos, ltp_pos);
-
       /* get ltp state speed & acceleration
        * from state estimation               */
       VECT3_COPY(ins_int.ltp_speed, state_estimation.states.vel);
       VECT3_COPY(ins_int.ltp_accel, state_estimation.states.acc);
-
     } break;
 
 	default: {
@@ -325,8 +340,6 @@ void state_estimation_run (void) {
   //else:
   state_estimation.mode = state_estimation.type;
 
-  delfly_state.est_status = state_estimation.status;
-
   struct Int32Vect3 pos, vel, air, acc;
   set_position_ned_i( &pos, stateGetPositionNed_i() );
   set_velocity_ned_i( &vel, stateGetSpeedNed_i() );
@@ -345,9 +358,6 @@ void state_estimation_run (void) {
   delfly_state.h.heading = stateGetNedToBodyEulers_i()->psi;
   delfly_state.h.azimuth = stateGetHorizontalSpeedDir_i();
   //TODO: get heading rate
-
-  //TODO: calculate wind velocity, set speed and direction
-  delfly_state.h.wind.x = delfly_state.h.speed_wind;
 
   state_estimation_aftermath();
 }

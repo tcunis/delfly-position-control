@@ -188,7 +188,7 @@
     <mode name="default">
       <message name="ROTORCRAFT_STATUS"      period="1"   />
       <message name="DELFLY_FLAPCONTROL"     period="0.02"/>
-      <message name="DELFLY_STATE"           period="0.02"/>
+      <message name="DELFLY_STATE"           period="0.01"/>
       <message name="DELFLY_GUIDANCE"        period="0.02"/>
       <message name="DELFLY_SPEEDCTRL"       period="0.02"/>
       <message name="DELFLY_STATEESTIMATION" period="0.02"/>
