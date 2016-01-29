@@ -34,6 +34,8 @@
 
 #include "speed_control.h"
 
+#include "math/pprz_algebra_float.h"
+
 
 struct SpeedControlRef {
 	/* (estimated) velocity reference
@@ -80,8 +82,12 @@ struct SpeedControlCmd {
 	int32_t pitch;
 
 	/* throttle command
-	 * 0:MAX_PPRZ					   */
+	 * 0:MAX_PPRZ					             */
 	int32_t throttle;
+
+	/* flapping frequency command
+	 * in Hz                           */
+	float flapfreq;
 };
 
 struct SpeedControlEquilibrium {
@@ -93,9 +99,13 @@ struct SpeedControlEquilibrium {
 	 * in rad, with #INT32_MATLAB_FRAC */
 	int32_t pitch;
 
-	/* throttle frequency at equilibrium
-	 * in %, with #INT32_MATLAB_FRAC   */
+	/* throttle command at equilibrium
+	 * in %, with #INT32_MATLAB_FRAC/2 */
 	int32_t throttle;
+
+	/* flapping frequency at equilibrium
+	 * in Hz                           */
+	float flapfreq;
 };
 
 struct SpeedControlGainScheduling {
@@ -106,8 +116,13 @@ struct SpeedControlGainScheduling {
 
 	/* throttle gain matrix
 	 * dF 	  = [tgm1 tgm2] * [h_acc v_acc]^T
-	 * with #INT32_MATLAB_FRAC		   */
+	 * with #INT32_MATLAB_FRAC/2     */
 	struct Int32Vect2 throttle;
+
+  /* flapping frequency gain matrix
+   * dff    = [fgm1 fgm2] * [h_acc v_acc]^T
+   *                               */
+	struct FloatVect2 flapfreq;
 };
 
 

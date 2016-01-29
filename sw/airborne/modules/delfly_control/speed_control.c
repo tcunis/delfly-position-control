@@ -64,6 +64,9 @@ void speed_control_init (void) {
 
   speed_control.mode = SPEED_CONTROL_MODE_OFF;
 
+  //default speed-control type
+  speed_control.type = SPEED_CONTROL_MODE_CONTROL;
+
   VECT2_ZERO(speed_control.sp.acceleration.xy);
   speed_control.sp.heading = 0;
 
@@ -128,32 +131,42 @@ static inline void speed_control_gain_scheduling (int32_t air_speed) {
     speed_control_var.eq.air_speed           = matlab_airspeed_v04;
     VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v04);
     VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v04);
+    VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v04);
     speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v04;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
     speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v04;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.flapfreq            = matlab_flapfreq_equilibrium_v04;
   } else if ( air_speed <= max_v08 ) {
     speed_control_var.eq.air_speed           = matlab_airspeed_v08;
     VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v08);
     VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
+    VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v08);
     speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
     speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.flapfreq            = matlab_flapfreq_equilibrium_v08;
   } else if ( air_speed <= max_v12 ) {
     speed_control_var.eq.air_speed           = matlab_airspeed_v12;
     VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v12);
     VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v12);
+    VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v12);
     speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v12;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
     speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v12;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.flapfreq            = matlab_flapfreq_equilibrium_v12;
   } else if ( air_speed <= max_v25 ) {
     speed_control_var.eq.air_speed           = matlab_airspeed_v25;
     VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v25);
     VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v25);
+    VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v25);
     speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v25;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
     speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v25;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.flapfreq            = matlab_flapfreq_equilibrium_v25;
   } else {
     speed_control_var.eq.air_speed           = matlab_airspeed_v50;
     VECT2_COPY(speed_control_var.mat.pitch,    matlab_pitch_matrix_v50);
     VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v50);
+    VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v50);
     speed_control_var.eq.pitch               = matlab_pitch_equilibrium_v50;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
     speed_control_var.eq.throttle            = matlab_throttle_equilibrium_v50;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+    speed_control_var.eq.flapfreq            = matlab_flapfreq_equilibrium_v50;
   }
 }
 
@@ -183,8 +196,10 @@ void speed_control_enter (void) {
   /* TODO: gain scheduling w.r.t. air speed */
   VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
   VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
+  VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v08);
   speed_control_var.eq.pitch 	= matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
   speed_control_var.eq.throttle = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+  speed_control_var.eq.flapfreq = matlab_flapfreq_equilibrium_v08;
 }
 
 
@@ -228,7 +243,7 @@ void speed_control_run (bool_t in_flight) {
 	  return speed_control_enter(); //nothing to do
 
   //else:
-  speed_control.mode = SPEED_CONTROL_MODE_CONTROL;
+  speed_control.mode = speed_control.type;
 
   /* feed-forward */
   //union Int32VectLong acceleration_cmd;
@@ -271,12 +286,23 @@ void speed_control_run (bool_t in_flight) {
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
-  stabilization_cmd[COMMAND_THRUST] = cmd_throttle;
-//  flap_control_run();
-
+  switch (speed_control.mode)
+  {
+  case SPEED_CONTROL_TYPE_FLAPFREQ:
+    {
+      flap_control_set(speed_control_var.cmd.flapfreq);
+      flap_control_run();
+    }
+    break;
+  case SPEED_CONTROL_TYPE_THROTTLE:
+  default:
+    stabilization_cmd[COMMAND_THRUST] = cmd_throttle;
+    break;
+  }
   stabilization_attitude_run(in_flight);
 
-  if ( cmd_throttle == speed_control_var.cmd.throttle ) {
+  if ( (speed_control.mode != SPEED_CONTROL_TYPE_FLAPFREQ && cmd_throttle == speed_control_var.cmd.throttle)
+       || (speed_control.mode == SPEED_CONTROL_TYPE_FLAPFREQ && flap_control_reachable()) )                   {
 	  // throttle command un-saturated
     delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
     VECT2_COPY(speed_control_var.ref.acceleration.xy, speed_control.sp.acceleration.xy);
@@ -300,4 +326,8 @@ void speed_control_calculate_cmd( struct SpeedControlCmd* cmd, struct SpeedContr
 	cmd->throttle = (eq->throttle //* (1 << INT32_ACCEL_FRAC)
 					         + VECT2_DOT_PRODUCT(mat->throttle, cmd->acceleration.xy)/(1 << INT32_ACCEL_FRAC))
 				        * (MAX_PPRZ*speed_control.ff_gains.throttle/100) / (100 << INT32_MATLAB_FRAC/2);
+	//commanded flapping frequency in Hz
+	cmd->flapfreq = (eq->flapfreq * (1 << INT32_ACCEL_FRAC)
+	                   + VECT2_DOT_PRODUCT(mat->flapfreq, cmd->acceleration.xy))
+	                / (1 << (INT32_ACCEL_FRAC));
 }

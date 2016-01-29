@@ -76,7 +76,7 @@ void flap_control_init(void) {
 
   flap_control_antiwindup = FALSE;
 
-  flap_control_mode = FLAP_CONTROL_MODE_FLAP;
+  flap_control_mode = FLAP_CONTROL_MODE_FLAPCTRL;
 }
 
 
@@ -143,14 +143,14 @@ bool_t flap_control_run(void) {
     /* no break */
   case FLAP_CONTROL_MODE_FLAPCTRL:
     {
-      //debug: set sp
-      if ( flap_control_mode == FLAP_CONTROL_MODE_FLAPCTRL ) {
-        flap_control.freq_sp = flap_control.gains.p / 10.0;
-      }
+//      //debug: set sp
+//      if ( flap_control_mode == FLAP_CONTROL_MODE_FLAPCTRL ) {
+//        flap_control.freq_sp = flap_control.gains.p / 10.0;
+//      }
 
-    //  if ( !flap_control_antiwindup || flap_control.freq_sp < flap_control.freq_now ) {
-    //    freq_ref = flap_control.freq_sp;
-    //  }
+//      if ( !flap_control_antiwindup || flap_control.freq_sp < flap_control.freq_now ) {
+//        freq_ref = flap_control.freq_sp;
+//      }
       if ( (freq_ref == -1) || (antiwindup_max && flap_control.freq_sp > flap_control.freq_now)
                             || (antiwindup_min && flap_control.freq_sp < flap_control.freq_now) ) {
         freq_ref = flap_control.freq_now;
