@@ -29,11 +29,16 @@
 #include "delfly_algebra_int.h"
 
 
-#define DELFLY_GUIDANCE_MODE_OFF			0
+#define DELFLY_GUIDANCE_MODE_OFF			  0
 #define DELFLY_GUIDANCE_MODE_MODULE			1
-#define DELFLY_GUIDANCE_MODE_NAV			2
+#define DELFLY_GUIDANCE_MODE_NAV			  2
 //#define DELFLY_GUIDANCE_MODE_NAV_WAYPOINT		6
 //#define DELFLY_GUIDANCE_MODE_NAV_SPEED		7
+
+
+#ifndef DELFLY_GUIDANCE_USE_SPEED_REF
+#define DELFLY_GUIDANCE_USE_SPEED_REF   FALSE
+#endif
 
 
 struct DelflyGuidanceCommand {

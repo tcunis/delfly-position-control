@@ -37,6 +37,8 @@
 
 #include "guidance/guidance_v.h"
 
+#include "speed_control_var.h"
+
 
 /* vertical acceleration command
  * in m/s2, with #INT32_ACCEL_FRAC
@@ -95,13 +97,13 @@ void guidance_v_module_run_traj( bool_t in_flight ) {
   {
 	/* compute position error    */
 	delfly_guidance.err.pos.z = delfly_guidance.sp.pos.z - delfly_state.v.pos;
-	/* saturate it               */
-	//VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
 
 	/* compute speed error    */
+#if DELFLY_GUIDANCE_USE_SPEED_REF
+  delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - speed_control_var.ref.velocity.fv.ver;
+#else
 	delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - delfly_state.v.vel;
-	/* saturate it               */
-	//VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
+#endif
 
 	delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
 	delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
