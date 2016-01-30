@@ -179,10 +179,13 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, stru
 		&speed_control_var.err.velocity.fv.ver,
 		&speed_control_var.ff_cmd.pitch,
 		&speed_control_var.ff_cmd.throttle,
+		&speed_control_var.ff_cmd.flapfreq,
 		&speed_control_var.fb_cmd.pitch,
 		&speed_control_var.fb_cmd.throttle,
+		&speed_control_var.fb_cmd.flapfreq,
 		&speed_control_var.cmd.pitch,
-		&speed_control_var.cmd.throttle
+		&speed_control_var.cmd.throttle,
+		&speed_control_var.cmd.flapfreq
 	);
 }
 
@@ -191,10 +194,13 @@ static void delfly_telemetry_send_speedcontrol_gains (struct transport_tx* trans
       &speed_control_var.eq.air_speed,
       &speed_control_var.eq.pitch,
       &speed_control_var.eq.throttle,
+      &speed_control_var.eq.flapfreq,
       &speed_control_var.mat.pitch.y,
       &speed_control_var.mat.throttle.y,
+      &speed_control_var.mat.flapfreq.y,
       &speed_control_var.mat.pitch.x,
-      &speed_control_var.mat.throttle.x
+      &speed_control_var.mat.throttle.x,
+      &speed_control_var.mat.flapfreq.x
   );
 }
 

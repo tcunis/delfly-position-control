@@ -971,21 +971,27 @@
       <field name="err_h_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated horizontal error</field>
       <field name="err_v_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated vertical error</field>
       <field name="cmd_ff_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-forward pitch command</field>
-      <field name="cmd_ff_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-forward throttle frequency command</field>
+      <field name="cmd_ff_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-forward throttle command</field>
+      <field name="cmd_ff_flapfreq" type="float" unit=" Hz">Feed-forward flapping frequency command</field>
       <field name="cmd_fb_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-back pitch command</field>
-      <field name="cmd_fb_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-back throttle frequency command</field>
+      <field name="cmd_fb_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-back throttle command</field>
+      <field name="cmd_fb_flapfreq" type="float" unit=" Hz">Feed-back flapping frequency command</field>
       <field name="cmd_pitch"       type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Pitch command (cmd = eq + ff + fb)</field>
-      <field name="cmd_throttle"    type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Throttle frequency command (cmd = eq + ff + fb)</field>
+      <field name="cmd_throttle"    type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Throttle command (cmd = eq + ff + fb)</field>
+      <field name="cmd_flapfreq"    type="float" unit=" Hz">Flapping frequency command (cmd = eq + ff + fb)</field>
     </message>
     
     <message name="DELFLY_SPEEDCTRL_GAINS" id="110">
       <field name="eq_speed"          type="int32" alt_unit=" m/s" alt_unit_coef="0.00006104">Equilibrii speed</field>
       <field name="eq_pitch"          type="int32" alt_unit=" deg" alt_unit_coef="0.00349733">Equilibrii pitch angle</field>
-      <field name="eq_throttle"       type="int32" alt_unit=" %"   alt_unit_coef="0.00781250">Equilibrii throttle frequency</field>
-      <field name="inv_lift_pitch"    type="int32" alt_unit=" deg/(m/s2)" alt_unit_coef="-0.00349706">Inverse derivative lift w.r.t. pitch</field>
-      <field name="inv_lift_throttle" type="int32" alt_unit=" %/(m/s2)"   alt_unit_coef="-0.00781250">Inverse derivative lift w.r.t. throttle frequency</field>
-      <field name="inv_drag_pitch"    type="int32" alt_unit=" deg/(m/s2)" alt_unit_coef="-0.00349706">Inverse derivative drag w.r.t. pitch</field>
-      <field name="inv_drag_throttle" type="int32" alt_unit=" %/(m/s2)"   alt_unit_coef="-0.00781250">Inverse derivative drag w.r.t. throttle frequency</field>   	
+      <field name="eq_throttle"       type="int32" alt_unit=" %"   alt_unit_coef="0.00781250">Equilibrii throttle</field>
+      <field name="eq_flapfreq"       type="float" unit=" Hz">Equilibrii flapping frequency</field>
+      <field name="inv_lift_pitch"    type="int32" alt_unit=" deg/(m/s2)" alt_unit_coef="-0.00349706">Inverse derivative lift w.r.t. pitch angle</field>
+      <field name="inv_lift_throttle" type="int32" alt_unit=" %/(m/s2)"   alt_unit_coef="-0.00781250">Inverse derivative lift w.r.t. throttle</field>
+      <field name="inv_lift_flapfreq" type="float" alt_unit=" Hz/(m/s2)"  alt_unit_coef="-1">Inverse derivative lift w.r.t. flapping frequency</field>
+      <field name="inv_drag_pitch"    type="int32" alt_unit=" deg/(m/s2)" alt_unit_coef="-0.00349706">Inverse derivative drag w.r.t. pitch angle</field>
+      <field name="inv_drag_throttle" type="int32" alt_unit=" %/(m/s2)"   alt_unit_coef="-0.00781250">Inverse derivative drag w.r.t. throttle</field>
+      <field name="inv_draq_flapfreq" type="float" alt_unit=" Hz/(m/s2)"  alt_unit_coef="-1">Inverse derivative drag w.r.t. flapping frequency</field>   	
     </message>
     
     <message name="DELFLY_GUIDANCE" id="230">
