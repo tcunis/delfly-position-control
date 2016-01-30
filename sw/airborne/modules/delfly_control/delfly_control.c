@@ -98,7 +98,7 @@ void delfly_control_run(void) {
 #endif
 
   state_estimation_run();
-  delfly_model_run();
+//  delfly_model_run();
 
   delfly_control_module_run();
 }

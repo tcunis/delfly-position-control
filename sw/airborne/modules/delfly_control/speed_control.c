@@ -99,6 +99,8 @@ void speed_control_init (void) {
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
   speed_control_var.fb_cmd.pitch = 0;
   speed_control_var.fb_cmd.throttle = 0;
+
+  delfly_model_init();
 }
 
 void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading ) {
@@ -191,7 +193,7 @@ void speed_control_enter (void) {
   flap_control_enter();
 
   delfly_model_enter();
-  delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
+  delfly_model_set_cmd( 0, 0 );
 
   /* TODO: gain scheduling w.r.t. air speed */
   VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
@@ -208,11 +210,14 @@ void speed_control_estimate_error (void) {
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
 
+
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
   //TODO: use reference model!
   VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
 		  	  	       speed_control_var.ref.acceleration.xy,
 				           SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+  //  VECT2_COPY(speed_control_var.ref.velocity.xy,     delfly_model.states.vel_fv.xy);
+  //  VECT2_COPY(speed_control_var.ref.acceleration.xy, delfly_model.states.acc_fv.xy);
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;

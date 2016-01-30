@@ -287,6 +287,8 @@ void ins_module_int_update_gps(struct NedCoor_i* pos, struct NedCoor_i* vel, flo
 #endif
           {
           }
+
+          delfly_model_evolute(dt);
         }
       }
 

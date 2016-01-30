@@ -51,6 +51,19 @@ struct DelflyModelStates {
 
   /* rotation speed in rad/s, with #INT32_RATE_FRAC */
   struct Int32Rates rot;
+
+  union Int32VectLong vel_fv;
+  union Int32VectLong acc_fv;
+};
+
+struct DelflyModelCommand {
+  /* accleration command in m/s2, with #INT32_ACCEL_FRAC */
+  struct Int32Vect3 acc;
+
+  /* rotation speed command in rad/s, with #INT32_RaTE_FRAC */
+  struct Int32Rates rot;
+
+  union Int32VectLong acc_fv;
 };
 
 
@@ -66,6 +79,7 @@ struct DelflyModel {
 	uint8_t mode;
 
 	struct DelflyModelStates states;
+	struct DelflyModelCommand cmd;
 };
 
 
@@ -84,6 +98,8 @@ extern void delfly_model_enter (void);
 extern void delfly_model_set_cmd (int32_t cmd_h_acc, int32_t cmd_v_acc);
 
 extern void delfly_model_run (void);
+extern void delfly_model_evolute (float dt);
+
 
 
 static inline void delfly_model_init_states ( struct DelflyModelStates* states ) {
@@ -178,6 +194,21 @@ static inline void delfly_model_predict_states ( struct DelflyModelStates* state
   VECT3_COPY(states->pos, temp);
 
   VECT3_ADD_SCALED2( states->vel, states->acc, period, (1<<(INT32_TIME_FRAC+INT32_ACCEL_FRAC-INT32_SPEED_FRAC)) );
+
+  // states->acc = states->acc
+
+  //TODO: update rotation
+}
+
+static inline void delfly_model_predict_states_f ( struct DelflyModelStates* states, float dt ) {
+
+  struct Int64Vect3 temp;
+  VECT3_COPY(temp, states->pos);
+  VECT3_ADD_SCALED2( temp, states->vel, dt, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)) );
+  VECT3_ADD_SCALED2( temp, states->acc, SQUARE(dt)*(1<<(INT32_POS_FRAC-INT32_ACCEL_FRAC)), 2 );
+  VECT3_COPY(states->pos, temp);
+
+  VECT3_ADD_SCALED2( states->vel, states->acc, dt*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)), 1 );
 
   // states->acc = states->acc
 
