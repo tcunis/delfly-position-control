@@ -72,7 +72,7 @@ void delfly_model_run (void) {
 
   delfly_model_predict_states( &delfly_model.states, DELFLY_MODEL_RUN_PERIOD*(1<<INT32_TIME_FRAC) );
 
-  delfly_model.states.vel_fv.fv.fwd = int32_vect2_norm(delfly_model.states.vel);
+  delfly_model.states.vel_fv.fv.fwd = INT32_VECT2_NORM(delfly_model.states.vel);
   delfly_model.states.vel_fv.fv.ver = delfly_model.states.vel.z;
 
   delfly_model_assign_eulers( &delfly_model.states, state_estimation.states.att, state_estimation.states.rot );
@@ -87,7 +87,7 @@ void delfly_model_evolute (float dt) {
 
   delfly_model_predict_states_f( &delfly_model.states, dt );
 
-  delfly_model.states.vel_fv.fv.fwd = int32_vect2_norm(delfly_model.states.vel);
+  delfly_model.states.vel_fv.fv.fwd = INT32_VECT2_NORM(delfly_model.states.vel);
   delfly_model.states.vel_fv.fv.ver = delfly_model.states.vel.z;
 
   delfly_model_assign_eulers( &delfly_model.states, state_estimation.states.att, state_estimation.states.rot );
