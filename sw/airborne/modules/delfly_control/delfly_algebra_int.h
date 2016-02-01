@@ -15,7 +15,8 @@
 #define INT32_TIME_FRAC	  10
 
 #define INT32_ZERO(_i)    { _i = 0; }
-#define INT32_SAT(_i, _m) (((_i) > (_m))? (_m) : (((_i) < -(_m))? -(_m) : (_i)))
+#define INT32_SAT(_i, _m) INT32_SAT_2(_i, -(_m), _m) //(((_i) > (_m))? (_m) : (((_i) < -(_m))? -(_m) : (_i)))
+#define INT32_SAT_2(_i, _min, _max) (((_i) > (_max))? (_max) : (((_i) < (_min))? (_min) : (_i)))
 #define INT32_STRIM(_i, _m)  { _i = INT32_SAT(_i, _m); }
 
 #define CUBE(_a)          ((_a)*(_a)*(_a))

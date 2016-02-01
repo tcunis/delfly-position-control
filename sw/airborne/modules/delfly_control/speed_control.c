@@ -278,6 +278,7 @@ void speed_control_run (bool_t in_flight) {
 
   speed_control_calculate_cmd(&speed_control_var.cmd, &speed_control_var.eq, &speed_control_var.mat);
 
+  int32_t cmd_pitch       = INT32_SAT_2(speed_control_var.cmd.pitch, 0, INT32_RAD_OF_DEG(ANGLE_BFP_OF_REAL(85)));
   int32_t cmd_throttle    = TRIM_UPPRZ(speed_control_var.cmd.throttle);
 
   //for telemetry:
@@ -287,7 +288,7 @@ void speed_control_run (bool_t in_flight) {
 
   static struct Int32Eulers orientation_cmd;
   orientation_cmd.phi   = 0;
-  orientation_cmd.theta = speed_control_var.cmd.pitch - speed_control.pitch_offset;
+  orientation_cmd.theta = cmd_pitch - speed_control.pitch_offset;
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
@@ -306,8 +307,9 @@ void speed_control_run (bool_t in_flight) {
   }
   stabilization_attitude_run(in_flight);
 
-  if ( (speed_control.mode != SPEED_CONTROL_TYPE_FLAPFREQ && cmd_throttle == speed_control_var.cmd.throttle)
-       || (speed_control.mode == SPEED_CONTROL_TYPE_FLAPFREQ && flap_control_reachable()) )                   {
+  if ( ( (speed_control.mode != SPEED_CONTROL_TYPE_FLAPFREQ && cmd_throttle == speed_control_var.cmd.throttle)
+          || (speed_control.mode == SPEED_CONTROL_TYPE_FLAPFREQ && flap_control_reachable()) )
+        && cmd_pitch == speed_control_var.cmd.pitch )                   {
 	  // throttle command un-saturated
     delfly_model_set_cmd( speed_control.sp.acceleration.fv.fwd, speed_control.sp.acceleration.fv.ver );
     VECT2_COPY(speed_control_var.ref.acceleration.xy, speed_control.sp.acceleration.xy);
