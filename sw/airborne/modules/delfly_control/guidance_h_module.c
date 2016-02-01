@@ -104,10 +104,10 @@ void guidance_h_module_enter() {
 
 void guidance_h_module_read_rc(void) {
 
-  switch (delfly_guidance.mode) {
-
-  case DELFLY_GUIDANCE_MODE_MODULE:
-  {
+//  switch (delfly_guidance.mode) {
+//
+//  case DELFLY_GUIDANCE_MODE_MODULE:
+//  {
 	stabilization_attitude_read_rc_setpoint_eulers(&delfly_guidance.sp.att_rc, TRUE, FALSE, FALSE);
 //#if GUIDANCE_H_USE_SPEED_REF
 	// negative pitch is forward
@@ -121,12 +121,12 @@ void guidance_h_module_read_rc(void) {
 	delfly_guidance.sp.vel_rc.fv.fwd = rc_x * max_speed / MAX_PPRZ;
 	delfly_guidance.sp.vel_rc.fv.ver = 0; //rc_y * max_speed / MAX_PPRZ;
 //#endif
-  } break;
-
-  case DELFLY_GUIDANCE_MODE_NAV:
-  default:
-  {} //nothing to do
-  }
+//  } break;
+//
+//  case DELFLY_GUIDANCE_MODE_NAV:
+//  default:
+//  {} //nothing to do
+//  }
 }
 
 
@@ -162,8 +162,8 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
 
   case DELFLY_GUIDANCE_MODE_NAV:
     {
-      VECT2_DIFF(delfly_guidance.err.pos, guidance_h.sp.pos, delfly_state.h.pos);
-      VECT2_DIFF(delfly_guidance.err.vel, guidance_h.sp.speed, delfly_state.h.vel);
+      VECT2_DIFF(delfly_guidance.err.pos, delfly_guidance.sp.pos, delfly_state.h.pos);
+      VECT2_DIFF(delfly_guidance.err.vel, delfly_guidance.sp.vel, delfly_state.h.vel);
 
       delfly_guidance.err.fwd.states.pos = VECT2_GET_FWD(delfly_guidance.err.pos, delfly_guidance.sp.heading);
       delfly_guidance.err.fwd.states.vel = VECT2_GET_FWD(delfly_guidance.err.vel, delfly_guidance.sp.heading);
@@ -171,22 +171,21 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
       delfly_guidance.err.lat.states.pos = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
       delfly_guidance.err.lat.states.vel = VECT2_GET_LAT(delfly_guidance.err.pos, delfly_guidance.sp.heading);
 
-//    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
-//    	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-//    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
-//    	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-      delfly_guidance.cmd.h_acc = 0;
+//      delfly_guidance.cmd.h_acc = 0;
+    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+    	                  	  	    / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+    	                            / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
 
       /* lateral guidance pseudo acceleration command
        * in m/s2, with #INT32_ACCEL_FRAC                  */
-      int32_t pseudo_cmd_lat_acc = 0; /*delfly_guidance.err.lat.states.pos * delfly_guidance.gains.lat.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-                                   + delfly_guidance.err.lat.states.vel * delfly_guidance.gains.lat.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));*/
+      int32_t pseudo_cmd_lat_acc = delfly_guidance.err.lat.states.pos * delfly_guidance.gains.lat.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+                                   + delfly_guidance.err.lat.states.vel * delfly_guidance.gains.lat.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
       /* lateral guidance pseudo heading difference
        * i.e. additional heading to set-point
        * in [-MAX_HEADING_DELTA, +MAX_HEADING_DELTA]
        * in rad, with #INT32_ANGLE_FRAC                   */
-      int32_t pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*(1<<(INT32_ANGLE_FRAC-INT32_ACCEL_FRAC)/100);
-      INT32_ANGLE_NORMALIZE(pseudo_heading_d);
+      int32_t pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*INT32_ANGLE_PI_4/(100*(1<<INT32_ACCEL_FRAC));
       INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
 
       /* lateral guidance pseudo heading command

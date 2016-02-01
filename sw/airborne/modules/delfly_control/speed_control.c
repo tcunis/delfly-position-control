@@ -268,7 +268,7 @@ void speed_control_run (bool_t in_flight) {
 					 (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
 
   //todo: debug: no feed-back control in horizontal
-  speed_control_var.fb_cmd.acceleration.fv.fwd = 0;
+  //speed_control_var.fb_cmd.acceleration.fv.fwd = 0;
 
   /* pitch and throttle command */
   //cmd = ff_cmd + fb_cmd

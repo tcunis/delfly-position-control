@@ -66,8 +66,8 @@ struct Int64Mat33 {
 /* c = (a - b) * s */
 #define VECT2_DIFF_SCALED(_c, _a, _b, _s)   VECT2_DIFF_SCALED2(_a, _b, _s, 1)
 
-#define VECT2_GET_FWD(_v,_h)				((_v).x*pprz_itrig_cos(_h) - (_v).y*pprz_itrig_sin(_h))
-#define VECT2_GET_LAT(_v,_h)				((_v).x*pprz_itrig_sin(_h) + (_v).y*pprz_itrig_cos(_h))
+#define VECT2_GET_FWD(_v,_h)				(((_v).x*pprz_itrig_cos(_h) - (_v).y*pprz_itrig_sin(_h))/(1<<INT32_TRIG_FRAC))
+#define VECT2_GET_LAT(_v,_h)				(((_v).x*pprz_itrig_sin(_h) + (_v).y*pprz_itrig_cos(_h))/(1<<INT32_TRIG_FRAC))
 
 /* a += b * num / den */
 #define VECT3_ADD_SCALED2(_a, _b, _num, _den) {   \
