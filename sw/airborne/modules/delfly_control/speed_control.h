@@ -84,8 +84,8 @@ static union Int32VectLong acc_now;// = delfly_state.fv.acc;
  * Speed/thrust control feed-back gains.
  */
 struct SpeedControlFeedBackGains {
-	int32_t p;
-	int32_t i;
+	struct Int32VectL p;
+	struct Int32VectL i;
 };
 
 /**

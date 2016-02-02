@@ -28,12 +28,14 @@
 #define RATES_ZERO(_r)    RATES_ASSIGN(_r, 0, 0, 0)
 
 
+struct Int32VectL {
+  int32_t fwd;
+  int32_t ver;
+};
+
 union Int32VectLong {
   struct Int32Vect2 xy;
-  struct {
-    int32_t fwd;
-    int32_t ver;
-  } fv;
+  struct Int32VectL fv;
 };
 
 union Int32VectState2 {

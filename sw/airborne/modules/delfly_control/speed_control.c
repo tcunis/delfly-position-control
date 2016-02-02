@@ -70,8 +70,10 @@ void speed_control_init (void) {
   VECT2_ZERO(speed_control.sp.acceleration.xy);
   speed_control.sp.heading = 0;
 
-  speed_control.fb_gains.p = SPEED_CONTROL_FB_PGAIN;
-  speed_control.fb_gains.i = SPEED_CONTROL_FB_IGAIN;
+  speed_control.fb_gains.p.fwd = SPEED_CONTROL_FB_FWD_PGAIN;
+  speed_control.fb_gains.p.ver = SPEED_CONTROL_FB_VER_PGAIN;
+  speed_control.fb_gains.i.fwd = SPEED_CONTROL_FB_FWD_IGAIN;
+  speed_control.fb_gains.i.ver = SPEED_CONTROL_FB_VER_IGAIN;
 
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
@@ -258,14 +260,21 @@ void speed_control_run (bool_t in_flight) {
   speed_control_estimate_error();
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
   //if p = 100 %, 1 m/s2 acceleration error equals to +1 m/s2 acceleration command
-  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
-                     speed_control_var.err.acceleration.xy,
-                     speed_control.fb_gains.p, 100 );
+  union Int32VectLong fb_p_cmd, fb_i_cmd;
+  fb_p_cmd.fv.fwd = speed_control.fb_gains.p.fwd*speed_control_var.err.acceleration.fv.fwd/100;
+  fb_p_cmd.fv.ver = speed_control.fb_gains.p.ver*speed_control_var.err.acceleration.fv.ver/100;
+//  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+//                     speed_control_var.err.acceleration.xy,
+//                     speed_control.fb_gains.p, 100 );
+  VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_p_cmd.xy );
   //if i = 100 %, 1 m/s velocity error equals to +1 m/s2 acceleration command
-  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
-		  	  	     speed_control_var.err.velocity.xy,
-		  	  	     speed_control.fb_gains.i,
-					 (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
+  fb_i_cmd.fv.fwd = speed_control.fb_gains.i.fwd*speed_control_var.err.velocity.fv.fwd/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+  fb_i_cmd.fv.ver = speed_control.fb_gains.i.ver*speed_control_var.err.velocity.fv.ver/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+//  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+//		  	  	         speed_control_var.err.velocity.xy,
+//		  	  	         speed_control.fb_gains.i,
+//		  	  	         (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
+  VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i_cmd.xy );
 
   //todo: debug: no feed-back control in horizontal
   //speed_control_var.fb_cmd.acceleration.fv.fwd = 0;

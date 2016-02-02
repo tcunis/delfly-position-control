@@ -21,10 +21,12 @@
        
     <dl_settings name="Speed/thrust loop"-->
       <dl_setting var="ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(speed_control.pitch_offset))" min="-90" step="1" max="90" alt_unit=" deg" module="delfly_control/speed_control" shortname="Th_off" param="SPEED_CONTROL_PITCH_OFFSET" type="int32" persistent="true" handler="set_pitch_offset"/>
-      <dl_setting var="speed_control.fb_gains.p" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_kp" param="SPEED_CONTROL_FB_PGAIN" type="int32" persistent="true"/>
-      <dl_setting var="speed_control.fb_gains.i" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_ki" param="SPEED_CONTROL_FB_IGAIN" type="int32" persistent="true"/>
-	  <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
-	  <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
+      <dl_setting var="speed_control.fb_gains.p.fwd" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_fwd_kp" param="SPEED_CONTROL_FB_FWD_PGAIN" type="int32" persistent="true"/>
+      <dl_setting var="speed_control.fb_gains.p.ver" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_ver_kp" param="SPEED_CONTROL_FB_VER_PGAIN" type="int32" persistent="true"/>
+      <dl_setting var="speed_control.fb_gains.i.fwd" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_fwd_ki" param="SPEED_CONTROL_FB_FWD_IGAIN" type="int32" persistent="true"/>
+      <dl_setting var="speed_control.fb_gains.i.ver" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="fb_ver_ki" param="SPEED_CONTROL_FB_VER_IGAIN" type="int32" persistent="true"/>
+  	  <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
+  	  <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
     <!--/dl_settings>
     
     <dl_settings name="State estimation"-->
