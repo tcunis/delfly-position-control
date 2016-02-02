@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Bart Slinger
+b * Copyright (C) Bart Slinger
  *
  * This file is part of paparazzi
  *
