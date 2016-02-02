@@ -152,6 +152,7 @@
     <define name="FB_VER_PGAIN" value="0"/>
     <define name="FB_FWD_IGAIN" value="100"/>
     <define name="FB_VER_IGAIN" value="200"/>
+    <define name="FB_I2GAIN"    value="0"/>
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
     <define name="PITCH_OFFSET" value="70"/>
@@ -160,6 +161,7 @@
   <section name="DELFLY_GUIDANCE" prefix="DELFLY_GUIDANCE_">
   	<define name="COMPLEMENTARY_HEADING_GAIN" value="100"/>
   	<define name="LATERAL_RATIO" value="100"/>
+  	<define name="USE_SPEED_REF" value="FALSE"/>
   </section><!--DELFLY_GUIDANCE-->
 
   <section name="DELFLY_STATE" prefix="STATE_ESTIMATION_">

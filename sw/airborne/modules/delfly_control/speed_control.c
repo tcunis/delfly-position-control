@@ -38,6 +38,8 @@
 #include "delfly_state.h"
 #include "state_estimation.h"
 
+#include "delfly_guidance.h"
+
 #include "matlab_include.h"
 
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
@@ -74,6 +76,7 @@ void speed_control_init (void) {
   speed_control.fb_gains.p.ver = SPEED_CONTROL_FB_VER_PGAIN;
   speed_control.fb_gains.i.fwd = SPEED_CONTROL_FB_FWD_IGAIN;
   speed_control.fb_gains.i.ver = SPEED_CONTROL_FB_VER_IGAIN;
+  speed_control.fb_gains.i2    = SPEED_CONTROL_FB_I2GAIN;
 
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
@@ -85,10 +88,11 @@ void speed_control_init (void) {
 
   VECT2_ZERO(speed_control_var.now.acceleration.xy);
   VECT2_ZERO(speed_control_var.now.velocity.xy);
-  VECT2_ZERO(speed_control_var.now.acceleration.xy);
+  VECT2_ZERO(speed_control_var.now.position.xy);
 
   VECT2_ZERO(speed_control_var.err.acceleration.xy);
   VECT2_ZERO(speed_control_var.err.velocity.xy);
+  VECT2_ZERO(speed_control_var.err.position.xy);
 
   VECT2_ZERO(speed_control_var.cmd.acceleration.xy);
   speed_control_var.cmd.pitch = 0;
@@ -188,9 +192,12 @@ void speed_control_enter (void) {
   speed_control.mode = SPEED_CONTROL_MODE_ENTER;
 
   VECT2_ZERO(speed_control_var.err.velocity.xy);
+  VECT2_ZERO(speed_control_var.err.position.xy);
 
   //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
+  speed_control_var.ref.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
+  speed_control_var.ref.position.fv.ver = delfly_state.v.pos;
 
   flap_control_enter();
 
@@ -211,6 +218,8 @@ void speed_control_estimate_error (void) {
 
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
+  speed_control_var.now.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
+  speed_control_var.now.position.fv.ver = delfly_state.v.pos;
 
 
   //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
@@ -220,6 +229,12 @@ void speed_control_estimate_error (void) {
 				           SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
   //  VECT2_COPY(speed_control_var.ref.velocity.xy,     delfly_model.states.vel_fv.xy);
   //  VECT2_COPY(speed_control_var.ref.acceleration.xy, delfly_model.states.acc_fv.xy);
+  VECT2_ADD_SCALED2(speed_control_var.ref.position.xy,
+                   speed_control_var.ref.velocity.xy,
+                   SPEED_CONTROL_RUN_PERIOD, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)));
+  VECT2_COPY(speed_control_var.ref.position.xy,         delfly_model.states.pos_fv.xy);
+
+  VECT2_DIFF(speed_control_var.err.position.xy, speed_control_var.ref.position.xy, speed_control_var.now.velocity.xy);
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;
@@ -275,6 +290,11 @@ void speed_control_run (bool_t in_flight) {
 //		  	  	         speed_control.fb_gains.i,
 //		  	  	         (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
   VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i_cmd.xy );
+
+  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+                     speed_control_var.err.position.xy,
+                     speed_control.fb_gains.i2,
+                     100*(1<<(INT32_POS_FRAC-INT32_ACCEL_FRAC)) );
 
   //todo: debug: no feed-back control in horizontal
   //speed_control_var.fb_cmd.acceleration.fv.fwd = 0;

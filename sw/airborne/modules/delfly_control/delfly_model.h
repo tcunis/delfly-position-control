@@ -52,6 +52,7 @@ struct DelflyModelStates {
   /* rotation speed in rad/s, with #INT32_RATE_FRAC */
   struct Int32Rates rot;
 
+  union Int32VectLong pos_fv;
   union Int32VectLong vel_fv;
   union Int32VectLong acc_fv;
 };

@@ -38,6 +38,10 @@
 
 
 struct SpeedControlRef {
+  /* (estimated) position reference
+   * in m, with #INT32_POS_FRAC     */
+  union Int32VectLong position;
+
 	/* (estimated) velocity reference
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
@@ -52,6 +56,10 @@ struct SpeedControlNow {
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	int32_t air_speed;
 
+	/* current position
+	 * in m, with #INT32_POS_FRAC   	 */
+	union Int32VectLong position;
+
 	/* current velocity
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
@@ -62,6 +70,10 @@ struct SpeedControlNow {
 };
 
 struct SpeedControlError {
+  /* 2nd-order integrated acceleration error
+   * in m, with #INT32_POS_FRAC      */
+  union Int32VectLong position;
+
 	/* integrated acceleration error
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
