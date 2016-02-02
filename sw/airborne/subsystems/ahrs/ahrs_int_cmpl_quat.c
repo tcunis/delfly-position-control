@@ -100,6 +100,10 @@ PRINT_CONFIG_VAR(AHRS_MAG_ZETA)
 #define AHRS_HEADING_UPDATE_GPS_MIN_SPEED 5.0
 #endif
 
+#ifndef AHRS_USE_GPS_HEADING_ONLY
+#define AHRS_USE_GPS_HEADING_ONLY   FALSE
+#endif
+
 struct AhrsIntCmplQuat ahrs_icq;
 
 static inline void UNUSED ahrs_icq_update_mag_full(struct Int32Vect3 *mag, float dt);
@@ -536,14 +540,18 @@ void ahrs_icq_update_gps(struct GpsState *gps_s __attribute__((unused)))
 
     /* the assumption here is that there is no side-slip, so heading=course */
 
+#if !AHRS_USE_GPS_HEADING_ONLY
     if (ahrs_icq.heading_aligned) {
       ahrs_icq_update_heading(course);
     } else {
+#else
+    {
+#endif //!AHR_USE_GPS_HEADING_ONLY
       /* hard reset the heading if this is the first measurement */
       ahrs_icq_realign_heading(course);
     }
   }
-#endif
+#endif //AHRS_USE_GPS_HEADING && USE_GPS
 }
 
 
