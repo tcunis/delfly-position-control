@@ -70,6 +70,9 @@ extern void autopilot_set_mode(uint8_t new_autopilot_mode);
 extern void autopilot_set_motors_on(bool_t motors_on);
 extern void autopilot_check_in_flight(bool_t motors_on);
 
+extern void autopilot_set_mode_in_nav(bool_t mode_in_nav);
+extern bool_t autopilot_mode_in_nav;
+
 extern bool_t autopilot_ground_detected;
 extern bool_t autopilot_detect_ground_once;
 

@@ -60,11 +60,27 @@
 #include "mcu_periph/gpio.h"
 #endif
 
+#ifdef GUIDANCE_H_MODE_IN_NAV
+#ifndef GUIDANCE_V_MODE_IN_NAV
+#define GUIDANCE_V_MODE_IN_NAV  GUIDANCE_V_MODE_NAV
+#endif
+#else
+#ifdef GUIDANCE_V_MODE_IN_NAV
+#define GUIDANCE_H_MODE_IN_NAV  GUIDANCE_H_MODE_NAV
+#endif
+#endif
+
 #include "pprz_version.h"
 
 uint8_t  autopilot_mode;
 uint8_t  autopilot_new_mode;
 uint8_t  autopilot_mode_auto2;
+
+bool_t   autopilot_mode_in_nav;
+#ifdef GUIDANCE_H_MODE_IN_NAV
+uint8_t  guidance_h_mode_in_nav;
+uint8_t  guidance_v_mode_in_nav;
+#endif
 
 bool_t   autopilot_in_flight;
 uint32_t autopilot_in_flight_counter;
@@ -312,6 +328,15 @@ void autopilot_init(void)
   gpio_clear(POWER_SWITCH_GPIO); // POWER OFF
 #endif
 
+#ifdef GUIDANCE_H_MODE_IN_NAV
+  guidance_h_mode_in_nav = GUIDANCE_H_MODE_IN_NAV;
+  guidance_v_mode_in_nav = GUIDANCE_V_MODE_IN_NAV;
+  autopilot_mode_in_nav = TRUE;
+#else
+  autopilot_mode_in_nav = FALSE;
+#endif
+
+
   autopilot_arming_init();
 
   nav_init();
@@ -459,7 +484,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
 #ifndef GUIDANCE_H_MODE_IN_NAV
         guidance_h_mode_changed(GUIDANCE_H_MODE_NAV);
 #else
-        guidance_h_mode_changed(GUIDANCE_H_MODE_IN_NAV);
+        guidance_h_mode_changed(guidance_v_mode_in_nav);
 #endif
         break;
       case AP_MODE_MODULE:
@@ -512,7 +537,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
 #ifndef GUIDANCE_V_MODE_IN_NAV
         guidance_v_mode_changed(GUIDANCE_V_MODE_NAV);
 #else
-        guidance_v_mode_changed(GUIDANCE_V_MODE_IN_NAV);
+        guidance_v_mode_changed(guidance_v_mode_in_nav);
 #endif
         break;
       case AP_MODE_MODULE:
@@ -682,4 +707,16 @@ void autopilot_on_rc_frame(void)
     guidance_h_read_rc(autopilot_in_flight);
   }
 
+}
+
+void autopilot_set_mode_in_nav(bool_t mode_in_nav) {
+#ifdef GUIDANCE_H_MODE_IN_NAV
+  if ( (autopilot_mode_in_nav = mode_in_nav) ) {
+    guidance_h_mode_in_nav = GUIDANCE_H_MODE_IN_NAV;
+    guidance_v_mode_in_nav = GUIDANCE_V_MODE_IN_NAV;
+  } else {
+    guidance_h_mode_in_nav = GUIDANCE_H_MODE_NAV;
+    guidance_v_mode_in_nav = GUIDANCE_V_MODE_NAV;
+  }
+#endif
 }
