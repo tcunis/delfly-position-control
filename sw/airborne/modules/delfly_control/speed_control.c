@@ -232,9 +232,9 @@ void speed_control_estimate_error (void) {
   VECT2_ADD_SCALED2(speed_control_var.ref.position.xy,
                    speed_control_var.ref.velocity.xy,
                    SPEED_CONTROL_RUN_PERIOD, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)));
-  VECT2_COPY(speed_control_var.ref.position.xy,         delfly_model.states.pos_fv.xy);
+//  VECT2_COPY(speed_control_var.ref.position.xy,         delfly_model.states.pos_fv.xy);
 
-  VECT2_DIFF(speed_control_var.err.position.xy, speed_control_var.ref.position.xy, speed_control_var.now.velocity.xy);
+  VECT2_DIFF(speed_control_var.err.position.xy, speed_control_var.ref.position.xy, speed_control_var.now.position.xy);
 
   //velocity error: v_err = v_ref - v_now
   union Int32VectLong velocity_error_new;
@@ -307,7 +307,7 @@ void speed_control_run (bool_t in_flight) {
 
   speed_control_calculate_cmd(&speed_control_var.cmd, &speed_control_var.eq, &speed_control_var.mat);
 
-  int32_t cmd_pitch       = INT32_SAT_2(speed_control_var.cmd.pitch, 0, INT32_RAD_OF_DEG(ANGLE_BFP_OF_REAL(85)));
+  int32_t cmd_pitch       = INT32_SAT_2(speed_control_var.cmd.pitch, 0, INT32_RAD_OF_DEG(ANGLE_BFP_OF_REAL(75)));
   int32_t cmd_throttle    = TRIM_UPPRZ(speed_control_var.cmd.throttle);
 
   //for telemetry:

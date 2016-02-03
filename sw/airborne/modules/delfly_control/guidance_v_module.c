@@ -94,22 +94,22 @@ void guidance_v_module_run_traj( bool_t in_flight ) {
   case DELFLY_GUIDANCE_MODE_MODULE:
   case DELFLY_GUIDANCE_MODE_NAV:
   default:
-  {
-	/* compute position error    */
-	delfly_guidance.err.pos.z = delfly_guidance.sp.pos.z - delfly_state.v.pos;
+    {
+    /* compute position error    */
+    delfly_guidance.err.pos.z = delfly_guidance.sp.pos.z - delfly_state.v.pos;
 
-	/* compute speed error    */
+    /* compute speed error    */
 #if DELFLY_GUIDANCE_USE_SPEED_REF
-  delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - speed_control_var.ref.velocity.fv.ver;
+    delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - speed_control_var.ref.velocity.fv.ver;
 #else
-	delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - delfly_state.v.vel;
+    delfly_guidance.err.vel.z = delfly_guidance.sp.vel.z - delfly_state.v.vel;
 #endif
 
-	delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
-	delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
+    delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
+    delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
 
-	delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-							                + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-  }
+    delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
+                                + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+    }
   }
 }

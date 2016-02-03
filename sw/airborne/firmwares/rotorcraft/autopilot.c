@@ -484,7 +484,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
 #ifndef GUIDANCE_H_MODE_IN_NAV
         guidance_h_mode_changed(GUIDANCE_H_MODE_NAV);
 #else
-        guidance_h_mode_changed(guidance_v_mode_in_nav);
+        guidance_h_mode_changed(guidance_h_mode_in_nav);
 #endif
         break;
       case AP_MODE_MODULE:

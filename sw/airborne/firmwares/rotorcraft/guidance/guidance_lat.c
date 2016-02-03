@@ -75,12 +75,15 @@ void guidance_lat_init(void) {
 #define GL_GAIN_SCALE  3
 #define GL_GAIN_FRAC  10
 
+#define VECT2_GET_LAT(_v,_h)        (((_v).x*pprz_itrig_sin(_h) + (_v).y*pprz_itrig_cos(_h))/(1<<INT32_TRIG_FRAC))
+
 void guidance_lat_adjust_heading(bool_t in_flight, int32_t* cmd_heading, struct Int32Vect2 h_pos_err) {
 
   /* lateral offset (error) to trajectory along heading sp -- with #INT32_POS_FRAC */
-  int32_t virtual_y_err = (  h_pos_err.x*pprz_itrig_sin(guidance_h.sp.heading)
-  	  	  	  	  	  	   + h_pos_err.y*pprz_itrig_sin(guidance_h.sp.heading)
-  	  	  	  	  	  	  )/(1<<INT32_TRIG_FRAC);
+  int32_t virtual_y_err = VECT2_GET_LAT(h_pos_err, guidance_h.sp.heading);
+                        /*(  h_pos_err.x*pprz_itrig_sin(guidance_h.sp.heading)
+  	  	  	  	  	  	   + h_pos_err.y*pprz_itrig_cos(guidance_h.sp.heading)
+  	  	  	  	  	  	  )/(1<<INT32_TRIG_FRAC);*/
 
   /* heading correction w.r.t. sp (rad) in order to reduce lateral error -- with #INT32_ANGLE_FRAC */
   int32_t heading_correct = virtual_y_err*guidance_lat.gains.p*GL_GAIN_SCALE/(1<<(GL_GAIN_FRAC+INT32_POS_FRAC-INT32_ANGLE_FRAC));

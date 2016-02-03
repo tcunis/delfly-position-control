@@ -31,8 +31,11 @@
     <!--/dl_settings>
     
     <dl_settings name="State estimation"-->
-      <dl_setting var="SPEED_FLOAT_OF_BFP(delfly_state.h.speed_wind)" min="0" step="0.1" max="10" alt_unit="m/s" module="delfly_control/delfly_state" shortname="V_W" param="0" type="int8" handler="set_windspeed"/> 
-      <dl_setting var="state_estimation.type" min="3" step="1" max="6" values="USE_GPS|GPS_FILTER|GPS_AVERAGE|GPS_AVGFILT" module="delfly_control/state_estimation" shortname="est_mode" param="STATE_ESTIMATION_MODE" type="uint8"/>
+      <dl_setting var="SPEED_FLOAT_OF_BFP(delfly_state.h.speed_wind)" min="0" step="0.1" max="10" alt_unit="m/s" module="delfly_control/delfly_state" shortname="V_W" param="0" type="int8" handler="set_windspeed" persistent="true"/> 
+      <dl_setting var="state_estimation.type" min="3" step="1" max="6" values="USE_GPS|GPS_FILTER|GPS_AVERAGE|GPS_AVGFILT" module="delfly_control/state_estimation" shortname="est_mode" param="STATE_ESTIMATION_MODE" type="uint8" persistent="true"/>
+    <!--/dl_settings>
+    
+    <dl_settings name="Delfly_System"-->
     </dl_settings>
     
     

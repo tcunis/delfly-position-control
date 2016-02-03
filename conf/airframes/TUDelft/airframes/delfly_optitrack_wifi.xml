@@ -150,8 +150,8 @@
   <section name="DELFLY_CONTROL" prefix="SPEED_CONTROL_">
     <define name="FB_FWD_PGAIN" value="0"/>
     <define name="FB_VER_PGAIN" value="0"/>
-    <define name="FB_FWD_IGAIN" value="100"/>
-    <define name="FB_VER_IGAIN" value="200"/>
+    <define name="FB_FWD_IGAIN" value="250"/>
+    <define name="FB_VER_IGAIN" value="250"/>
     <define name="FB_I2GAIN"    value="0"/>
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
@@ -165,7 +165,7 @@
   </section><!--DELFLY_GUIDANCE-->
 
   <section name="DELFLY_STATE" prefix="STATE_ESTIMATION_">
-    <define name="TYPE"     value="STATE_ESTIMATION_TYPE_GPS"/>
+    <define name="TYPE"     value="STATE_ESTIMATION_TYPE_GPS_FILTER"/>
     <define name="GPS_FREQ" value="30"/>
     <define name="FILTER_CUTOFF" value="10"/>
     <!--define name="MODE_SWITCH" value="RADIO_ELEV"/-->

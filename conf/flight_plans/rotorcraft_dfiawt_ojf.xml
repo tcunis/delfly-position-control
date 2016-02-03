@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="47" ground_alt="45" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Open Jet Facility of the Delft University of Technology" security_height="0.3">
+<flight_plan alt="2" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Open Jet Facility of the Delft University of Technology" security_height="0.3">
   <header>
 #include "autopilot.h"
 </header>
@@ -9,6 +9,7 @@
     <waypoint name="CLIMB" x="1.2" y="-0.6"/>
     <waypoint name="STDBY" x="-0.7" y="-0.8"/>
     <waypoint name="TD" x="0.8" y="-1.7" alt="2"/>
+    <waypoint name="TD2" x="0.0" y="0.5" alt="2.5"/>
     <waypoint x="0.0" y="0.5" alt="2" name="TARGET"/>
     <waypoint lat="51.9906308" lon="4.3767945" alt="2" name="p1"/>
     <waypoint lat="51.9906420" lon="4.3768256" alt="2" name="p2"/>
@@ -63,21 +64,18 @@
       <call fun="nav_set_heading_deg(0)"/>
       <stay wp="TARGET"/>
     </block>
-    <block name="Set up">
-      <call fun="NavSetWaypointPos(WP_TD, 0.0, 0.5)"/>
-      <call fun="NavSetWaypointAlt(WP_TD, -42.5)"/>
-      <stay wp="TD" until="stage_time > 30"/>
+    <block name="Step up">
+      <call fun="NavSetWaypointPos(WP_TD2, 0.0, 0.5)"/>
+      <stay wp="TD2" until="stage_time > 30"/>
       <deroute block="Goto Tulip"/>
     </block>
-    <block name="Set forward">
+    <block name="Step forward">
       <call fun="NavSetWaypointPos(WP_TD, 0.0, 1.0)"/>
-      <call fun="NavSetWaypointAlt(WP_TD, -43.0)"/>
       <stay wp="TD" until="stage_time > 30"/>
       <deroute block="Goto Tulip"/>
     </block>
-    <block name="Set right">
+    <block name="Step right">
       <call fun="NavSetWaypointPos(WP_TD, 0.5, 0.5)"/>
-      <call fun="NavSetWaypointAlt(WP_TD, -43.0)"/>
       <stay wp="TD" until="stage_time > 30"/>
       <deroute block="Goto Tulip"/>
     </block>
