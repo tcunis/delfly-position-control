@@ -86,6 +86,8 @@ extern struct LlaCoor_i *waypoint_get_lla(uint8_t wp_id);
 extern void waypoint_set_enu(uint8_t wp_id, struct EnuCoor_f *enu);
 /** Set altitude of waypoint in meters (above reference) */
 extern void waypoint_set_alt(uint8_t wp_id, float alt);
+/** Set position of waypoint in meters (ENU) */
+extern void waypoint_set_xy(uint8_t wp_id, float x, float y);
 
 /** set waypoint to current location and altitude */
 extern void waypoint_set_here(uint8_t wp_id);

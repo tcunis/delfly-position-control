@@ -137,6 +137,22 @@ void waypoint_move_enu_i(uint8_t wp_id, struct EnuCoor_i *new_pos)
  * Set only local XY coordinates of waypoint without update altitude.
  * @todo: how to handle global waypoints?
  */
+void waypoint_set_xy(uint8_t wp_id, float x, float y)
+{
+  if (wp_id < nb_waypoint) {
+    waypoints[wp_id].enu_f.x = x;
+    waypoints[wp_id].enu_f.y = y;
+    /* also update ENU int representation */
+    waypoints[wp_id].enu_i.x = POS_BFP_OF_REAL(waypoints[wp_id].enu_f.x);
+    waypoints[wp_id].enu_i.y = POS_BFP_OF_REAL(waypoints[wp_id].enu_f.y);
+    waypoint_globalize(wp_id);
+  }
+}
+
+/**
+ * Set only local XY coordinates of waypoint without update altitude.
+ * @todo: how to handle global waypoints?
+ */
 void waypoint_set_xy_i(uint8_t wp_id, int32_t x, int32_t y)
 {
   if (wp_id < nb_waypoint) {
