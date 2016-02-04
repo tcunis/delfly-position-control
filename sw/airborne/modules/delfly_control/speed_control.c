@@ -84,6 +84,9 @@ void speed_control_init (void) {
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
 
+  speed_control.fb_gains.adapt.fwd = SPEED_CONTROL_FWD_ADAPT_GAIN;
+  speed_control.fb_gains.adapt.ver = SPEED_CONTROL_VER_ADAPT_GAIN;
+
   speed_control_set_pitch_offset(SPEED_CONTROL_PITCH_OFFSET);
 
   VECT2_ZERO(speed_control_var.ref.velocity.xy);
@@ -96,6 +99,9 @@ void speed_control_init (void) {
   VECT2_ZERO(speed_control_var.err.acceleration.xy);
   VECT2_ZERO(speed_control_var.err.velocity.xy);
   VECT2_ZERO(speed_control_var.err.position.xy);
+
+  VECT2_ZERO(speed_control_var.adapt.last_ref_velocity);
+  speed_control_var.adapt.xi = 1;
 
   VECT2_ZERO(speed_control_var.cmd.acceleration.xy);
   speed_control_var.cmd.pitch = 0;
@@ -199,9 +205,12 @@ void speed_control_enter (void) {
 
   //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
+  VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
 
   speed_control_var.ref.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
   speed_control_var.ref.position.fv.ver = delfly_state.v.pos;
+
+  VECT2_COPY(speed_control_var.adapt.last_ref_velocity, speed_control_var.ref.velocity);
 
   flap_control_enter();
 
@@ -219,6 +228,10 @@ void speed_control_enter (void) {
 
 
 void speed_control_estimate_error (void) {
+
+  union Int32VectLong last_velocity_ref, last_velocity_now;
+  VECT2_COPY( last_velocity_ref.xy, speed_control_var.ref.velocity.xy );
+  VECT2_COPY( last_velocity_now.xy, speed_control_var.now.velocity.xy );
 
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
@@ -289,8 +302,13 @@ void speed_control_estimate_error (void) {
     break;
   }
 
+  VECT2_DIFF(speed_control_var.ref.velocity_diff.xy, speed_control_var.ref.velocity.xy,     last_velocity_ref.xy);
+  VECT2_DIFF(speed_control_var.now.velocity_diff.xy, speed_control_var.now.velocity.xy,     last_velocity_now.xy);
+
   VECT2_DIFF(speed_control_var.err.velocity.xy,     speed_control_var.ref.velocity.xy,     speed_control_var.now.velocity.xy);
   VECT2_DIFF(speed_control_var.err.acceleration.xy, speed_control_var.ref.acceleration.xy, speed_control_var.now.acceleration.xy);
+
+  VECT2_DIFF(speed_control_var.err.velocity_diff.xy, speed_control_var.ref.velocity_diff.xy, speed_control_var.now.velocity_diff.xy);
 }
 
 
@@ -314,22 +332,43 @@ void speed_control_run (bool_t in_flight) {
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
   union Int32VectLong fb_p_cmd, fb_i_cmd, fb_i2_cmd;
 
-  //if p = 100 %, 1 m/s2 acceleration error equals to +1 m/s2 acceleration command
-  fb_p_cmd.fv.fwd = speed_control.fb_gains.p.fwd*speed_control_var.err.acceleration.fv.fwd/100;
-  fb_p_cmd.fv.ver = speed_control.fb_gains.p.ver*speed_control_var.err.acceleration.fv.ver/100;
-//  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
-//                     speed_control_var.err.acceleration.xy,
-//                     speed_control.fb_gains.p, 100 );
-  VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_p_cmd.xy );
+  switch (speed_control.type)
+  {
+  default:
+  case SPEED_CONTROL_TYPE_THROTTLE:
+  case SPEED_CONTROL_TYPE_FLAPFREQ:
+    {
+      //if p = 100 %, 1 m/s2 acceleration error equals to +1 m/s2 acceleration command
+      fb_p_cmd.fv.fwd = speed_control.fb_gains.p.fwd*speed_control_var.err.acceleration.fv.fwd/100;
+      fb_p_cmd.fv.ver = speed_control.fb_gains.p.ver*speed_control_var.err.acceleration.fv.ver/100;
+    //  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+    //                     speed_control_var.err.acceleration.xy,
+    //                     speed_control.fb_gains.p, 100 );
+      VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_p_cmd.xy );
 
-  //if i = 100 %, 1 m/s velocity error equals to +1 m/s2 acceleration command
-  fb_i_cmd.fv.fwd = speed_control.fb_gains.i.fwd*speed_control_var.err.velocity.fv.fwd/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-  fb_i_cmd.fv.ver = speed_control.fb_gains.i.ver*speed_control_var.err.velocity.fv.ver/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
-//  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
-//		  	  	         speed_control_var.err.velocity.xy,
-//		  	  	         speed_control.fb_gains.i,
-//		  	  	         (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
-  VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i_cmd.xy );
+      //if i = 100 %, 1 m/s velocity error equals to +1 m/s2 acceleration command
+      fb_i_cmd.fv.fwd = speed_control.fb_gains.i.fwd*speed_control_var.err.velocity.fv.fwd/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      fb_i_cmd.fv.ver = speed_control.fb_gains.i.ver*speed_control_var.err.velocity.fv.ver/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+    //  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+    //		  	  	         speed_control_var.err.velocity.xy,
+    //		  	  	         speed_control.fb_gains.i,
+    //		  	  	         (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
+      VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i_cmd.xy );
+    } break;
+
+  case SPEED_CONTROL_TYPE_ADAPTIVE:
+    {
+      struct Int32VectL dXi;
+      dXi.fwd = -speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+      dXi.ver = -speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+
+      speed_control_var.adapt.xi.fwd += dXi.fwd*SPEED_CONTROL_RUN_PERIOD;
+      speed_control_var.adapt.xi.ver += dXi.ver*SPEED_CONTROL_RUN_PERIOD;
+
+      speed_control_var.ff_cmd.acceleration.fv.fwd = speed_control_var.ff_cmd.acceleration.fv.fwd*speed_control_var.adapt.xi.fwd/(1<<INT32_MATLAB_FRAC);
+      speed_control_var.ff_cmd.acceleration.fv.ver = speed_control_var.ff_cmd.acceleration.fv.ver*speed_control_var.adapt.xi.ver/(1<<INT32_MATLAB_FRAC);
+    }
+  } break;
 
   //if i2 = 100 %, 1 m position error equals to +1 m/s2 acceleration command
   fb_i2_cmd.fv.fwd = speed_control.fb_gains.i2*speed_control_var.err.position.fv.fwd/(100<<(INT32_POS_FRAC-INT32_ACCEL_FRAC));

@@ -65,6 +65,7 @@
 
 #define SPEED_CONTROL_TYPE_THROTTLE   4
 #define SPEED_CONTROL_TYPE_FLAPFREQ   5
+#define SPEED_CONTROL_TYPE_ADAPTIVE   7
 
 /**
  * Command to speed/thrust control.
@@ -89,6 +90,8 @@ struct SpeedControlFeedBackGains {
 	struct Int32VectL p;
 	struct Int32VectL i;
 	int32_t i2;
+
+	struct Int32VectL adapt;
 };
 
 /**

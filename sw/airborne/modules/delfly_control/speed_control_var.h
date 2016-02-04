@@ -46,6 +46,8 @@ struct SpeedControlRef {
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
 
+	union Int32VectLong velocity_diff;
+
 	/* (commanded) acceleration reference
 	 * in m/s2, with #INT32_ACCEL_FRAC */
 	union Int32VectLong acceleration;
@@ -64,6 +66,8 @@ struct SpeedControlNow {
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
 
+	union Int32VectLong velocity_diff;
+
 	/* current acceleration
 	 * in m/s2, with #INT32_ACCEL_FRAC */
 	union Int32VectLong acceleration;
@@ -77,6 +81,8 @@ struct SpeedControlError {
 	/* integrated acceleration error
 	 * in m/s, with #INT32_SPEED_FRAC  */
 	union Int32VectLong velocity;
+
+	union Int32VectLong velocity_diff;
 
 	/* acceleration error
 	 * in m/s2, with #INT32_ACCEL_FRAC */
@@ -137,6 +143,11 @@ struct SpeedControlGainScheduling {
 	struct FloatVect2 flapfreq;
 };
 
+struct SpeedControlAdaptive {
+
+  struct Int32VectL xi;
+};
+
 
 struct SpeedControlVariables {
 	struct SpeedControlRef ref;
@@ -147,6 +158,7 @@ struct SpeedControlVariables {
 	struct SpeedControlCmd cmd;
 	struct SpeedControlEquilibrium eq;
 	struct SpeedControlGainScheduling mat;
+	struct SpeedControlAdaptive adapt;
 };
 
 
