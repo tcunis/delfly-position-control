@@ -199,6 +199,7 @@ void speed_control_enter (void) {
 
   //initial velocity ref: v_ref(0) = v0
   VECT2_COPY(speed_control_var.ref.velocity.xy, delfly_state.fv.air.xy);
+
   speed_control_var.ref.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
   speed_control_var.ref.position.fv.ver = delfly_state.v.pos;
 
@@ -221,41 +222,75 @@ void speed_control_estimate_error (void) {
 
   VECT2_COPY(speed_control_var.now.velocity.xy, delfly_state.fv.air.xy);
   VECT2_COPY(speed_control_var.now.acceleration.xy, delfly_state.fv.acc.xy);
-  speed_control_var.now.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
-  speed_control_var.now.position.fv.ver = delfly_state.v.pos;
 
+  switch (speed_control.control_mode) {
 
-  //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
-  //TODO: use reference model!
-  VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy,
-		  	  	       speed_control_var.ref.acceleration.xy,
-				           SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
-  //  VECT2_COPY(speed_control_var.ref.velocity.xy,     delfly_model.states.vel_fv.xy);
-  //  VECT2_COPY(speed_control_var.ref.acceleration.xy, delfly_model.states.acc_fv.xy);
-  VECT2_ADD_SCALED2(speed_control_var.ref.position.xy,
-                   speed_control_var.ref.velocity.xy,
-                   SPEED_CONTROL_RUN_PERIOD, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)));
-//  VECT2_COPY(speed_control_var.ref.position.xy,         delfly_model.states.pos_fv.xy);
+  /* speed-control adaption mode: adapt to actual equilibrium.
+   * ff_cmd = 0, fb_cmd = i2*(p_ref(k) - p(k))
+   *
+   * where p_ref(k) = p(0) f.a. k
+   *
+   * let v_ref = v(k), a_ref = a(k)
+   * i.e. v_err = a_err = 0                                                   */
+  case SPEED_CONTROL_MODE_ADAPT:
+    {
+      VECT2_ZERO( speed_control_var.ff_cmd.acceleration.xy );
 
-  VECT2_DIFF(speed_control_var.err.position.xy, speed_control_var.ref.position.xy, speed_control_var.now.position.xy);
+      speed_control_var.now.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
+      speed_control_var.now.position.fv.ver = delfly_state.v.pos;
 
-  //velocity error: v_err = v_ref - v_now
-  union Int32VectLong velocity_error_new;
-  VECT2_DIFF(velocity_error_new.xy, speed_control_var.ref.velocity.xy, speed_control_var.now.velocity.xy);
+//      VECT2_ADD_SCALED2(speed_control_var.ref.position.xy,
+//                       speed_control_var.ref.velocity.xy,
+//                       SPEED_CONTROL_RUN_PERIOD, (1<<(INT32_SPEED_FRAC-INT32_POS_FRAC)));
+////      VECT2_COPY(speed_control_var.ref.position.xy,         delfly_model.states.pos_fv.xy);
 
-//  //estimated acceleration error: a_err(k-1) = (v_err(k) - v_err(k-1))/T
-//  VECT2_DIFF_SCALED2(speed_control_var.err.acceleration.xy,
-//		  	  	    velocity_error_new.xy,
-//					speed_control_var.err.velocity.xy,
-//					SPEED_CONTROL_RUN_FREQ,(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
-  VECT2_COPY(speed_control_var.err.velocity.xy, velocity_error_new.xy);
+      VECT2_COPY(speed_control_var.ref.velocity.xy,     speed_control_var.now.velocity.xy);
+      VECT2_COPY(speed_control_var.ref.acceleration.xy, speed_control_var.now.acceleration.xy);
 
+      VECT2_DIFF(speed_control_var.err.position.xy, speed_control_var.ref.position.xy, speed_control_var.now.position.xy);
+    }
+    break;
+
+  /* speed-control control mode:
+   * ff_cmd = a_sp, fb_cmd = p*(a_ref(k) - a(k)) + i*(v_ref(k) - v(k)) + adapt_cmd
+   *
+   * where a_ref(k) = a_sp(k-1), v_ref(k) = v_ref(k-1) + dt*a_sp(k-1),
+   *       v_ref(0) = v(0)
+   *
+   * and adapt_cmd = i2*p_err                                                   */
+  case SPEED_CONTROL_MODE_CONTROL:
+    {
+      //update velocity ref: v_ref(k) = v_ref(k-1) + T*a_cmd(k-1)
+      //TODO: use reference model!
+      VECT2_ADD_SCALED(speed_control_var.ref.velocity.xy, speed_control_var.ref.acceleration.xy, SPEED_CONTROL_RUN_PERIOD*(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+
+//      VECT2_COPY(speed_control_var.ref.velocity.xy,     delfly_model.states.vel_fv.xy);
+//      VECT2_COPY(speed_control_var.ref.acceleration.xy, delfly_model.states.acc_fv.xy);
+
+//      //velocity error: v_err = v_ref - v_now
+//      union Int32VectLong velocity_error_new;
+//      VECT2_DIFF(velocity_error_new.xy, speed_control_var.ref.velocity.xy, speed_control_var.now.velocity.xy);
+//
+//      //estimated acceleration error: a_err(k-1) = (v_err(k) - v_err(k-1))/T
+//      VECT2_DIFF_SCALED2(speed_control_var.err.acceleration.xy,
+//                    velocity_error_new.xy,
+//              speed_control_var.err.velocity.xy,
+//              SPEED_CONTROL_RUN_FREQ,(1<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)));
+//      VECT2_COPY(speed_control_var.err.velocity.xy, velocity_error_new.xy);
+
+//      //for telemetry: a_now = a_ref - a_err
+//      VECT2_DIFF(speed_control_var.now.acceleration.xy,
+//    		  	 speed_control.sp.acceleration.xy,
+//    			 speed_control_var.err.acceleration.xy);
+    }
+    /* no break */
+  default:
+    VECT2_COPY(speed_control_var.ff_cmd.acceleration.xy, speed_control.sp.acceleration.xy);
+    break;
+  }
+
+  VECT2_DIFF(speed_control_var.err.velocity.xy,     speed_control_var.ref.velocity.xy,     speed_control_var.now.velocity.xy);
   VECT2_DIFF(speed_control_var.err.acceleration.xy, speed_control_var.ref.acceleration.xy, speed_control_var.now.acceleration.xy);
-
-//  //for telemetry: a_now = a_ref - a_err
-//  VECT2_DIFF(speed_control_var.now.acceleration.xy,
-//		  	 speed_control.sp.acceleration.xy,
-//			 speed_control_var.err.acceleration.xy);
 }
 
 
@@ -270,21 +305,23 @@ void speed_control_run (bool_t in_flight) {
   //else:
   speed_control.mode = speed_control.control_mode;
 
+  speed_control_estimate_error();
+
   /* feed-forward */
-  //union Int32VectLong acceleration_cmd;
-  VECT2_COPY(speed_control_var.ff_cmd.acceleration.xy, speed_control.sp.acceleration.xy);
+//  VECT2_COPY(speed_control_var.ff_cmd.acceleration.xy, speed_control.sp.acceleration.xy);
 
   /* feed-back */
-  speed_control_estimate_error();
   VECT2_ZERO(speed_control_var.fb_cmd.acceleration.xy);
+  union Int32VectLong fb_p_cmd, fb_i_cmd, fb_i2_cmd;
+
   //if p = 100 %, 1 m/s2 acceleration error equals to +1 m/s2 acceleration command
-  union Int32VectLong fb_p_cmd, fb_i_cmd;
   fb_p_cmd.fv.fwd = speed_control.fb_gains.p.fwd*speed_control_var.err.acceleration.fv.fwd/100;
   fb_p_cmd.fv.ver = speed_control.fb_gains.p.ver*speed_control_var.err.acceleration.fv.ver/100;
 //  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
 //                     speed_control_var.err.acceleration.xy,
 //                     speed_control.fb_gains.p, 100 );
   VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_p_cmd.xy );
+
   //if i = 100 %, 1 m/s velocity error equals to +1 m/s2 acceleration command
   fb_i_cmd.fv.fwd = speed_control.fb_gains.i.fwd*speed_control_var.err.velocity.fv.fwd/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
   fb_i_cmd.fv.ver = speed_control.fb_gains.i.ver*speed_control_var.err.velocity.fv.ver/(100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
@@ -294,13 +331,15 @@ void speed_control_run (bool_t in_flight) {
 //		  	  	         (100<<(INT32_SPEED_FRAC-INT32_ACCEL_FRAC)) );
   VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i_cmd.xy );
 
-  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
-                     speed_control_var.err.position.xy,
-                     speed_control.fb_gains.i2,
-                     100*(1<<(INT32_POS_FRAC-INT32_ACCEL_FRAC)) );
+  //if i2 = 100 %, 1 m position error equals to +1 m/s2 acceleration command
+  fb_i2_cmd.fv.fwd = speed_control.fb_gains.i2*speed_control_var.err.position.fv.fwd/(100<<(INT32_POS_FRAC-INT32_ACCEL_FRAC));
+  fb_i2_cmd.fv.ver = speed_control.fb_gains.i2*speed_control_var.err.position.fv.ver/(100<<(INT32_POS_FRAC-INT32_ACCEL_FRAC));
+//  VECT2_ADD_SCALED2( speed_control_var.fb_cmd.acceleration.xy,
+//                     speed_control_var.err.position.xy,
+//                     speed_control.fb_gains.i2,
+//                     100*(1<<(INT32_POS_FRAC-INT32_ACCEL_FRAC)) );
+  VECT2_ADD( speed_control_var.fb_cmd.acceleration.xy, fb_i2_cmd.xy );
 
-  //todo: debug: no feed-back control in horizontal
-  //speed_control_var.fb_cmd.acceleration.fv.fwd = 0;
 
   /* pitch and throttle command */
   //cmd = ff_cmd + fb_cmd

@@ -156,6 +156,7 @@
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
     <define name="PITCH_OFFSET" value="70"/>
+    <define name="MODE_SWITCH" value="RADIO_ELEV"/>    
   </section><!--DELFLY_CONTROL-->
   
   <section name="DELFLY_GUIDANCE" prefix="DELFLY_GUIDANCE_">
