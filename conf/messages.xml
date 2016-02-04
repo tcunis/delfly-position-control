@@ -960,7 +960,8 @@
       <description>
         Input, states, and output of the Delfly control speed control sub-module. 77 bytes
       </description>
-      <field name="mode"      type="uint8" values="OFF|ENTER|CONTROL|THROTTLE|FLAPCTRL">Speed control mode</field>
+      <field name="mode"      type="uint8" values="OFF|ENTER|CONTROL|ADAPT">Speed control mode</field>
+      <field name="type"      type="uint8" values="NN0|NN1|NN2|NN3|THROTTLE|FLAPCTRL">Speed control type</field>
       <field name="sp_acc_h"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Horizontal acceleration set-point</field>
       <field name="sp_acc_v"  type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration set-point</field>
       <field name="air_speed" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Air speed</field>
@@ -970,6 +971,8 @@
       <field name="err_v"     type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration error</field>
       <field name="err_h_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated horizontal error</field>
       <field name="err_v_int" type="int32" alt_unit=" m/s" alt_unit_coef="0.00000191">Integrated vertical error</field>
+      <field name="err_h_pos" type="int32" alt_unit=" m"   alt_unit_coef="0.00012207">Horizontal position error</field>
+      <field name="err_v_pos" type="int32" alt_unit=" m"   alt_unit_coef="0.00012207">Vertical position error</field>
       <field name="cmd_ff_pitch"    type="int32" alt_unit=" deg" alt_unit_coef="0.01398823">Feed-forward pitch command</field>
       <field name="cmd_ff_throttle" type="int32" alt_unit=" %" alt_unit_coef="0.01041667">Feed-forward throttle command</field>
       <field name="cmd_ff_flapfreq" type="float" unit=" Hz">Feed-forward flapping frequency command</field>

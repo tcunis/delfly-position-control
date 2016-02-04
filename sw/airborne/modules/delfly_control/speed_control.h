@@ -61,8 +61,10 @@
 #define SPEED_CONTROL_MODE_OFF		    0
 #define SPEED_CONTROL_MODE_ENTER	    1
 #define SPEED_CONTROL_MODE_CONTROL	  2
-#define SPEED_CONTROL_TYPE_THROTTLE   3
-#define SPEED_CONTROL_TYPE_FLAPFREQ   4
+#define SPEED_CONTROL_MODE_ADAPT      3
+
+#define SPEED_CONTROL_TYPE_THROTTLE   4
+#define SPEED_CONTROL_TYPE_FLAPFREQ   5
 
 /**
  * Command to speed/thrust control.
@@ -100,6 +102,7 @@ struct SpeedControlFeedForwardGains {
 
 struct SpeedControl {
 	uint8_t mode;
+	uint8_t control_mode;
 	uint8_t type;
 
 	struct SpeedControlSetPoint sp;

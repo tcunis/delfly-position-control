@@ -67,7 +67,10 @@ void speed_control_init (void) {
   speed_control.mode = SPEED_CONTROL_MODE_OFF;
 
   //default speed-control type
-  speed_control.type = SPEED_CONTROL_MODE_CONTROL;
+  speed_control.type = SPEED_CONTROL_TYPE_THROTTLE;
+
+  //default speed-control mode
+  speed_control.control_mode = SPEED_CONTROL_MODE_CONTROL;
 
   VECT2_ZERO(speed_control.sp.acceleration.xy);
   speed_control.sp.heading = 0;
@@ -265,7 +268,7 @@ void speed_control_run (bool_t in_flight) {
 	  return speed_control_enter(); //nothing to do
 
   //else:
-  speed_control.mode = speed_control.type;
+  speed_control.mode = speed_control.control_mode;
 
   /* feed-forward */
   //union Int32VectLong acceleration_cmd;
@@ -321,7 +324,7 @@ void speed_control_run (bool_t in_flight) {
   orientation_cmd.psi   = speed_control.sp.heading;
 
   stabilization_attitude_set_rpy_setpoint_i( &orientation_cmd );
-  switch (speed_control.mode)
+  switch (speed_control.type)
   {
   case SPEED_CONTROL_TYPE_FLAPFREQ:
     {

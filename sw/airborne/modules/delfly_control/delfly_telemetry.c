@@ -168,6 +168,7 @@ static void delfly_telemetry_send_stateestimation (struct transport_tx* trans, s
 static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, struct link_device* dev) {
   pprz_msg_send_DELFLY_SPEEDCTRL(trans, dev, AC_ID,
 		&speed_control.mode,
+		&speed_control.type,
 		&speed_control.sp.acceleration.fv.fwd,
 		&speed_control.sp.acceleration.fv.ver,
 		&speed_control_var.now.air_speed,
@@ -177,6 +178,8 @@ static void delfly_telemetry_send_speedcontrol (struct transport_tx* trans, stru
 		&speed_control_var.err.acceleration.fv.ver,
 		&speed_control_var.err.velocity.fv.fwd,
 		&speed_control_var.err.velocity.fv.ver,
+		&speed_control_var.err.position.fv.fwd,
+		&speed_control_var.err.position.fv.ver,
 		&speed_control_var.ff_cmd.pitch,
 		&speed_control_var.ff_cmd.throttle,
 		&speed_control_var.ff_cmd.flapfreq,
