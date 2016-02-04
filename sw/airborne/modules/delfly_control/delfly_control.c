@@ -109,9 +109,9 @@ void delfly_control_run(void) {
 
 #ifdef SPEED_CONTROL_MODE_SWITCH
   if (radio_control.values[SPEED_CONTROL_MODE_SWITCH] > 0)
-    speed_control.control_mode = SPEED_CONTROL_MODE_ADAPT;
-  else
     speed_control.control_mode = SPEED_CONTROL_MODE_CONTROL;
+  else
+    speed_control.control_mode = SPEED_CONTROL_MODE_ADAPT;
 #endif
 
   state_estimation_run();

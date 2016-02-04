@@ -152,7 +152,7 @@
     <define name="FB_VER_PGAIN" value="0"/>
     <define name="FB_FWD_IGAIN" value="250"/>
     <define name="FB_VER_IGAIN" value="250"/>
-    <define name="FB_I2GAIN"    value="0"/>
+    <define name="FB_I2GAIN"    value="100"/>
     <define name="FF_PITCH_GAIN" value="100"/>
     <define name="FF_THROTTLE_GAIN" value="100"/>
     <define name="PITCH_OFFSET" value="70"/>
