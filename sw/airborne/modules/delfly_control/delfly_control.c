@@ -36,6 +36,7 @@
 #include "state_estimation.h"
 #include "delfly_model.h"
 #include "flap_control.h"
+#include "speed_control.h"
 
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
@@ -44,6 +45,15 @@
 
 #include "state.h"
 #include "subsystems/radio_control.h"
+
+
+#ifdef STATE_ESTIMATION_MODE_SWITCH
+#ifdef SPEED_CONTROL_MODE_SWITCH
+#if STATE_ESTIMATION_MODE_SWITCH == SPEED_CONTROL_MODE_SWITCH
+#warning "Same mode switch used for state-estimation and speed-control!"
+#endif
+#endif
+#endif
 
 
 uint8_t h_mode_alt;
@@ -95,6 +105,13 @@ void delfly_control_run(void) {
     state_estimation.type = STATE_ESTIMATION_TYPE_GPS_FILTER;
   else
     state_estimation.type = STATE_ESTIMATION_TYPE_GPS_AVERAGE;
+#endif
+
+#ifdef SPEED_CONTROL_MODE_SWITCH
+  if (radio_control.values[SPEED_CONTROL_MODE_SWITCH] > 0)
+    speed_control.control_mode = SPEED_CONTROL_MODE_ADAPT;
+  else
+    speed_control.control_mode = SPEED_CONTROL_MODE_CONTROL;
 #endif
 
   state_estimation_run();
