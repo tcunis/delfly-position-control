@@ -184,9 +184,9 @@
   </section><!--GPS-->
  
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="PGAIN" value="808"/>
-    <define name="DGAIN" value="150"/>
-    <define name="IGAIN" value="0"/>
+    <define name="PGAIN" value="1900"/>
+    <define name="DGAIN" value="0"/>
+    <define name="IGAIN" value="10"/>
     <define name="USE_REF" value="FALSE"/>
     <define name="USE_SPEED_REF" value="FALSE"/>
   </section><!--GUIDANCE_H-->
@@ -197,9 +197,9 @@
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
-    <define name="HOVER_KP" value="600"/>
-    <define name="HOVER_KD" value="401"/>
-    <define name="HOVER_KI" value="155"/>
+    <define name="HOVER_KP" value="60"/>
+    <define name="HOVER_KD" value="20"/>
+    <define name="HOVER_KI" value="35"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.75"/>
   </section><!--GUIDANCE_V-->
 
@@ -261,19 +261,19 @@
     <define name="REF_MAX_R" value="90." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="2224"/>
-    <define name="PHI_DGAIN" value="1"/>
+    <define name="PHI_PGAIN" value="0"/>
+    <define name="PHI_DGAIN" value="0"/>
     <define name="PHI_IGAIN" value="0"/>
     <define name="THETA_PGAIN" value="2024"/>
     <define name="THETA_DGAIN" value="200"/>
     <define name="THETA_IGAIN" value="800"/>
-    <define name="PSI_PGAIN" value="1100"/>
-    <define name="PSI_DGAIN" value="200"/>
-    <define name="PSI_IGAIN" value="350"/>
+    <define name="PSI_PGAIN" value="850"/>
+    <define name="PSI_DGAIN" value="100"/>
+    <define name="PSI_IGAIN" value="225"/>
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
     <define name="THETA_DDGAIN" value="0"/>
-    <define name="PSI_DDGAIN" value=" 300"/>
+    <define name="PSI_DDGAIN" value=" 0"/>
     <define name="PHI_AGAIN" value="0"/>
     <define name="THETA_AGAIN" value="0"/>
     <define name="PSI_AGAIN" value="0"/>

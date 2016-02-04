@@ -437,6 +437,7 @@ void guidance_h_run(bool_t  in_flight)
 
         /* set psi command */
         guidance_h.sp.heading = 0; //nav_heading;
+//        guidance_h.sp.heading = guidance_h.rc_sp.psi;
         INT32_ANGLE_NORMALIZE(guidance_h.sp.heading);
 #if GUIDANCE_INDI
         guidance_indi_run(in_flight, guidance_h.sp.heading);
