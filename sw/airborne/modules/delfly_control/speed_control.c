@@ -84,8 +84,8 @@ void speed_control_init (void) {
   speed_control.ff_gains.pitch    = SPEED_CONTROL_FF_PITCH_GAIN;
   speed_control.ff_gains.throttle = SPEED_CONTROL_FF_THROTTLE_GAIN;
 
-  speed_control.fb_gains.adapt.fwd = SPEED_CONTROL_FWD_ADAPT_GAIN;
-  speed_control.fb_gains.adapt.ver = SPEED_CONTROL_VER_ADAPT_GAIN;
+  speed_control.fb_gains.adapt.fwd = SPEED_CONTROL_ADAPT_FWD_GAIN;
+  speed_control.fb_gains.adapt.ver = SPEED_CONTROL_ADAPT_VER_GAIN;
 
   speed_control_set_pitch_offset(SPEED_CONTROL_PITCH_OFFSET);
 
@@ -100,8 +100,8 @@ void speed_control_init (void) {
   VECT2_ZERO(speed_control_var.err.velocity.xy);
   VECT2_ZERO(speed_control_var.err.position.xy);
 
-  VECT2_ZERO(speed_control_var.adapt.last_ref_velocity);
-  speed_control_var.adapt.Xi = (1<<INT32_MATLAB_FRAC);
+  speed_control_var.adapt.Xi.fwd = (1<<INT32_MATLAB_FRAC);
+  speed_control_var.adapt.Xi.ver = (1<<INT32_MATLAB_FRAC);
 
   VECT2_ZERO(speed_control_var.cmd.acceleration.xy);
   speed_control_var.cmd.pitch = 0;
@@ -209,8 +209,6 @@ void speed_control_enter (void) {
 
   speed_control_var.ref.position.fv.fwd = VECT2_GET_FWD(delfly_state.h.pos, delfly_guidance.sp.heading);
   speed_control_var.ref.position.fv.ver = delfly_state.v.pos;
-
-  VECT2_COPY(speed_control_var.adapt.last_ref_velocity, speed_control_var.ref.velocity);
 
   flap_control_enter();
 
@@ -370,8 +368,8 @@ void speed_control_run (bool_t in_flight) {
 
       speed_control_var.ff_cmd.acceleration.fv.fwd = speed_control_var.ff_cmd.acceleration.fv.fwd*speed_control_var.adapt.Xi.fwd/(1<<INT32_MATLAB_FRAC);
       speed_control_var.ff_cmd.acceleration.fv.ver = speed_control_var.ff_cmd.acceleration.fv.ver*speed_control_var.adapt.Xi.ver/(1<<INT32_MATLAB_FRAC);
-    }
-  } break;
+    } break;
+  }
 
   //if i2 = 100 %, 1 m position error equals to +1 m/s2 acceleration command
   fb_i2_cmd.fv.fwd = speed_control.fb_gains.i2*speed_control_var.err.position.fv.fwd/(100<<(INT32_POS_FRAC-INT32_ACCEL_FRAC));
