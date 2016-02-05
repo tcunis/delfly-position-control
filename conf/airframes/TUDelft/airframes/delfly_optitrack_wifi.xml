@@ -150,9 +150,9 @@
   <section name="DELFLY_CONTROL" prefix="SPEED_CONTROL_">
     <define name="FB_FWD_PGAIN" value="0"/>
     <define name="FB_VER_PGAIN" value="0"/>
-    <define name="FB_FWD_IGAIN" value="250"/>
-    <define name="FB_VER_IGAIN" value="250"/>
-    <define name="FB_I2GAIN"    value="100"/>
+    <define name="FB_FWD_IGAIN" value="200"/>
+    <define name="FB_VER_IGAIN" value="200"/>
+    <define name="FB_I2GAIN"    value="250"/>
     <define name="ADAPT_FWD_GAIN" value="100"/>
     <define name="ADAPT_VER_GAIN" value="100"/>
     <define name="FF_PITCH_GAIN" value="100"/>
@@ -163,7 +163,7 @@
   
   <section name="DELFLY_GUIDANCE" prefix="DELFLY_GUIDANCE_">
   	<define name="COMPLEMENTARY_HEADING_GAIN" value="100"/>
-  	<define name="LATERAL_RATIO" value="100"/>
+  	<define name="LATERAL_RATIO" value="75"/>
   	<define name="LATERAL_IGAIN" value="0"/>
   	<define name="USE_SPEED_REF" value="FALSE"/>
   </section><!--DELFLY_GUIDANCE-->
@@ -196,7 +196,7 @@
   </section><!--GUIDANCE_H-->
  
   <section name="GUIDANCE_LAT" prefix="GUIDANCE_LAT_">
-    <define name="PGAIN" value="250"/>
+    <define name="PGAIN" value="200"/>
   </section><!--GUIDANCE_LAT-->
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">

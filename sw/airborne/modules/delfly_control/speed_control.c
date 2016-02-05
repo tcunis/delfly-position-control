@@ -216,12 +216,12 @@ void speed_control_enter (void) {
   delfly_model_set_cmd( 0, 0 );
 
   /* TODO: gain scheduling w.r.t. air speed */
-  VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
-  VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
-  VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v08);
-  speed_control_var.eq.pitch 	= matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
-  speed_control_var.eq.throttle = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
-  speed_control_var.eq.flapfreq = matlab_flapfreq_equilibrium_v08;
+//  VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
+//  VECT2_COPY(speed_control_var.mat.throttle, matlab_throttle_matrix_v08);
+//  VECT2_COPY(speed_control_var.mat.flapfreq, matlab_flapfreq_matrix_v08);
+//  speed_control_var.eq.pitch 	= matlab_pitch_equilibrium_v08;     // pitch at eq in rad, with #INT32_MATLAB_FRAC
+//  speed_control_var.eq.throttle = matlab_throttle_equilibrium_v08;  // throttle at eq in %, with #INT32_MATLAB_FRAC
+//  speed_control_var.eq.flapfreq = matlab_flapfreq_equilibrium_v08;
 }
 
 
