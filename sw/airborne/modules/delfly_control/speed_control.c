@@ -101,7 +101,7 @@ void speed_control_init (void) {
   VECT2_ZERO(speed_control_var.err.position.xy);
 
   VECT2_ZERO(speed_control_var.adapt.last_ref_velocity);
-  speed_control_var.adapt.xi = 1;
+  speed_control_var.adapt.Xi = (1<<INT32_MATLAB_FRAC);
 
   VECT2_ZERO(speed_control_var.cmd.acceleration.xy);
   speed_control_var.cmd.pitch = 0;
@@ -358,15 +358,18 @@ void speed_control_run (bool_t in_flight) {
 
   case SPEED_CONTROL_TYPE_ADAPTIVE:
     {
-      struct Int32VectL dXi;
-      dXi.fwd = -speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
-      dXi.ver = -speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+      if ( !VECT2_EQUALS_ZERO(speed_control_var.ref.acceleration.xy) ) {
+        /* adapt ratio Xi if not saturated */
+        struct Int32VectL dXi;
+        dXi.fwd = speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+        dXi.ver = speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
 
-      speed_control_var.adapt.xi.fwd += dXi.fwd*SPEED_CONTROL_RUN_PERIOD;
-      speed_control_var.adapt.xi.ver += dXi.ver*SPEED_CONTROL_RUN_PERIOD;
+        speed_control_var.adapt.Xi.fwd += dXi.fwd*SPEED_CONTROL_RUN_PERIOD;
+        speed_control_var.adapt.Xi.ver += dXi.ver*SPEED_CONTROL_RUN_PERIOD;
+      }
 
-      speed_control_var.ff_cmd.acceleration.fv.fwd = speed_control_var.ff_cmd.acceleration.fv.fwd*speed_control_var.adapt.xi.fwd/(1<<INT32_MATLAB_FRAC);
-      speed_control_var.ff_cmd.acceleration.fv.ver = speed_control_var.ff_cmd.acceleration.fv.ver*speed_control_var.adapt.xi.ver/(1<<INT32_MATLAB_FRAC);
+      speed_control_var.ff_cmd.acceleration.fv.fwd = speed_control_var.ff_cmd.acceleration.fv.fwd*speed_control_var.adapt.Xi.fwd/(1<<INT32_MATLAB_FRAC);
+      speed_control_var.ff_cmd.acceleration.fv.ver = speed_control_var.ff_cmd.acceleration.fv.ver*speed_control_var.adapt.Xi.ver/(1<<INT32_MATLAB_FRAC);
     }
   } break;
 

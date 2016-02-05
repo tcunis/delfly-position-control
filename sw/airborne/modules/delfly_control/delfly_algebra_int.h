@@ -69,6 +69,23 @@ struct Int64Mat33 {
 /* c = (a - b) * s */
 #define VECT2_DIFF_SCALED(_c, _a, _b, _s)   VECT2_DIFF_SCALED2(_a, _b, _s, 1)
 
+/* a o b, o in {<, <=, ==, !=, >=, >} */
+#define VECT2_CP(_a, _cp, _b)     ( \
+    (_a).x _cp (_b).x &&            \
+    (_a).y _cp (_b).y               \
+  )
+
+/* a == b */
+#define VECT2_EQUALS(_a, _b)      VECT2_CP(_a, ==, _b)
+
+/* element-wise a o b, o in {<, <=, ==, !=, >=, >} */
+#define VECT2_EW_CP(_a, _cp, _s)  ( \
+    (_a).x _cp (_s) &&     \
+    (_a).y _cp (_s)        \
+  )
+
+#define VECT2_EQUALS_ZERO(_v)     VECT2_EW_CP(_v, ==, 0)
+
 #define VECT2_GET_FWD(_v,_h)				(((_v).x*pprz_itrig_cos(_h) - (_v).y*pprz_itrig_sin(_h))/(1<<INT32_TRIG_FRAC))
 #define VECT2_GET_LAT(_v,_h)				(((_v).x*pprz_itrig_sin(_h) + (_v).y*pprz_itrig_cos(_h))/(1<<INT32_TRIG_FRAC))
 

@@ -145,7 +145,7 @@ struct SpeedControlGainScheduling {
 
 struct SpeedControlAdaptive {
 
-  struct Int32VectL xi;
+  struct Int32VectL Xi;
 };
 
 
