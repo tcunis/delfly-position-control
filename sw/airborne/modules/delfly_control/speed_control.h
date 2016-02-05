@@ -65,7 +65,7 @@
 
 #define SPEED_CONTROL_TYPE_THROTTLE   4
 #define SPEED_CONTROL_TYPE_FLAPFREQ   5
-#define SPEED_CONTROL_TYPE_ADAPTIVE   7
+#define SPEED_CONTROL_TYPE_ADAPTIVE   6
 
 
 /* Command to speed-control            */

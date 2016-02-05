@@ -121,15 +121,15 @@ void speed_control_init (void) {
 void speed_control_set_cmd_h( int32_t cmd_h_acceleration, int32_t cmd_heading ) {
 
   // saturate acceleration command by maximal acceleration
-//  speed_control.sp.acceleration.fv.fwd = INT32_SAT(cmd_h_acceleration, STATE_ESTIMATION_ACC_MAX);
-  speed_control.sp.acceleration.fv.fwd = cmd_h_acceleration;
+  speed_control.sp.acceleration.fv.fwd = INT32_SAT(cmd_h_acceleration, STATE_ESTIMATION_ACC_MAX);
+//  speed_control.sp.acceleration.fv.fwd = cmd_h_acceleration;
   speed_control.sp.heading = cmd_heading;
 }
 
 void speed_control_set_cmd_v( int32_t cmd_v_acceleration ) {
 
-//  speed_control.sp.acceleration.fv.ver = INT32_SAT(cmd_v_acceleration, STATE_ESTIMATION_ACC_MAX);
-  speed_control.sp.acceleration.fv.ver = cmd_v_acceleration;
+  speed_control.sp.acceleration.fv.ver = INT32_SAT(cmd_v_acceleration, STATE_ESTIMATION_ACC_MAX);
+//  speed_control.sp.acceleration.fv.ver = cmd_v_acceleration;
 }
 
 void speed_control_set_pitch_offset( int32_t pitch_offset_deg ) {
@@ -214,6 +214,8 @@ void speed_control_enter (void) {
 
   delfly_model_enter();
   delfly_model_set_cmd( 0, 0 );
+
+  speed_control_gain_scheduling(speed_control_var.now.air_speed);
 
   /* TODO: gain scheduling w.r.t. air speed */
 //  VECT2_COPY(speed_control_var.mat.pitch, matlab_pitch_matrix_v08);
@@ -361,8 +363,8 @@ void speed_control_run (bool_t in_flight) {
          * dXi/dt = sign(v_ref)*(gamma/100)*(v_ref - v_now)
          * where gamma is the adaption gain in percent. */
         struct Int32VectL dXi;
-        dXi.fwd = INT32_SIGN(speed_control_var.ref.velocity_diff.fv.fwd)*speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
-        dXi.ver = INT32_SIGN(speed_control_var.ref.velocity_diff.fv.ver)*speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+        dXi.fwd = INT32_SIGN(speed_control_var.ref.velocity.fv.fwd)*speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+        dXi.ver = INT32_SIGN(speed_control_var.ref.velocity.fv.ver)*speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
 
         speed_control_var.adapt.Xi.fwd += dXi.fwd*SPEED_CONTROL_RUN_PERIOD;
         speed_control_var.adapt.Xi.ver += dXi.ver*SPEED_CONTROL_RUN_PERIOD;

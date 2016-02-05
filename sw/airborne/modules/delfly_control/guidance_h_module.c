@@ -67,7 +67,7 @@ void guidance_h_module_init() {
   delfly_guidance.gains.h.complementary_gain = DELFLY_GUIDANCE_COMPLEMENTARY_HEADING_GAIN;
 
 //  VECT2_COPY(delfly_guidance.gains.fwd.xy, matlab_guidance_gain_fwd);
-  VECT2_ASSIGN(delfly_guidance.gains.fwd.xy, 1<<INT32_MATLAB_FRAC, 2<<INT32_MATLAB_FRAC);
+  VECT2_ASSIGN(delfly_guidance.gains.fwd.xy, 1*(1<<INT32_MATLAB_FRAC), 2*(1<<INT32_MATLAB_FRAC));
 
 //  VECT2_COPY(delfly_guidance.gains.lat.xy, matlab_guidance_gain_fwd);
   VECT2_ASSIGN(delfly_guidance.gains.lat.xy, 1<<INT32_MATLAB_FRAC, 2<<INT32_MATLAB_FRAC);

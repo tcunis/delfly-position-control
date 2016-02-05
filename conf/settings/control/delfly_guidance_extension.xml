@@ -31,6 +31,7 @@
       <dl_setting var="speed_control.fb_gains.adapt.ver" min="0" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="adapt_ver" param="SPEED_CONTROL_ADAPT_VER_GAIN" type="int32" persistent="true"/>
       <dl_setting var="speed_control.ff_gains.pitch" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_pitch" param="SPEED_CONTROL_FF_PITCH_GAIN" type="int32" persistent="true"/>
   	  <dl_setting var="speed_control.ff_gains.throttle" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/speed_control" shortname="ff_throttle" param="SPEED_CONTROL_FF_THROTTLE_GAIN" type="int32" persistent="true"/>
+  	  <dl_setting var="speed_control.type" min="4" step="1" max="6" values="THROTTLE|FLAPFREQ|ADAPTIVE" module="delfly_control/speed_control" shortname="type" param="" type="uint8"/>
     <!--/dl_settings>
     
     <dl_settings name="State estimation"-->
