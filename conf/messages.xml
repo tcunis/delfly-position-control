@@ -994,7 +994,9 @@
       <field name="inv_lift_flapfreq" type="float" alt_unit=" Hz/(m/s2)"  alt_unit_coef="-1">Inverse derivative lift w.r.t. flapping frequency</field>
       <field name="inv_drag_pitch"    type="int32" alt_unit=" deg/(m/s2)" alt_unit_coef="-0.00349706">Inverse derivative drag w.r.t. pitch angle</field>
       <field name="inv_drag_throttle" type="int32" alt_unit=" %/(m/s2)"   alt_unit_coef="-0.00781250">Inverse derivative drag w.r.t. throttle</field>
-      <field name="inv_draq_flapfreq" type="float" alt_unit=" Hz/(m/s2)"  alt_unit_coef="-1">Inverse derivative drag w.r.t. flapping frequency</field>   	
+      <field name="inv_draq_flapfreq" type="float" alt_unit=" Hz/(m/s2)"  alt_unit_coef="-1">Inverse derivative drag w.r.t. flapping frequency</field>
+      <field name="Xi_h"              type="int32" alt_unit=" %"          alt_unit_coef="0.00610315">Adaptive horizontal ratio Xi</field>
+      <field name="Xi_v"              type="int32" alt_unit=" %"          alt_unit_coef="0.00610315">Adaptive vertical ratio Xi</field>   	
     </message>
     
     <message name="DELFLY_GUIDANCE" id="230">

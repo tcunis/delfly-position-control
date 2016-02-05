@@ -203,7 +203,9 @@ static void delfly_telemetry_send_speedcontrol_gains (struct transport_tx* trans
       &speed_control_var.mat.flapfreq.y,
       &speed_control_var.mat.pitch.x,
       &speed_control_var.mat.throttle.x,
-      &speed_control_var.mat.flapfreq.x
+      &speed_control_var.mat.flapfreq.x,
+      &speed_control_var.adapt.Xi.fwd,
+      &speed_control_var.adapt.Xi.ver
   );
 }
 
