@@ -43,6 +43,7 @@ void delfly_guidance_init (void) {
   INT32_ZERO(delfly_guidance.cmd.heading);
   VECT2_ZERO(delfly_guidance.err.fwd.xy);
   VECT2_ZERO(delfly_guidance.err.lat.xy);
+  INT32_ZERO(delfly_guidance.err.lat_pos_int);
   VECT2_ZERO(delfly_guidance.sp.vel_rc.xy);
 
 }

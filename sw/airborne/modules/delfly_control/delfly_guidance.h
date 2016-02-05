@@ -77,6 +77,10 @@ struct DelflyGuidanceError {
    * in m,   with #INT32_POS_FRAC;
    * in m/s, with #INT32_SPEED_FRAC  */
   union Int32VectState2 ver;
+
+  /* integrated lateral position error
+   * in m*s, with #INT32_SPEED_FRAC  */
+  int32_t lat_pos_int;
 };
 
 struct DelflyGuidanceHorizontalGains {
@@ -103,6 +107,10 @@ struct DelflyGuidanceGains {
   /* forward gain matrix
    * with #INT32_MATLAB_FRAC         */
   union Int32VectState2 ver;
+
+  /* lateral integrator gain
+   * in percent                     */
+  int32_t lat_i;
 
   /* gains related to heading        */
   struct DelflyGuidanceHorizontalGains h;
