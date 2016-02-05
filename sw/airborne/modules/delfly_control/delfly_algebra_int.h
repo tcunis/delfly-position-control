@@ -19,6 +19,8 @@
 #define INT32_SAT_2(_i, _min, _max) (((_i) > (_max))? (_max) : (((_i) < (_min))? (_min) : (_i)))
 #define INT32_STRIM(_i, _m)  { _i = INT32_SAT(_i, _m); }
 
+#define INT32_SIGN(_i)    ((_i >= 0)? 1 : -1)
+
 #define CUBE(_a)          ((_a)*(_a)*(_a))
 #define HYCUBE(_a)        ((_a)*(_a)*(_a)*(_a))
 

@@ -359,8 +359,8 @@ void speed_control_run (bool_t in_flight) {
       if ( !VECT2_EQUALS_ZERO(speed_control_var.ref.acceleration.xy) ) {
         /* adapt ratio Xi if not saturated */
         struct Int32VectL dXi;
-        dXi.fwd = speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
-        dXi.ver = speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+        dXi.fwd = INT32_SIGN(speed_control_var.ref.velocity_diff.fv.fwd)*speed_control.fb_gains.adapt.fwd*speed_control_var.err.velocity_diff.fv.fwd/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
+        dXi.ver = INT32_SIGN(speed_control_var.ref.velocity_diff.fv.ver)*speed_control.fb_gains.adapt.ver*speed_control_var.err.velocity_diff.fv.ver/(100*(1<<(INT32_SPEED_FRAC-INT32_MATLAB_FRAC)));
 
         speed_control_var.adapt.Xi.fwd += dXi.fwd*SPEED_CONTROL_RUN_PERIOD;
         speed_control_var.adapt.Xi.ver += dXi.ver*SPEED_CONTROL_RUN_PERIOD;
