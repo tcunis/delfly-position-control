@@ -107,6 +107,15 @@ void sdlogger_spi_direct_periodic(void)
 {
   sdcard_spi_periodic(&sdcard1);
 
+  static uint8_t sdlogger_control_switch = 0;
+  if (radio_control.values[SDLOGGER_CONTROL_SWITCH] > 0) {
+    if (sdlogger_control_switch < 10)
+      sdlogger_control_switch++;
+  } else {
+    if (sdlogger_control_switch > 0)
+      sdlogger_control_switch--;
+  }
+
   switch (sdlogger_spi.status) {
     case SDLogger_Initializing:
       if (sdcard1.status == SDCard_Idle) {
@@ -116,7 +125,7 @@ void sdlogger_spi_direct_periodic(void)
       break;
 
     case SDLogger_Ready:
-      if (radio_control.values[SDLOGGER_CONTROL_SWITCH] > 0 &&
+      if (sdlogger_control_switch > 0 && //radio_control.values[SDLOGGER_CONTROL_SWITCH] > 0 &&
           sdcard1.status == SDCard_Idle) {
         LOGGER_LED_ON;
         sdcard_spi_multiwrite_start(&sdcard1, sdlogger_spi.next_available_address);
