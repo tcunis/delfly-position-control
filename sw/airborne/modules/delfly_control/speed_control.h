@@ -67,49 +67,58 @@
 #define SPEED_CONTROL_TYPE_FLAPFREQ   5
 #define SPEED_CONTROL_TYPE_ADAPTIVE   7
 
-/**
- * Command to speed/thrust control.
- */
+
+/* Command to speed-control            */
 struct SpeedControlSetPoint {
-	/** h/v acceleration sp
+	/* h/v acceleration set-point
 	 * .x = h, .y = v
-	 * in m/s2, with #INT32_ACCEL_FRACstatic union Int32VectLong vel_now;// = delfly_state.fv.air;
-static union Int32VectLong acc_now;// = delfly_state.fv.acc;
-	 *  */
+	 * in m/s2, with #INT32_ACCEL_FRAC   */
 	union Int32VectLong acceleration;
 
-	/** heading s
-	 * in rad, with #INT32_ANGLE_FRAC  */
+	/* heading set-point
+	 * (fed-through to stabilization)
+	 * in rad, with #INT32_ANGLE_FRAC    */
 	int32_t heading;
 };
 
-/**
- * Speed/thrust control feed-back gains.
- */
+/* Speed-control feed-back gains
+ * all gains in percent                */
 struct SpeedControlFeedBackGains {
+  /* proportional feed-back gain       */
 	struct Int32VectL p;
+	/* integral feed-back gain           */
 	struct Int32VectL i;
+	/* 2nd-order integral gain           */
 	int32_t i2;
 
+	/* feed-back adaption gain           */
 	struct Int32VectL adapt;
 };
 
-/**
- * Speed/thrust control feed-forward gains.
- */
+/* Speed-control feed-forward gains
+ * all gains in percent                */
 struct SpeedControlFeedForwardGains {
+  /* feed-forward pitch gain           */
   int32_t pitch;
+  /* feed-forward throttle gain        */
   int32_t throttle;
 };
 
 
+/* Speed-control (public interface)    */
 struct SpeedControl {
+  /* Speed-control (current) mode      */
 	uint8_t mode;
+	/* Speed-control control mode        */
 	uint8_t control_mode;
+	/* Speed-control control type        */
 	uint8_t type;
 
+	/* Speed-control set point           */
 	struct SpeedControlSetPoint sp;
+	/* Speed-control feed-back gains     */
 	struct SpeedControlFeedBackGains fb_gains;
+	/* Speed-control feed-forward gains  */
 	struct SpeedControlFeedForwardGains ff_gains;
 
 	/* constant pitch offset
