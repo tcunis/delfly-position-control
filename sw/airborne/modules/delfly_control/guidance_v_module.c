@@ -63,7 +63,7 @@ void guidance_v_module_init(void) {
   VECT2_ZERO(delfly_guidance.err.ver.xy);
 
   //VECT2_COPY(delfly_guidance.gains.ver.xy, matlab_guidance_gain);
-  VECT2_ASSIGN(delfly_guidance.gains.ver.xy, 1*(1<<INT32_MATLAB_FRAC), 2*(1<<INT32_MATLAB_FRAC));
+  VECT2_ASSIGN(delfly_guidance.gains.ver.xy, 1, 2);
 }
 
 
@@ -108,8 +108,8 @@ void guidance_v_module_run_traj( bool_t in_flight ) {
     delfly_guidance.err.ver.states.pos = delfly_guidance.err.pos.z;
     delfly_guidance.err.ver.states.vel = delfly_guidance.err.vel.z;
 
-    delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(INT32_MATLAB_FRAC+INT32_POS_FRAC-INT32_ACCEL_FRAC))
-                                + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(INT32_MATLAB_FRAC+INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+    delfly_guidance.cmd.v_acc = delfly_guidance.err.ver.states.pos * delfly_guidance.gains.ver.states.pos / (1<<(/*INT32_MATLAB_FRAC+*/INT32_POS_FRAC-INT32_ACCEL_FRAC))
+                                + delfly_guidance.err.ver.states.vel * delfly_guidance.gains.ver.states.vel / (1<<(/*INT32_MATLAB_FRAC+*/INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
     }
   }
 }
