@@ -95,12 +95,13 @@ void delfly_guidance_run (void) {
       static struct NedCoor_i nav_carrot_ned;
       ENU_OF_TO_NED(nav_carrot_ned /*in NED*/, navigation_carrot /*in ENU*/);
       nav_carrot_ned.z = -nav_flight_altitude;
-//      // re-set heading set-point if carrot has changed
-//      if ( !VECT3_EQUALS(nav_carrot_ned, delfly_guidance.sp.pos) ) {
-//        nav_set_heading_towards_carrot();
-//      }
+      // re-set heading set-point if carrot has changed
+      if ( !VECT3_EQUALS(nav_carrot_ned, delfly_guidance.sp.pos) ) {
+        nav_set_heading_towards_carrot();
+      }
       //TODO: set position and velocity set-point
-      delfly_guidance.sp.heading = 0; //nav_heading; //delfly_guidance.sp.att_rc.psi;
+//      delfly_guidance.sp.heading = 0;
+      delfly_guidance.sp.heading = nav_heading;
       VECT3_COPY(delfly_guidance.sp.pos /*in NED*/, nav_carrot_ned /*in ENU*/);
       VECT3_ZERO(delfly_guidance.sp.vel);
     } break;
