@@ -177,11 +177,11 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
 
       delfly_guidance.err.lat_pos_int += delfly_guidance.err.lat.states.pos*(1.0/PERIODIC_FREQUENCY)*(1<<(INT32_SPEED_FRAC-INT32_POS_FRAC));
 
-//      delfly_guidance.cmd.h_acc = 0;
-    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
-    	                  	  	    / (1<<(/*INT32_MATLAB_FRAC+*/INT32_POS_FRAC-INT32_ACCEL_FRAC))
-    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
-    	                            / (1<<(/*INT32_MATLAB_FRAC+*/INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      delfly_guidance.cmd.h_acc = 0;
+//    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+//    	                  	  	    / (1<<(/*INT32_MATLAB_FRAC+*/INT32_POS_FRAC-INT32_ACCEL_FRAC))
+//    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+//    	                            / (1<<(/*INT32_MATLAB_FRAC+*/INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
 
       /* lateral guidance pseudo acceleration command
        * in m/s2, with #INT32_ACCEL_FRAC                  */

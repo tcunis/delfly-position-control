@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="1" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
+<flight_plan alt="1.5" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
   <header>
 #include "autopilot.h"
 </header>
@@ -68,6 +68,12 @@
     </block>
     <block name="small_circle">
       <circle wp="p1" radius="1"/>
+    </block>
+    <block name="height step" strip_button="step up & down" strip_icon="flat_theme/survey_rect_ns.png">
+      <call fun="NavCopyWaypoint(WP_TD,WP_p1)"/>
+	  <call fun="NavSetWaypointAlt(WP_TD, 2.0)"/>
+	  <circle wp="TD" radius="1" until="stage_time > 30"/>
+      <deroute block="small_circle"/>
     </block>
     <block name="go_p2">
       <call fun="nav_set_heading_deg(90)"/>
