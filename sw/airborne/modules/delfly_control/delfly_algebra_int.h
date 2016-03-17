@@ -21,6 +21,8 @@
 
 #define INT32_SIGN(_i)    ((_i >= 0)? 1 : -1)
 
+#define INT32_SQUARE(_i)  ((_i)*(_i))
+
 #define CUBE(_a)          ((_a)*(_a)*(_a))
 #define HYCUBE(_a)        ((_a)*(_a)*(_a)*(_a))
 

@@ -1022,6 +1022,8 @@
       <field name="cmd_v"    type="int32" alt_unit=" m/s2" alt_unit_coef="0.00097656">Vertical acceleration command (in z-axis, geographic frame)</field>
       <field name="cmd_psi"  type="int32" alt_unit=" deg"  alt_unit_coef="0.01398823">Heading pseudo command</field>
       <field name="ref_psi"  type="int32" alt_unit=" deg"  alt_unit_coef="0.01398823">Heading reference command</field>
+      <!--field name="k_z"	 	 type="int32"></field>
+      <field name="d_z"		 type="int32"></field-->
     </message>
     
     <message name="DELFLY_FLAPCONTROL" id="245">

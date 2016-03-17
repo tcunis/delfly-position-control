@@ -62,8 +62,18 @@ void guidance_v_module_init(void) {
   delfly_guidance.cmd.v_acc = 0;
   VECT2_ZERO(delfly_guidance.err.ver.xy);
 
+  delfly_guidance_set_vertical_pole(DELFLY_GUIDANCE_VERTICAL_POLE);
+}
+
+
+void delfly_guidance_set_vertical_pole( int32_t vertical_pole )
+{
+  delfly_guidance.gains.vertical_pole = vertical_pole;
+
   //VECT2_COPY(delfly_guidance.gains.ver.xy, matlab_guidance_gain);
-  VECT2_ASSIGN(delfly_guidance.gains.ver.xy, 1, 2);
+  delfly_guidance.gains.ver.states.pos = INT32_SQUARE(delfly_guidance.gains.vertical_pole);
+  delfly_guidance.gains.ver.states.vel = -2*delfly_guidance.gains.vertical_pole;
+//  VECT2_ASSIGN(delfly_guidance.gains.ver.xy, 1, 2);
 }
 
 

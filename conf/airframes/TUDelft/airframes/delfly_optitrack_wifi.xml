@@ -165,6 +165,7 @@
   	<define name="COMPLEMENTARY_HEADING_GAIN" value="100"/>
   	<define name="LATERAL_RATIO" value="75"/>
   	<define name="LATERAL_IGAIN" value="0"/>
+  	<define name="VERTICAL_POLE" value="-1"/>
   	<define name="USE_SPEED_REF" value="FALSE"/>
   </section><!--DELFLY_GUIDANCE-->
 

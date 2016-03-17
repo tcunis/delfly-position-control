@@ -112,6 +112,10 @@ struct DelflyGuidanceGains {
    * in percent                     */
   int32_t lat_i;
 
+  /* pole of vertical guidance
+   *                                */
+  int32_t vertical_pole;
+
   /* gains related to heading        */
   struct DelflyGuidanceHorizontalGains h;
 };
@@ -158,6 +162,8 @@ extern void delfly_guidance_init (void);
 
 extern void delfly_guidance_enter (void);
 extern void delfly_guidance_run (void);
+
+extern void delfly_guidance_set_vertical_pole(int32_t);
 
 
 #endif /* DELFLY_GUIDANCE_H_ */
