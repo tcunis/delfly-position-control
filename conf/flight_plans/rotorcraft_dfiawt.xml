@@ -70,15 +70,14 @@
       <circle wp="p1" radius="1"/>
     </block>
     <block name="height step" strip_button="step up & down" strip_icon="flat_theme/survey_rect_ns.png">
+      <circle wp="TD" radius="1" until="stage_time > 5"/>
       <call fun="NavCopyWaypoint(WP_TD,WP_p1)"/>
 	  <call fun="NavSetWaypointAlt(WP_TD, 2.0)"/>
-	  <circle wp="TD" radius="1" until="stage_time > 30"/>
-      <deroute block="small_circle"/>
+	  <circle wp="TD" radius="1" until="stage_time > 20"/>
+      <deroute block="stay_p1"/>
     </block>
     <block name="go_p2">
-      <call fun="nav_set_heading_deg(90)"/>
-      <go wp="p2"/>
-      <deroute block="stay_p1"/>
+      <oval p1="p1" p2="p2" radius="2"/>
     </block>
     <block name="trajectory" strip_button="Closed trajectory" strip_icon="flat_theme/oval.png">
       <while cond="TRUE">
