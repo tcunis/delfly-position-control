@@ -33,12 +33,12 @@
     </block>
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 1)"/>
+      <!--call fun="NavSetGroundReferenceHere()"/>
+      <call fun="NavSetAltitudeReferenceHere()"/-->
       <!--call fun="NavSetWaypointHere(WP_HOME)"/-->
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <call fun="NavSetWaypointHere(WP_TD)"/>
-      <!--call fun="NavSetGroundReferenceHere()"/>
-      <call fun="NavSetAltitudeReferenceHere()"/-->
     </block>
     <block name="Holding point">
       <deroute block="stay_p1"/>
