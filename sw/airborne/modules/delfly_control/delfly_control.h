@@ -40,10 +40,14 @@
 #include "math/pprz_geodetic_int.h"
 #include "std.h"
 
+#include "delfly_state.h"
 
 
 #define GUIDANCE_H_MODE_MODULE_SETTING 	GUIDANCE_H_MODE_MODULE
 #define GUIDANCE_V_MODE_MODULE_SETTING 	GUIDANCE_V_MODE_MODULE
+
+
+#define ROUTE_SPEED   delfly_state.h.speed_wind
 
 
 #ifndef DELFLY_MODEL_RUN_PERIOD
