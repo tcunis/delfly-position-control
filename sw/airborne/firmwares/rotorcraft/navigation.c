@@ -311,7 +311,7 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
 
 /* a == b */
 #define VECT2_EQUALS(_a, _b)      ( \
-    (_a).x == (_b).y &&     \
+    (_a).x == (_b).x &&     \
     (_a).y == (_b).y        \
   )
 
@@ -326,14 +326,14 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
     route_time0 = stage_time;
   uint16_t route_time = stage_time - route_time0;
   struct Int32Vect2 progress_pos;
-  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC-INT32_POS_FRAC));
+  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC));
   VECT2_SUM(navigation_target, *wp_start, progress_pos);
 
   nav_segment_start = *wp_start;
   nav_segment_end   = *wp_end;
   horizontal_mode   = HORIZONTAL_MODE_ROUTE;
 
-  dist2_to_wp = get_dist2_to_point(wp_end);
+  dist2_to_wp = POS_FLOAT_OF_BFP(sqrt(VECT2_NORM2(progress_pos))); //get_dist2_to_point(wp_end);
 }
 
 bool_t nav_approaching_from(struct EnuCoor_i *wp, struct EnuCoor_i *from, int16_t approaching_time)
