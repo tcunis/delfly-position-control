@@ -90,6 +90,10 @@ float nav_climb_vspeed, nav_descend_vspeed;
 #define DEFAULT_CIRCLE_RADIUS 5.
 #endif
 
+#ifndef ROUTE_SPEED
+#define ROUTE_SPEED   SPEED_BFP_OF_REAL(0.5)
+#endif
+
 #ifndef NAV_CLIMB_VSPEED
 #define NAV_CLIMB_VSPEED 0.5
 #endif
@@ -301,6 +305,33 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
   nav_segment_start = *wp_start;
   nav_segment_end = *wp_end;
   horizontal_mode = HORIZONTAL_MODE_ROUTE;
+
+  dist2_to_wp = get_dist2_to_point(wp_end);
+}
+
+/* a == b */
+#define VECT2_EQUALS(_a, _b)      ( \
+    (_a).x == (_b).y &&     \
+    (_a).y == (_b).y        \
+  )
+
+void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t velocity)
+{
+  struct Int32Vect2 wp_diff, wp_diff_norm;
+  VECT2_DIFF(wp_diff, *wp_end, *wp_start);
+  VECT2_COPY(wp_diff_norm, wp_diff);
+  int32_vect2_normalize(&wp_diff_norm, INT32_POS_FRAC);
+  static uint16_t route_time0 = 0;
+  if ( !VECT2_EQUALS(*wp_start, nav_segment_start) )
+    route_time0 = stage_time;
+  uint16_t route_time = stage_time - route_time0;
+  struct Int32Vect2 progress_pos;
+  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC-INT32_POS_FRAC));
+  VECT2_SUM(navigation_target, *wp_start, progress_pos);
+
+  nav_segment_start = *wp_start;
+  nav_segment_end   = *wp_end;
+  horizontal_mode   = HORIZONTAL_MODE_ROUTE;
 
   dist2_to_wp = get_dist2_to_point(wp_end);
 }
@@ -625,7 +656,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
       return;
 
     case OR12:
-      nav_route(&p1_out, &p2_in);
+      nav_route2(&p1_out, &p2_in, ROUTE_SPEED);
       if (nav_approaching_from(&p2_in, &p1_out, CARROT)) {
         oval_status = OC2;
         nav_oval_count++;
@@ -644,7 +675,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
       return;
 
     case OR21:
-      nav_route(&waypoints[p2].enu_i, &waypoints[p1].enu_i);
+      nav_route2(&waypoints[p2].enu_i, &waypoints[p1].enu_i, ROUTE_SPEED);
       if (nav_approaching_from(&waypoints[p1].enu_i, &waypoints[p2].enu_i, CARROT)) {
         oval_status = OC1;
         InitStage();
