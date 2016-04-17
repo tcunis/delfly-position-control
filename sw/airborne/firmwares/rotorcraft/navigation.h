@@ -94,6 +94,7 @@ extern bool_t nav_set_heading_rad(float rad);
 extern bool_t nav_set_heading_deg(float deg);
 extern bool_t nav_set_heading_towards(float x, float y);
 extern bool_t nav_set_heading_towards_waypoint(uint8_t wp);
+extern bool_t nav_set_heading_from_to(struct EnuCoor_i* from, struct EnuCoor_i* to);
 extern bool_t nav_set_heading_current(void);
 
 /** default approaching_time for a wp */
@@ -150,6 +151,7 @@ extern uint8_t nav_oval_count;
 #define Oval(a, b, c) nav_oval((b), (a), (c))
 
 /*********** Navigation along a line *************************************/
+extern double navigation_route_step;
 extern void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end);
 extern void nav_route2(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end, int32_t velocity);
 #define NavSegment(_start, _end) { \

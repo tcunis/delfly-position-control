@@ -315,6 +315,8 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
     (_a).y == (_b).y        \
   )
 
+double navigation_route_step;
+
 void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t velocity)
 {
   struct Int32Vect2 wp_diff, wp_diff_norm;
@@ -322,11 +324,14 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
   VECT2_COPY(wp_diff_norm, wp_diff);
   int32_vect2_normalize(&wp_diff_norm, INT32_POS_FRAC);
   static uint16_t route_time0 = 0;
-  if ( !VECT2_EQUALS(*wp_start, nav_segment_start) )
+  if ( !VECT2_EQUALS(*wp_start, nav_segment_start) ) {
     route_time0 = stage_time;
+    navigation_route_step = 0;
+  }
   uint16_t route_time = stage_time - route_time0;
   struct Int32Vect2 progress_pos;
-  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC-INT32_POS_FRAC));
+  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC)); //-INT32_POS_FRAC));
+  VECT2_ADD_SCALED(progress_pos, wp_diff_norm, navigation_route_step);
   VECT2_SUM(navigation_target, *wp_start, progress_pos);
 
   nav_segment_start = *wp_start;
@@ -575,6 +580,21 @@ bool_t nav_set_heading_towards(float x, float y)
 bool_t nav_set_heading_towards_waypoint(uint8_t wp)
 {
   return nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
+}
+
+bool_t nav_set_heading_from_to(struct EnuCoor_i* from, struct EnuCoor_i* to)
+{
+  struct FloatVect2 pos_diff;
+  pos_diff.x = POS_FLOAT_OF_BFP(to->x - from->x);
+  pos_diff.y = POS_FLOAT_OF_BFP(to->y - from->y);
+  // don't change heading if closer than 0.5m to target
+  if (VECT2_NORM2(pos_diff) > 0.25) {
+    float heading_f = atan2f(pos_diff.x, pos_diff.y);
+    nav_heading = ANGLE_BFP_OF_REAL(heading_f);
+  }
+  // return false so it can be called from the flightplan
+  // meaning it will continue to the next stage
+  return FALSE;
 }
 
 /** Set heading to the current yaw angle */
