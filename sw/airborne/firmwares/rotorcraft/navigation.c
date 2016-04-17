@@ -338,7 +338,7 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
   nav_segment_end   = *wp_end;
   horizontal_mode   = HORIZONTAL_MODE_ROUTE;
 
-  dist2_to_wp = get_dist2_to_point(wp_end);
+  dist2_to_wp = POS_FLOAT_OF_BFP(sqrt(VECT2_NORM2(progress_pos))); //get_dist2_to_point(wp_end);
 }
 
 bool_t nav_approaching_from(struct EnuCoor_i *wp, struct EnuCoor_i *from, int16_t approaching_time)
@@ -580,21 +580,6 @@ bool_t nav_set_heading_towards(float x, float y)
 bool_t nav_set_heading_towards_waypoint(uint8_t wp)
 {
   return nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
-}
-
-bool_t nav_set_heading_from_to(struct EnuCoor_i* from, struct EnuCoor_i* to)
-{
-  struct FloatVect2 pos_diff;
-  pos_diff.x = POS_FLOAT_OF_BFP(to->x - from->x);
-  pos_diff.y = POS_FLOAT_OF_BFP(to->y - from->y);
-  // don't change heading if closer than 0.5m to target
-  if (VECT2_NORM2(pos_diff) > 0.25) {
-    float heading_f = atan2f(pos_diff.x, pos_diff.y);
-    nav_heading = ANGLE_BFP_OF_REAL(heading_f);
-  }
-  // return false so it can be called from the flightplan
-  // meaning it will continue to the next stage
-  return FALSE;
 }
 
 /** Set heading to the current yaw angle */
