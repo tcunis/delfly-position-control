@@ -38,6 +38,7 @@
 
 extern struct EnuCoor_i navigation_target;
 extern struct EnuCoor_i navigation_carrot;
+extern struct EnuCoor_i navigation_velocity;
 
 extern void nav_init(void);
 extern void nav_run(void);
