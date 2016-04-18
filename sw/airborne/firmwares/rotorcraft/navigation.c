@@ -50,6 +50,7 @@
 
 struct EnuCoor_i navigation_target;
 struct EnuCoor_i navigation_carrot;
+struct EnuCoor_i navigation_velocity;
 
 struct EnuCoor_i nav_last_point;
 
@@ -176,6 +177,7 @@ void nav_init(void)
   flight_altitude = SECURITY_ALT;
   VECT3_COPY(navigation_target, waypoints[WP_HOME].enu_i);
   VECT3_COPY(navigation_carrot, waypoints[WP_HOME].enu_i);
+  INT32_VECT3_ZERO(navigation_velocity);
 
   horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
   vertical_mode = VERTICAL_MODE_ALT;
@@ -279,6 +281,7 @@ void nav_circle(struct EnuCoor_i *wp_center, int32_t radius)
   nav_circle_center = *wp_center;
   nav_circle_radius = radius;
   horizontal_mode = HORIZONTAL_MODE_CIRCLE;
+  INT32_VECT3_ZERO(navigation_velocity);
 }
 
 
@@ -301,6 +304,7 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
   struct Int32Vect2 progress_pos;
   VECT2_SMUL(progress_pos, wp_diff_prec, ((float)nav_leg_progress) / nav_leg_length);
   VECT2_SUM(navigation_target, *wp_start, progress_pos);
+  INT32_VECT3_ZERO(navigation_velocity);
 
   nav_segment_start = *wp_start;
   nav_segment_end = *wp_end;
@@ -333,6 +337,8 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
   INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC)); //-INT32_POS_FRAC));
   VECT2_ADD_SCALED(progress_pos, wp_diff_norm, navigation_route_step);
   VECT2_SUM(navigation_target, *wp_start, progress_pos);
+
+  VECT2_SCALE(navigation_velocity, wp_diff_norm, velocity, 1<<(INT32_POS_FRAC));
 
   nav_segment_start = *wp_start;
   nav_segment_end   = *wp_end;
@@ -510,6 +516,7 @@ void nav_home(void)
 {
   horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
   VECT3_COPY(navigation_target, waypoints[WP_HOME].enu_i);
+  INT32_VECT3_ZERO(navigation_velocity);
 
   vertical_mode = VERTICAL_MODE_ALT;
   nav_altitude = waypoints[WP_HOME].enu_i.z;
@@ -582,12 +589,30 @@ bool_t nav_set_heading_towards_waypoint(uint8_t wp)
   return nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
 }
 
+bool_t nav_set_heading_from_to(struct EnuCoor_i* from, struct EnuCoor_i* to)
+{
+  struct FloatVect2 pos_diff;
+  pos_diff.x = POS_FLOAT_OF_BFP(to->x - from->x);
+  pos_diff.y = POS_FLOAT_OF_BFP(to->y - from->y);
+  float heading_f = atan2f(pos_diff.x, pos_diff.y);
+  nav_heading = ANGLE_BFP_OF_REAL(heading_f);
+
+  // return false so it can be called from the flightplan
+  // meaning it will continue to the next stage
+  return FALSE;
+}
+
 /** Set heading to the current yaw angle */
 bool_t nav_set_heading_current(void)
 {
   nav_heading = stateGetNedToBodyEulers_i()->psi;
   return FALSE;
 }
+
+static inline void nav_set_heading_towards_carrot (void) {
+  nav_set_heading_towards( POS_FLOAT_OF_BFP(navigation_carrot.x), POS_FLOAT_OF_BFP(navigation_carrot.y) );
+}
+
 
 /************** Oval Navigation **********************************************/
 
@@ -653,6 +678,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
   switch (oval_status) {
     case OC1 :
       nav_circle(&p1_center, POS_BFP_OF_REAL(-radius));
+      nav_set_heading_towards_carrot();
       if (NavQdrCloseTo(INT32_DEG_OF_RAD(qdr_out_1) - qdr_anticipation)) {
         oval_status = OR12;
         InitStage();
@@ -662,6 +688,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
 
     case OR12:
       nav_route2(&p1_out, &p2_in, ROUTE_SPEED);
+      nav_set_heading_from_to(&p1_out, &p2_in);
       if (nav_approaching_from(&p2_in, &p1_out, CARROT)) {
         oval_status = OC2;
         nav_oval_count++;
@@ -672,6 +699,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
 
     case OC2 :
       nav_circle(&p2_center, POS_BFP_OF_REAL(-radius));
+      nav_set_heading_towards_carrot();
       if (NavQdrCloseTo(INT32_DEG_OF_RAD(qdr_out_2) - qdr_anticipation)) {
         oval_status = OR21;
         InitStage();
@@ -681,6 +709,7 @@ void nav_oval(uint8_t p1, uint8_t p2, float radius)
 
     case OR21:
       nav_route2(&waypoints[p2].enu_i, &waypoints[p1].enu_i, ROUTE_SPEED);
+      nav_set_heading_from_to(&waypoints[p2].enu_i, &waypoints[p1].enu_i);
       if (nav_approaching_from(&waypoints[p1].enu_i, &waypoints[p2].enu_i, CARROT)) {
         oval_status = OC1;
         InitStage();

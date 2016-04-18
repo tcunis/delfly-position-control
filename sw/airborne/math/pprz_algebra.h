@@ -115,6 +115,12 @@ extern "C" {
     (_vo).y =  (_vi).y / (_s);      \
   }
 
+#define VECT2_SCALE(_vo, _vi, _num, _den) { \
+    (_vo).x = ((_vi).x * (_num)) / (_den);           \
+    (_vo).y = ((_vi).y * (_num)) / (_den);           \
+  }
+
+
 /* _v = Bound(_v, _min, _max) */
 #define VECT2_STRIM(_v, _min, _max) {         \
     (_v).x = (_v).x < _min ? _min : (_v).x > _max ? _max : (_v).x;  \
