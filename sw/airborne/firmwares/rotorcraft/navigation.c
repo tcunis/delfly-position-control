@@ -315,7 +315,7 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
 
 /* a == b */
 #define VECT2_EQUALS(_a, _b)      ( \
-    (_a).x == (_b).y &&     \
+    (_a).x == (_b).x &&     \
     (_a).y == (_b).y        \
   )
 
