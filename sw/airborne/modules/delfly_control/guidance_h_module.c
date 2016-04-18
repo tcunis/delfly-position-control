@@ -43,6 +43,7 @@
 
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_lat.h"
+#include "navigation.h"
 
 #include "matlab_include.h"
 
@@ -177,11 +178,16 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
 
       delfly_guidance.err.lat_pos_int += delfly_guidance.err.lat.states.pos*(1.0/PERIODIC_FREQUENCY)*(1<<(INT32_SPEED_FRAC-INT32_POS_FRAC));
 
-      delfly_guidance.cmd.h_acc = 0;
-//    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
-//    	                  	  	    / (1<<(/*INT32_MATLAB_FRAC+*/INT32_POS_FRAC-INT32_ACCEL_FRAC))
-//    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
-//    	                            / (1<<(/*INT32_MATLAB_FRAC+*/INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
+      int32_t pseudo_heading_d;
+
+      if (horizontal_mode == HORIZONTAL_MODE_CIRCLE) {
+        delfly_guidance.cmd.h_acc = 0;
+        pseudo_heading_d = 0;
+      } else {
+    	delfly_guidance.cmd.h_acc = delfly_guidance.gains.fwd.states.pos * delfly_guidance.err.fwd.states.pos
+    	                  	  	    / (1<<(/*INT32_MATLAB_FRAC+*/INT32_POS_FRAC-INT32_ACCEL_FRAC))
+    	                          + delfly_guidance.gains.fwd.states.vel * delfly_guidance.err.fwd.states.vel
+    	                            / (1<<(/*INT32_MATLAB_FRAC+*/INT32_SPEED_FRAC-INT32_ACCEL_FRAC));
 
       /* lateral guidance pseudo acceleration command
        * in m/s2, with #INT32_ACCEL_FRAC                  */
@@ -192,8 +198,9 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
        * i.e. additional heading to set-point
        * in [-MAX_HEADING_DELTA, +MAX_HEADING_DELTA]
        * in rad, with #INT32_ANGLE_FRAC                   */
-      int32_t pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*INT32_ANGLE_PI_4/(100*(1<<INT32_ACCEL_FRAC));
+      pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*INT32_ANGLE_PI_4/(100*(1<<INT32_ACCEL_FRAC));
       INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
+      }
 
       /* lateral guidance pseudo heading command
        * i.e. desired heading set-point to attitude control
@@ -205,6 +212,7 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
       delfly_guidance.cmd.heading = (delfly_guidance.gains.h.complementary_gain*delfly_guidance.cmd.pseudo_heading
                                      + (100 - delfly_guidance.gains.h.complementary_gain)*delfly_state.h.heading)
                                     /100;
+
     }
     break;
 

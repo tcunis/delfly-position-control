@@ -11,7 +11,7 @@
       <dl_setting var="delfly_guidance.gains.h.lateral_ratio" min="1" step="1" max="1000" alt_unit=" %" module="delfly_control/delfly_guidance" shortname="lat_ratio" param="DELFLY_GUIDANCE_LATERAL_RATIO" type="int32" persistent="true"/>
       <dl_setting var="delfly_guidance.gains.lat_i" min="0" step="1" max="1000" module="delfly_control/delfly_guidance" shortname="lat_i" param="DELFLY_GUIDANCE_LATERAL_IGAIN" type="int32" persistent="true"/>
       <dl_setting var="guidance_lat.gains.p" min="0" step="1" max="1000" alt_unit=" %" module="guidance/guidance_lat" shortname="lat_kp" param="GUIDANCE_LAT_PGAIN" type="int32" persistent="true"/>
-      <dl_setting var="delfly_guidance.gains.vertical_pole" min="-10" step="1" max="-1" module="delfly_control/delfly_guidance" shortname="s_z" param="DELFLY_GUIDANCE_VERTiCAL_POLE" type="int32" handler="set_vertical_pole"/>
+      <dl_setting var="delfly_guidance.gains.vertical_pole" min="-15" step="1" max="-1" module="delfly_control/delfly_guidance" shortname="s_z" param="DELFLY_GUIDANCE_VERTiCAL_POLE" type="int32" handler="set_vertical_pole"/>
     <!--/dl_settings>
     
     <dl_settings name="Flap control"-->
