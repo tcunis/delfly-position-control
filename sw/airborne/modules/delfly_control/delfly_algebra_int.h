@@ -55,6 +55,7 @@ struct Int64Mat33 {
   int64_t m[3 * 3];
 };
 
+#ifndef VECT2_ADD_SCALED2
 /* a += b * num / den */
 #define VECT2_ADD_SCALED2(_a, _b, _num, _den) {   \
     (_a).x += ((_b).x * (_num)) / (_den);           \
@@ -63,6 +64,7 @@ struct Int64Mat33 {
 
 /* a += b * s */
 #define VECT2_ADD_SCALED(_a, _b, _s)		VECT2_ADD_SCALED2(_a, _b, _s, 1)
+#endif
 
 /* c = (a - b) * num / den */
 #define VECT2_DIFF_SCALED2(_c, _a, _b, _num, _den) { 	\

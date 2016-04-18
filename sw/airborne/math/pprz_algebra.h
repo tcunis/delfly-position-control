@@ -87,6 +87,16 @@ extern "C" {
     (_c).y = (_a).y + (_b).y;     \
   }
 
+/* a += b * num / den */
+#define VECT2_ADD_SCALED2(_a, _b, _num, _den) {   \
+    (_a).x += ((_b).x * (_num)) / (_den);           \
+    (_a).y += ((_b).y * (_num)) / (_den);           \
+  }
+
+/* a += b * s */
+#define VECT2_ADD_SCALED(_a, _b, _s)    VECT2_ADD_SCALED2(_a, _b, _s, 1)
+
+
 /* c = a - b */
 #define VECT2_DIFF(_c, _a, _b) {                \
     (_c).x = (_a).x - (_b).x;     \
