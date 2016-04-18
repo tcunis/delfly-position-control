@@ -315,6 +315,8 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
     (_a).y == (_b).y        \
   )
 
+double navigation_route_step;
+
 void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t velocity)
 {
   struct Int32Vect2 wp_diff, wp_diff_norm;
@@ -322,11 +324,14 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
   VECT2_COPY(wp_diff_norm, wp_diff);
   int32_vect2_normalize(&wp_diff_norm, INT32_POS_FRAC);
   static uint16_t route_time0 = 0;
-  if ( !VECT2_EQUALS(*wp_start, nav_segment_start) )
+  if ( !VECT2_EQUALS(*wp_start, nav_segment_start) ) {
     route_time0 = stage_time;
+    navigation_route_step = 0;
+  }
   uint16_t route_time = stage_time - route_time0;
   struct Int32Vect2 progress_pos;
-  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC));
+  INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC)); //-INT32_POS_FRAC));
+  VECT2_ADD_SCALED(progress_pos, wp_diff_norm, navigation_route_step);
   VECT2_SUM(navigation_target, *wp_start, progress_pos);
 
   nav_segment_start = *wp_start;
