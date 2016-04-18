@@ -97,9 +97,9 @@ void delfly_guidance_run (void) {
       ENU_OF_TO_NED(nav_velocity_ned, navigation_velocity);
       nav_carrot_ned.z = -nav_flight_altitude;
       // re-set heading set-point if carrot has changed
-      if ( !VECT3_EQUALS(nav_carrot_ned, delfly_guidance.sp.pos) ) {
-        nav_set_heading_towards_carrot();
-      }
+//      if ( !VECT3_EQUALS(nav_carrot_ned, delfly_guidance.sp.pos) ) {
+//        nav_set_heading_towards_carrot();
+//      }
       //TODO: set position and velocity set-point
 //      delfly_guidance.sp.heading = 0;
       delfly_guidance.sp.heading = nav_heading;
