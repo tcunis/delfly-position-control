@@ -41,7 +41,7 @@
       <call fun="NavSetWaypointHere(WP_TD)"/>
     </block>
     <block name="Holding point">
-      <deroute block="stay_p1"/>
+      <deroute block="go_p2"/>
       <!--call fun="NavKillThrottle()"/-->
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>

@@ -138,6 +138,9 @@ struct DelflyGuidanceSetPoint {
    * in m/s, with #INT32_SPEED_FRAC */
   struct Int32Vect3 vel;
 
+  int32_t fwd;
+  int32_t lat;
+
   /* heading set-point
    * in rad, with #INT32_ANGLE_FRAC */
   int32_t heading;

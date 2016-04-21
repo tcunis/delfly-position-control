@@ -1006,6 +1006,8 @@
       <field name="sp_x"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in x-axis (geographic frame)</field>
       <field name="sp_y"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in y-axis (geographic frame)</field>
       <field name="sp_z"     type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position set-point in z-axis (geographic frame)</field>
+      <field name="sp_fwd" 	 type="int32" alt_unit=" m"    alt_unit_coef="0.00012207"/>
+      <field name="sp_lat"	 type="int32" alt_unit=" m"    alt_unit_coef="0.00012207"/>
       <field name="ref_air"  type="int32" alt_unit=" m/s"  alt_unit_coef="0.00000191">Air speed reference in xy-plane (geographic frame)</field>
       <field name="sp_psi"  type="int32" alt_unit=" deg"  alt_unit_coef="0.01398823">Heading reference</field>
       <field name="err_x"    type="int32" alt_unit=" m"    alt_unit_coef="0.00012207">Position error in x-axis (geographic frame)</field>

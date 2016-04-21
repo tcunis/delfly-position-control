@@ -167,6 +167,10 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
 
   case DELFLY_GUIDANCE_MODE_NAV:
     {
+      //telemetry
+      delfly_guidance.sp.fwd = VECT2_GET_FWD(delfly_guidance.sp.pos, delfly_guidance.sp.heading);
+      delfly_guidance.sp.lat = VECT2_GET_LAT(delfly_guidance.sp.pos, delfly_guidance.sp.heading);
+
       VECT2_DIFF(delfly_guidance.err.pos, delfly_guidance.sp.pos, delfly_state.h.pos);
       VECT2_DIFF(delfly_guidance.err.vel, delfly_guidance.sp.vel, delfly_state.h.vel);
 
@@ -198,8 +202,8 @@ void guidance_h_module_run_traj( bool_t in_flight ) {
        * i.e. additional heading to set-point
        * in [-MAX_HEADING_DELTA, +MAX_HEADING_DELTA]
        * in rad, with #INT32_ANGLE_FRAC                   */
-      pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*INT32_ANGLE_PI_4/(100*(1<<INT32_ACCEL_FRAC));
-      INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
+//      pseudo_heading_d   = delfly_guidance.gains.h.lateral_ratio*pseudo_cmd_lat_acc*INT32_ANGLE_PI_4/(100*(1<<INT32_ACCEL_FRAC));
+//      INT32_STRIM(pseudo_heading_d, MAX_HEADING_DELTA);
       }
 
       /* lateral guidance pseudo heading command

@@ -7,7 +7,7 @@
       <message name="AUTOPILOT_VERSION"      period="6."    phase="3."/>  <!-- 1 + n bytes -->
       <message name="DATALINK_REPORT"        period="6."    phase="0."/>  <!-- 9 bytes -->
       <message name="DELFLY_FLAPCONTROL"     period="0.25"  />
-      <message name="DELFLY_GUIDANCE"        period="0.5"   phase="0."/>
+      <message name="DELFLY_GUIDANCE"        period="0.25"   phase="0."/>
       <message name="DELFLY_STATE"           period="0.25"  /><!-- 68 bytes -->
       <message name="DELFLY_SPEEDCTRL"       period="0.25"  />
       <message name="DELFLY_SPEEDCTRL_GAINS" period="1."  />      
@@ -20,7 +20,7 @@
       <message name="INS_REF"                period="6."    />
       <!--message name="ROTORCRAFT_CMD"         period="0.5"   phase="0.25"/-->
       <message name="ROTORCRAFT_FP"          period="0.5"   phase="0.25"/><!-- 58 bytes -->
-      <message name="ROTORCRAFT_NAV_STATUS"  period="1.5"   />            <!-- 15 bytes -->
+      <message name="ROTORCRAFT_NAV_STATUS"  period="0.5"   />            <!-- 15 bytes -->
       <message name="ROTORCRAFT_STATUS"      period="1.5"   phase="0.75"/><!-- 17 bytes -->
       <message name="RPM_SENSOR"             period="0.25"  />
       <message name="STAB_ATTITUDE_INT"      period="0.5"   />
