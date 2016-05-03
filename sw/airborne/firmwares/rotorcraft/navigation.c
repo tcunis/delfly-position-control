@@ -332,7 +332,7 @@ void nav_route2(struct EnuCoor_i* wp_start, struct EnuCoor_i* wp_end, int32_t ve
     route_time0 = stage_time;
     navigation_route_step = 0;
   }
-  uint16_t route_time = stage_time - route_time0;
+  uint16_t route_time = stage_time;// - route_time0;
   struct Int32Vect2 progress_pos;
   INT32_VECT2_SCALE_2(progress_pos, wp_diff_norm, velocity*route_time, 1<<(INT32_SPEED_FRAC)); //-INT32_POS_FRAC));
   VECT2_ADD_SCALED(progress_pos, wp_diff_norm, navigation_route_step);

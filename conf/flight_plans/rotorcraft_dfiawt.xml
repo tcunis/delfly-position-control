@@ -70,15 +70,15 @@
       <circle wp="p1" radius="1"/>
     </block>
     <block name="height step" strip_button="step up & down" strip_icon="flat_theme/survey_rect_ns.png">
-      <circle wp="TD" radius="2" until="stage_time > 5"/>
       <call fun="NavCopyWaypoint(WP_TD,WP_p1)"/>
-	  <call fun="NavSetWaypointAlt(WP_TD, 2.0)"/>
+	  <circle wp="TD" radius="2" until="stage_time > 5"/>
+      <call fun="NavSetWaypointAlt(WP_TD, 2.0)"/>
 	  <circle wp="TD" radius="2" until="stage_time > 20"/>
       <deroute block="stay_p1"/>
     </block>
     <block name="height step small" strip_button="step up & down" strip_icon="flat_theme/survey_rect_ns.png">
-      <circle wp="TD" radius="1" until="stage_time > 5"/>
       <call fun="NavCopyWaypoint(WP_TD,WP_p1)"/>
+      <circle wp="TD" radius="1" until="stage_time > 5"/>
 	  <call fun="NavSetWaypointAlt(WP_TD, 2.0)"/>
 	  <circle wp="TD" radius="1" until="stage_time > 30"/>
       <deroute block="stay_p1"/>
