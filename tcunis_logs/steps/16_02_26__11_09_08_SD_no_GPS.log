@@ -73,7 +73,7 @@
             <block name="small_circle" no="8">
               <circle wp="p1" radius="1" no="0"/>
             </block>
-            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up & down" name="height step" no="9">
+            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up and down" name="height step" no="9">
               <call fun="NavCopyWaypoint(WP_TD,WP_p1)" no="0"/>
               <call fun="NavSetWaypointAlt(WP_TD, 2.0)" no="1"/>
               <circle wp="TD" until="stage_time > 30" radius="1" no="2"/>

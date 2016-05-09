@@ -69,14 +69,14 @@
             <block name="small_circle" no="8">
               <circle wp="p1" radius="1" no="0"/>
             </block>
-            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up & down" name="height step" no="9">
+            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up and down" name="height step" no="9">
               <circle wp="TD" until="stage_time > 5" radius="2" no="0"/>
               <call fun="NavCopyWaypoint(WP_TD,WP_p1)" no="1"/>
               <call fun="NavSetWaypointAlt(WP_TD, 2.0)" no="2"/>
               <circle wp="TD" until="stage_time > 20" radius="2" no="3"/>
               <deroute block="stay_p1" no="4"/>
             </block>
-            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up & down" name="height step small" no="10">
+            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up and down" name="height step small" no="10">
               <circle wp="TD" until="stage_time > 5" radius="1" no="0"/>
               <call fun="NavCopyWaypoint(WP_TD,WP_p1)" no="1"/>
               <call fun="NavSetWaypointAlt(WP_TD, 2.0)" no="2"/>
@@ -712,14 +712,14 @@
             <block name="small_circle" no="8">
               <circle wp="p1" radius="1" no="0"/>
             </block>
-            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up & down" name="height step" no="9">
+            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up and down" name="height step" no="9">
               <circle wp="TD" until="stage_time > 5" radius="2" no="0"/>
               <call fun="NavCopyWaypoint(WP_TD,WP_p1)" no="1"/>
               <call fun="NavSetWaypointAlt(WP_TD, 2.0)" no="2"/>
               <circle wp="TD" until="stage_time > 20" radius="2" no="3"/>
               <deroute block="stay_p1" no="4"/>
             </block>
-            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up & down" name="height step small" no="10">
+            <block strip_icon="flat_theme/survey_rect_ns.png" strip_button="step up and down" name="height step small" no="10">
               <circle wp="TD" until="stage_time > 5" radius="1" no="0"/>
               <call fun="NavCopyWaypoint(WP_TD,WP_p1)" no="1"/>
               <call fun="NavSetWaypointAlt(WP_TD, 2.0)" no="2"/>
